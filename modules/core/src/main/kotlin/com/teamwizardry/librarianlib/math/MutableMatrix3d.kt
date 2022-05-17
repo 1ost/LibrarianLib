@@ -475,7 +475,7 @@ public open class MutableMatrix3d(
     }
 
     override fun scale(v: Vector3d): MutableMatrix3d {
-        return scale(v.getX(), v.getY(), v.getZ())
+        return scale(v.x(), v.y(), v.z())
     }
 
     override fun scale(x: Float, y: Float, z: Float): MutableMatrix3d {

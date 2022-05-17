@@ -22,7 +22,7 @@ public operator fun Vector3i.times(other: Int): Vector3i = ivec(this.x * other, 
 public operator fun Vector3i.unaryMinus(): Vector3i = this * -1
 
 @JvmSynthetic
-public infix fun Vector3i.cross(other: Vector3i): Vector3i = this.crossProduct(other)
+public infix fun Vector3i.cross(other: Vector3i): Vector3i = this.cross(other)
 
 @JvmSynthetic
 public operator fun Vector3i.component1(): Int = this.x

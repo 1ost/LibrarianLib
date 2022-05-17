@@ -22,7 +22,7 @@ public operator fun BlockPos.times(other: Int): BlockPos = block(this.x * other,
 public operator fun BlockPos.unaryMinus(): BlockPos = this * -1
 
 @JvmSynthetic
-public infix fun BlockPos.cross(other: BlockPos): BlockPos = this.crossProduct(other)
+public infix fun BlockPos.cross(other: BlockPos): BlockPos = this.cross(other)
 
 @JvmSynthetic
 public operator fun BlockPos.component1(): Int = this.x

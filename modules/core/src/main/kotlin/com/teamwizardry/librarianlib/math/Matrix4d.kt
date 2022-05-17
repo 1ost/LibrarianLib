@@ -80,7 +80,7 @@ public open class Matrix4d(
         (m as IMatrix4f).m33
     )
 
-    public constructor(stack: MatrixStack): this(stack.last.matrix)
+    public constructor(stack: MatrixStack): this(stack.last().pose())
 
     public operator fun get(row: Int, col: Int): Double {
         when (row) {

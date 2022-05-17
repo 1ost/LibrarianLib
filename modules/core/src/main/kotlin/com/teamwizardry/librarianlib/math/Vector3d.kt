@@ -28,9 +28,9 @@ public operator fun Vector3d.times(other: Double): Vector3d = vec(this.x * other
 public operator fun Vector3d.unaryMinus(): Vector3d = this * -1
 
 @JvmSynthetic
-public infix fun Vector3d.dot(other: Vector3d): Double = this.dotProduct(other)
+public infix fun Vector3d.dot(other: Vector3d): Double = this.dot(other)
 @JvmSynthetic
-public infix fun Vector3d.cross(other: Vector3d): Vector3d = this.crossProduct(other)
+public infix fun Vector3d.cross(other: Vector3d): Vector3d = this.cross(other)
 
 @JvmSynthetic
 public operator fun Vector3d.component1(): Double = this.x

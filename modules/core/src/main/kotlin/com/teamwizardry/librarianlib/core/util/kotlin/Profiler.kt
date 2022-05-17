@@ -25,11 +25,11 @@ public inline fun <T> IProfiler.section(name: String, block: () -> T): T {
     contract {
         callsInPlace(block, InvocationKind.EXACTLY_ONCE)
     }
-    this.startSection(name)
+    this.push(name)
     return try {
         block()
     } finally {
-        this.endSection()
+        this.pop()
     }
 }
 
@@ -38,10 +38,10 @@ public inline fun <T> IProfiler.section(noinline name: () -> String, block: () -
     contract {
         callsInPlace(block, InvocationKind.EXACTLY_ONCE)
     }
-    this.startSection(name)
+    this.push(name)
     return try {
         block()
     } finally {
-        this.endSection()
+        this.pop()
     }
 }

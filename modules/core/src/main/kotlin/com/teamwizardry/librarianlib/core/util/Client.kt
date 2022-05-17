@@ -44,11 +44,11 @@ public object Client {
 
     @JvmStatic
     public val window: MainWindow
-        get() = minecraft.mainWindow
+        get() = minecraft.window
 
     @JvmStatic
     public val guiScaleFactor: Double
-        get() = window.guiScaleFactor
+        get() = window.guiScale
 
     @JvmStatic
     public val resourceManager: IResourceManager
@@ -60,7 +60,7 @@ public object Client {
 
     @JvmStatic
     public val fontRenderer: FontRenderer
-        get() = minecraft.fontRenderer
+        get() = minecraft.font
 
     @JvmStatic
     public val tessellator: Tessellator
@@ -80,7 +80,7 @@ public object Client {
         override val ticks: Int
             get() = globalTicks.toInt()
         override val partialTicks: Float
-            get() = timer.renderPartialTicks
+            get() = timer.partialTick
     }
 
     /**
@@ -91,10 +91,10 @@ public object Client {
         override val ticks: Int
             get() = worldTicks.toInt()
         override val partialTicks: Float
-            get() = if (minecraft.isGamePaused)
+            get() = if (minecraft.isPaused)
                 renderPartialTicksPaused.get(minecraft) as Float
             else
-                timer.renderPartialTicks
+                timer.partialTick
     }
 
     @JvmStatic
@@ -102,7 +102,7 @@ public object Client {
 
     @JvmStatic
     public fun displayGuiScreen(screen: Screen?) {
-        minecraft.displayGuiScreen(screen)
+        minecraft.setScreen(screen)
     }
 
     /**
@@ -111,18 +111,18 @@ public object Client {
      */
     @JvmStatic
     public fun runAsync(task: Runnable): CompletableFuture<Void> {
-        return minecraft.runAsync(task)
+        return minecraft.submitAsync(task)
     }
 
     @JvmStatic
     public fun getBlockAtlasSprite(sprite: ResourceLocation): TextureAtlasSprite {
         @Suppress("DEPRECATION")
-        return getAtlasSprite(AtlasTexture.LOCATION_BLOCKS_TEXTURE, sprite)
+        return getAtlasSprite(AtlasTexture.LOCATION_BLOCKS, sprite)
     }
 
     @JvmStatic
     public fun getAtlasSprite(atlas: ResourceLocation, texture: ResourceLocation): TextureAtlasSprite {
-        return minecraft.getAtlasSpriteGetter(atlas).apply(texture)
+        return minecraft.getTextureAtlas(atlas).apply(texture)
     }
 
     /**
@@ -304,7 +304,7 @@ public object Client {
     internal fun clientTickEnd(event: TickEvent.ClientTickEvent) {
         if (event.phase == TickEvent.Phase.END) {
             val mc = Minecraft.getInstance()
-            if (!mc.isGamePaused)
+            if (!mc.isPaused)
                 worldTicks++
             globalTicks++
         }

@@ -18,8 +18,8 @@ public object AWTTextureUtil {
     public fun fillNativeImage(image: BufferedImage, nativeImage: NativeImage) {
         val imagePointer: Long = imagePointer.get(nativeImage)
 
-        if(nativeImage.format != NativeImage.PixelFormat.RGBA)
-            throw IllegalArgumentException("The ${nativeImage.format} format isn't supported. Only the RGBA image format is supported.")
+        if(nativeImage.format() != NativeImage.PixelFormat.RGBA)
+            throw IllegalArgumentException("The ${nativeImage.format()} format isn't supported. Only the RGBA image format is supported.")
         for(y in 0 until image.height) {
             for(x in 0 until image.width) {
                 val index = (x + y * image.width) * 4

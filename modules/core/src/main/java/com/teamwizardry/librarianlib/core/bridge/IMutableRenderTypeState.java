@@ -8,6 +8,6 @@ public interface IMutableRenderTypeState {
     default void addState(String name, Runnable setupTask, Runnable clearTask) {
         this.addState(new RenderState(name, setupTask, clearTask) {});
     }
-    ImmutableList<RenderState> getRenderStates();
-    void setRenderStates(ImmutableList<RenderState> renderStates);
+    ImmutableList<RenderState> getStates();
+    void setStates(ImmutableList<RenderState> renderStates);
 }

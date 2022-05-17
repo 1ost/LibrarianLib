@@ -386,7 +386,7 @@ public class Quaternion(
      * @return The rotated vector
      */
     public fun rotate(v: Vector3d): Vector3d {
-        return rotate(v.getX(), v.getY(), v.getZ())
+        return rotate(v.x(), v.y(), v.z())
     }
 
     /**
@@ -683,7 +683,7 @@ public class Quaternion(
          * @return The quaternion defined by the rotation around the axis
          */
         public fun fromAngleRadAxis(angle: Double, axis: Vector3d): Quaternion {
-            return fromAngleRadAxis(angle, axis.getX(), axis.getY(), axis.getZ())
+            return fromAngleRadAxis(angle, axis.x(), axis.y(), axis.z())
         }
 
         /**

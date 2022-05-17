@@ -187,7 +187,7 @@ public open class Matrix3d(
     }
 
     public open fun scale(v: Vector3d): Matrix3d {
-        return scale(v.getX(), v.getY(), v.getZ())
+        return scale(v.x(), v.y(), v.z())
     }
 
     public open fun scale(x: Float, y: Float, z: Float): Matrix3d {
@@ -286,7 +286,7 @@ public open class Matrix3d(
      * Transforms the passed vector using this matrix.
      */
     public fun transform(v: Vector3d): Vector3d {
-        return transform(v.getX(), v.getY(), v.getZ())
+        return transform(v.x(), v.y(), v.z())
     }
 
     /**

@@ -42,16 +42,16 @@ public object SimpleRenderTypes {
         glMode: Int = GL11.GL_QUADS,
         configure: Consumer<RenderType.State.Builder>? = null
     ): RenderType {
-        val renderState = RenderType.State.getBuilder()
-            .texture(RenderState.TextureState(texture, false, false))
-            .alpha(DefaultRenderStates.DEFAULT_ALPHA)
-            .depthTest(DefaultRenderStates.DEPTH_LEQUAL)
-            .transparency(DefaultRenderStates.TRANSLUCENT_TRANSPARENCY)
+        val renderState = RenderType.State.builder()
+            .setTextureState(RenderState.TextureState(texture, false, false))
+            .setAlphaState(DefaultRenderStates.DEFAULT_ALPHA)
+            .setDepthTestState(DefaultRenderStates.DEPTH_LEQUAL)
+            .setTransparencyState(DefaultRenderStates.TRANSLUCENT_TRANSPARENCY)
         configure?.accept(renderState)
 
         return makeType(
             "flat_texture",
-            DefaultVertexFormats.POSITION_COLOR_TEX, glMode, 256, false, false, renderState.build(true)
+            DefaultVertexFormats.POSITION_COLOR_TEX, glMode, 256, false, false, renderState.createCompositeState(true)
         )
     }
 
@@ -75,17 +75,17 @@ public object SimpleRenderTypes {
     }
 
     private fun makeFlat(glMode: Int, configure: Consumer<RenderType.State.Builder>? = null): RenderType {
-        val renderState = RenderType.State.getBuilder()
-            .texture(RenderState.TextureState())
-            .alpha(DefaultRenderStates.DEFAULT_ALPHA)
-            .depthTest(DefaultRenderStates.DEPTH_LEQUAL)
-            .transparency(DefaultRenderStates.TRANSLUCENT_TRANSPARENCY)
-            .shadeModel(DefaultRenderStates.SHADE_ENABLED)
+        val renderState = RenderType.State.builder()
+            .setTextureState(RenderState.TextureState())
+            .setAlphaState(DefaultRenderStates.DEFAULT_ALPHA)
+            .setDepthTestState(DefaultRenderStates.DEPTH_LEQUAL)
+            .setTransparencyState(DefaultRenderStates.TRANSLUCENT_TRANSPARENCY)
+            .setShadeModelState(DefaultRenderStates.SHADE_ENABLED)
         configure?.accept(renderState)
 
         return makeType(
             "flat_color",
-            DefaultVertexFormats.POSITION_COLOR, glMode, 256, false, false, renderState.build(true)
+            DefaultVertexFormats.POSITION_COLOR, glMode, 256, false, false, renderState.createCompositeState(true)
         )
     }
 
@@ -109,7 +109,7 @@ public object SimpleRenderTypes {
             )
         )
         @Suppress("INACCESSIBLE_TYPE")
-        return RenderType.makeType(
+        return RenderType.create(
             name,
             vertexFormatIn,
             glMode,

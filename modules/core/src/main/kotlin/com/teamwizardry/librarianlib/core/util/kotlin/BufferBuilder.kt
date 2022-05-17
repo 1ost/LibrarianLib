@@ -15,9 +15,9 @@ public inline fun <reified T: IVertexBuilder> T.pos(pos: Vector3d): T = this.pos
 public inline fun <reified T: IVertexBuilder> T.normal(normal: Vector3d): T = this.normal(normal.x, normal.y, normal.z)
 public inline fun <reified T: IVertexBuilder> T.tex(uv: Vec2d): T = this.tex(uv.x, uv.y)
 
-public inline fun <reified T: IVertexBuilder> T.pos(x: Number, y: Number, z: Number): T = this.pos(x.toDouble(), y.toDouble(), z.toDouble()) as T
+public inline fun <reified T: IVertexBuilder> T.pos(x: Number, y: Number, z: Number): T = this.vertex(x.toDouble(), y.toDouble(), z.toDouble()) as T
 public inline fun <reified T: IVertexBuilder> T.normal(x: Number, y: Number, z: Number): T = this.normal(x.toFloat(), y.toFloat(), z.toFloat()) as T
-public inline fun <reified T: IVertexBuilder> T.tex(u: Number, v: Number): T = this.tex(u.toFloat(), v.toFloat()) as T
+public inline fun <reified T: IVertexBuilder> T.tex(u: Number, v: Number): T = this.uv(u.toFloat(), v.toFloat()) as T
 
 public inline fun <reified T: IVertexBuilder> T.color(color: Color): T = this.color(color.red / 255f, color.green / 255f, color.blue / 255f, color.alpha / 255f) as T
 

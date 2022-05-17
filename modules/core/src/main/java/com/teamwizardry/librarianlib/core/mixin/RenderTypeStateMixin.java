@@ -13,18 +13,18 @@ import java.util.ArrayList;
 public abstract class RenderTypeStateMixin implements IMutableRenderTypeState {
     @Override
     public void addState(RenderState state) {
-        ArrayList<RenderState> states = new ArrayList<>(getRenderStates());
+        ArrayList<RenderState> states = new ArrayList<>(getStates());
         states.add(state);
-        setRenderStates(ImmutableList.copyOf(states));
+        setStates(ImmutableList.copyOf(states));
     }
 
     @Accessor
     @Mutable
     @Override
-    public abstract ImmutableList<RenderState> getRenderStates();
+    public abstract ImmutableList<RenderState> getStates();
 
     @Accessor
     @Mutable
     @Override
-    public abstract void setRenderStates(ImmutableList<RenderState> renderStates);
+    public abstract void setStates(ImmutableList<RenderState> renderStates);
 }
