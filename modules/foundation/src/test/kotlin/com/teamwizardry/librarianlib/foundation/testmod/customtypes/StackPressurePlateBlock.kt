@@ -8,7 +8,7 @@ import net.minecraft.world.World
 
 class StackPressurePlateBlock(properties: FoundationBlockProperties, textureName: String) :
     BaseAnalogPressurePlateBlock(properties, textureName) {
-    override fun computeRedstoneStrength(world: World, pos: BlockPos): Int {
+    override fun getSignalStrength(world: World, pos: BlockPos): Int {
         return this.getEntitiesOnPressurePlate(world, pos, true)
             .filterIsInstance<ItemEntity>()
             .sumBy { it.item.count } % 16

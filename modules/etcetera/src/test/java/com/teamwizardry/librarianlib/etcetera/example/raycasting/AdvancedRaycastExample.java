@@ -18,22 +18,22 @@ public class AdvancedRaycastExample {
     public void advancedRaycast(Entity entity) {
         double rayLength = 100;
         Vector3d start = entity.getEyePosition(0);
-        Vector3d look = entity.getLookVec();
+        Vector3d look = entity.getLookAngle();
         look = new Vector3d(
-                look.getX() * rayLength,
-                look.getY() * rayLength,
-                look.getZ() * rayLength
+                look.x() * rayLength,
+                look.y() * rayLength,
+                look.z() * rayLength
         );
 
         // cast the ray
-        raycaster.cast(entity.getEntityWorld(),
+        raycaster.cast(entity.getCommandSenderWorld(),
                 Raycaster.BlockMode.VISUAL,
                 Raycaster.FluidMode.SOURCE,
                 isPlayerPredicate,
-                start.getX(), start.getY(), start.getZ(),
-                start.getX() + look.getX(),
-                start.getY() + look.getY(),
-                start.getZ() + look.getZ()
+                start.x(), start.y(), start.z(),
+                start.x() + look.x(),
+                start.y() + look.y(),
+                start.z() + look.z()
         );
 
         // get the result out of it

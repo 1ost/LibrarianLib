@@ -53,21 +53,21 @@ public interface TransferRule {
          * @see TransferSlot.isStackSimilar
          */
         private fun defaultIsStackSimilar(slot: Slot, stack: ItemStack): Boolean {
-            return Container.areItemsAndTagsEqual(stack, slot.stack)
+            return Container.consideredTheSameItem(stack, slot.item)
         }
 
         /**
          * @see TransferSlot.transferIntoSlot
          */
         private fun defaultTransferIntoSlot(slot: Slot, transfer: TransferState) {
-            if (!slot.isItemValid(transfer.stack))
+            if (!slot.mayPlace(transfer.stack))
                 return
-            val slotStack = slot.stack
+            val slotStack = slot.item
 
             // if it's the same item, we should try stacking. if it's empty, we'll just stack onto that zero.
-            if (Container.areItemsAndTagsEqual(transfer.stack, slotStack) || slotStack.isEmpty) {
+            if (Container.consideredTheSameItem(transfer.stack, slotStack) || slotStack.isEmpty) {
                 // compute how much to actually transfer
-                val maxStackSize = min(slot.getItemStackLimit(transfer.stack), transfer.stack.maxStackSize)
+                val maxStackSize = min(slot.getMaxStackSize(transfer.stack), transfer.stack.maxStackSize)
                 val transferLimit = max(0, maxStackSize - slotStack.count)
                 val transferAmount = min(transfer.stack.count, transferLimit)
 
@@ -80,7 +80,7 @@ public interface TransferRule {
                 // we copy the transferring stack instead of the current stack so we can seamlessly handle empty slots
                 val insert = transfer.stack.copy()
                 insert.count = slotStack.count + transferAmount
-                slot.putStack(insert)
+                slot.set(insert)
 
                 // decrement the remaining stack appropriately. `isEmpty` returns true when the count is zero
                 transfer.stack.count -= transferAmount
@@ -114,7 +114,7 @@ public interface TransferSlot {
      *
      * Here's a reference implementation:
      * ```kotlin
-     * Container.areItemsAndTagsEqual(stack, this.stack)
+     * Container.consideredTheSameItem(stack, this.stack)
      * ```
      */
     public fun isStackSimilar(stack: ItemStack): Boolean
@@ -127,7 +127,7 @@ public interface TransferSlot {
      *
      * ```kotlin
      * // check if the stack is valid here
-     * if(Container.areItemsAndTagsEqual(transfer.stack, this.stack) || this.stack.isEmpty) {
+     * if(Container.consideredTheSameItem(transfer.stack, this.stack) || this.stack.isEmpty) {
      *     val transferAmount = // compute how much can fit
      *
      *     // split off a stack and insert it

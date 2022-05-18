@@ -29,7 +29,7 @@ public abstract class BaseButtonBlock(
             .withExistingParent(registryName!!.path + "_down", loc("block/button_pressed"))
             .texture("texture", texture)
 
-        gen.horizontalFaceBlock(this, { state -> if(state.get(POWERED)) pressedModel else unpressedModel }, 180)
+        gen.horizontalFaceBlock(this, { state -> if(state.getValue(POWERED)) pressedModel else unpressedModel }, 180)
         gen.itemModels().singleTexture("block/${registryName!!.path}_inventory", loc("block/button_inventory"), texture)
     }
 
@@ -37,20 +37,20 @@ public abstract class BaseButtonBlock(
         return "block/${registryName!!.path}_inventory"
     }
 
-    override fun powerBlock(state: BlockState, world: World, pos: BlockPos) {
+    override fun press(state: BlockState, world: World, pos: BlockPos) {
         setPressed(state, world, pos, true, playSound = false)
     }
 
-    override fun tick(state: BlockState, world: ServerWorld, pos: BlockPos, rand: Random?) {
+    override fun tick(state: BlockState, world: ServerWorld, pos: BlockPos, rand: Random) {
         setPressed(state, world, pos, false, playSound = true)
     }
 
     protected fun setPressed(state: BlockState, world: World, pos: BlockPos, pressed: Boolean, playSound: Boolean) {
-        if (pressed != state.get(POWERED)) {
-            world.setBlockState(pos, state.with(POWERED, pressed), 3)
+        if (pressed != state.getValue(POWERED)) {
+            world.setBlock(pos, state.setValue(POWERED, pressed), 3)
             this.updateNeighbors(state, world, pos)
             if (pressed) {
-                world.pendingBlockTicks.scheduleTick(BlockPos(pos), this, pressDuration)
+                world.blockTicks.scheduleTick(BlockPos(pos), this, pressDuration)
             }
             if(playSound) {
                 playSound(null, world, pos, pressed)
@@ -59,7 +59,7 @@ public abstract class BaseButtonBlock(
     }
 
     private fun updateNeighbors(state: BlockState, world: World, pos: BlockPos) {
-        world.notifyNeighborsOfStateChange(pos, this)
-        world.notifyNeighborsOfStateChange(pos.offset(getFacing(state).opposite), this)
+        world.updateNeighborsAt(pos, this)
+        world.updateNeighborsAt(pos.offset(getConnectedDirection(state).opposite.normal), this)
     }
 }

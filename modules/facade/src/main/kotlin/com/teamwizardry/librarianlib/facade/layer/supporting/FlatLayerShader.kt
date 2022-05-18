@@ -21,7 +21,7 @@ internal object FlatLayerShader: Shader("flat_layer", null, ResourceLocation("li
     var blendMode: BlendMode = BlendMode.NORMAL
 
     override fun setupState() {
-        displaySize.set(Client.window.framebufferWidth.toFloat(), Client.window.framebufferHeight.toFloat())
+        displaySize.set(Client.window.width.toFloat(), Client.window.height.toFloat())
         RenderSystem.enableBlend()
         blendMode.glApply()
     }

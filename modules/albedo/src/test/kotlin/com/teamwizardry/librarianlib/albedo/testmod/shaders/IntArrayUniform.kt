@@ -34,21 +34,21 @@ internal object IntArrayUniform: ShaderTest<IntArrayUniform.Test>() {
         shader.vector4.set(0, 10, 20, 30, 40)
         shader.vector4.set(1, 50, 60, 70, 80)
 
-        val buffer = IRenderTypeBuffer.getImpl(Client.tessellator.buffer)
+        val buffer = IRenderTypeBuffer.immediate(Client.tessellator.builder)
         val vb = buffer.getBuffer(renderType)
 
-        vb.pos2d(minX, maxY).color(c).tex(0f, 1f).endVertex()
-        vb.pos2d(maxX, maxY).color(c).tex(1f, 1f).endVertex()
-        vb.pos2d(maxX, minY).color(c).tex(1f, 0f).endVertex()
-        vb.pos2d(minX, minY).color(c).tex(0f, 0f).endVertex()
+        vb.pos2d(minX, maxY).color(c).uv(0f, 1f).endVertex()
+        vb.pos2d(maxX, maxY).color(c).uv(1f, 1f).endVertex()
+        vb.pos2d(maxX, minY).color(c).uv(1f, 0f).endVertex()
+        vb.pos2d(minX, minY).color(c).uv(0f, 0f).endVertex()
 
         shader.bind()
-        buffer.finish()
+        buffer.endBatch()
         shader.unbind()
 
-        val fr = Client.minecraft.fontRenderer
-        fr.drawString(matrixStack, "$index",
-            (maxX - 2 - fr.getStringWidth("$index")).toInt().toFloat(),
+        val fr = Client.minecraft.font
+        fr.draw(matrixStack, "$index",
+            (maxX - 2 - fr.width("$index")).toInt().toFloat(),
             minY.toFloat() + 11,
             Color.WHITE.rgb
         )

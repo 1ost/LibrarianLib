@@ -64,7 +64,7 @@ public abstract class FacadeContainerScreen<T: Container>(
 
     public val jei: JeiIntegration = JeiIntegration()
 
-    private val messageEncoder = MessageEncoder(container.javaClass, container.windowId)
+    private val messageEncoder = MessageEncoder(container.javaClass, container.containerId)
 
     init {
         background.zIndex = GuiLayer.BACKGROUND_Z
@@ -88,7 +88,7 @@ public abstract class FacadeContainerScreen<T: Container>(
      */
     public fun sendMessage(name: String, vararg arguments: Any?) {
         LibrarianLibFacadeModule.channel.sendToServer(messageEncoder.encode(name, arguments))
-        messageEncoder.invoke(container, name, arguments)
+        messageEncoder.invoke(menu, name, arguments)
     }
 
     override fun render(matrixStack: MatrixStack, p_render_1_: Int, p_render_2_: Int, p_render_3_: Float) {
@@ -97,22 +97,22 @@ public abstract class FacadeContainerScreen<T: Container>(
         if(background.isVisible) {
             frame = frame.grow(background.style.edgeSize - background.style.edgeInset)
         }
-        xSize = frame.widthi
-        ySize = frame.heighti
-        guiLeft = frame.xi
-        guiTop = frame.yi
+        width = frame.widthi
+        height = frame.heighti
+        leftPos = frame.xi
+        topPos = frame.yi
         ContainerSpace.guiLeft = guiLeft
         ContainerSpace.guiTop = guiTop
 
         this.renderBackground(matrixStack)
         super.render(matrixStack, p_render_1_, p_render_2_, p_render_3_)
         if(!facade.hasTooltip)
-            this.renderHoveredTooltip(matrixStack, p_render_1_, p_render_2_)
+            this.renderTooltip(matrixStack, p_render_1_, p_render_2_)
     }
 
     override fun isMouseMasked(mouseX: Double, mouseY: Double): Boolean {
-        return getEventListenerForPos(mouseX, mouseY).isPresent || container.inventorySlots.any {
-            isPointInRegion(it.xPos, it.yPos, 16, 16, mouseX, mouseY) && it.isEnabled
+        return getChildAt(mouseX, mouseY).isPresent || menu.slots.any {
+            isHovering(it.x, it.y, 16, 16, mouseX, mouseY) && it.isActive
         }
     }
 
@@ -124,29 +124,29 @@ public abstract class FacadeContainerScreen<T: Container>(
         return facade.hitTest(mouseX, mouseY).layer == null
     }
 
-    override fun drawGuiContainerBackgroundLayer(matrixStack: MatrixStack, partialTicks: Float, mouseX: Int, mouseY: Int) {
+    override fun renderBg(matrixStack: MatrixStack, partialTicks: Float, mouseX: Int, mouseY: Int) {
         facade.filterRendering { it.zIndex < 1000 }
         facade.render(matrixStack)
     }
 
-    override fun drawGuiContainerForegroundLayer(matrixStack: MatrixStack, mouseX: Int, mouseY: Int) {
+    override fun renderLabels(matrixStack: MatrixStack, mouseX: Int, mouseY: Int) {
         RenderSystem.enableDepthTest() // depth testing is disabled because... logic?
 
         RenderSystem.translatef(-guiLeft.toFloat(), -guiTop.toFloat(), 0.0f)
 
         RenderSystem.colorMask(false, false, false, false)
         RenderSystem.depthFunc(GL11.GL_ALWAYS)
-        val buffer = IRenderTypeBuffer.getImpl(Client.tessellator.buffer)
+        val buffer = IRenderTypeBuffer.immediate(Client.tessellator.builder)
         val vb = buffer.getBuffer(depthClobberRenderType)
 
-        val windowHeight = Client.window.scaledHeight
-        val windowWidth = Client.window.scaledWidth
+        val windowHeight = Client.window.guiScaledHeight
+        val windowWidth = Client.window.guiScaledWidth
         vb.pos2d(Matrix4d.IDENTITY, 0, windowHeight).color(1f, 0f, 1f, 0.5f).endVertex()
         vb.pos2d(Matrix4d.IDENTITY, windowWidth, windowHeight).color(1f, 0f, 1f, 0.5f).endVertex()
         vb.pos2d(Matrix4d.IDENTITY, windowWidth, 0).color(1f, 0f, 1f, 0.5f).endVertex()
         vb.pos2d(Matrix4d.IDENTITY, 0, 0).color(1f, 0f, 1f, 0.5f).endVertex()
 
-        buffer.finish()
+        buffer.endBatch()
         RenderSystem.depthFunc(GL11.GL_LEQUAL)
         RenderSystem.colorMask(true, true, true, true)
 
@@ -251,13 +251,13 @@ public abstract class FacadeContainerScreen<T: Container>(
 
         @JvmSynthetic
         internal fun acceptJeiGhostStack(slot: GhostSlot, stack: ItemStack) {
-            sendMessage("acceptJeiGhostStack", slot.slotNumber, stack)
+            sendMessage("acceptJeiGhostStack", slot.slotIndex, stack)
         }
     }
 
     public companion object {
         private val depthClobberRenderType = SimpleRenderTypes.flat(GL11.GL_QUADS) {
-            it.depthTest(DefaultRenderStates.DEPTH_ALWAYS)
+            it.setDepthTestState(DefaultRenderStates.DEPTH_ALWAYS)
         }
     }
 }

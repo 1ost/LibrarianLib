@@ -180,19 +180,19 @@ public object GlitterWorldCollider {
 
     @Suppress("ReplacePutWithAssignment")
     private fun getBoundingBoxes(x: Int, y: Int, z: Int): List<AxisAlignedBB> {
-        val world = Client.minecraft.world ?: return emptyList()
+        val world = Client.minecraft.level ?: return emptyList()
 
         // blocks outside the world never have collision
         if (y < 0 || y > world.height)
             return emptyList()
 
         // check if the sub-chunk is known to be empty
-        sectionPos.setPos(x shr 4, y shr 4, z shr 4)
-        if (airCache.contains(sectionPos.toLong()))
+        sectionPos.set(x shr 4, y shr 4, z shr 4)
+        if (airCache.contains(sectionPos.asLong()))
             return emptyList()
 
-        mutablePos.setPos(x, y, z)
-        val toLong = mutablePos.toLong()
+        mutablePos.set(x, y, z)
+        val toLong = mutablePos.asLong()
         // we can't use getOrPut because it uses the boxed Long
         blockCache.get(toLong)?.let { return it }
 
@@ -201,8 +201,8 @@ public object GlitterWorldCollider {
         if (chunk == null) {
             // the entire chunk is unloaded. Mark all its sub-chunks as empty
             for (i in 0 until 16) {
-                sectionPos.setPos(x shr 4, i, z shr 4)
-                airCache.add(sectionPos.toLong())
+                sectionPos.set(x shr 4, i, z shr 4)
+                airCache.add(sectionPos.asLong())
             }
             return emptyList()
         }
@@ -210,19 +210,19 @@ public object GlitterWorldCollider {
         val section = chunk.sections[y shr 4]
         if (ChunkSection.isEmpty(section)) {
             // if the section is empty, make note of that for future calls
-            airCache.add(sectionPos.toLong())
+            airCache.add(sectionPos.asLong())
             return emptyList()
         }
 
         val state = section.getBlockState(x and 15, y and 15, z and 15)
 
-        val boxes = if (state == Blocks.AIR.defaultState || state.isAir(world, mutablePos)
-            || state.material.let { !it.blocksMovement() || it.isLiquid }) {
+        val boxes = if (state == Blocks.AIR.defaultBlockState() || state.isAir(world, mutablePos)
+            || state.material.let { !it.blocksMotion() || it.isLiquid }) {
             // ignore air, non-solid, and liquid blocks
             emptyList()
         } else {
             val shape = state.getCollisionShape(world, mutablePos)
-            shapeCache.getOrPut(shape) { shape.toBoundingBoxList() }
+            shapeCache.getOrPut(shape) { shape.toAabbs() }
         }
 
         // we survived the gauntlet, now cache the resulting list for next time

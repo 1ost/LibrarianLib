@@ -11,13 +11,13 @@ import net.minecraft.util.math.BlockPos
 import net.minecraft.util.text.StringTextComponent
 
 class SimpleContainer(windowId: Int, player: PlayerEntity): FacadeContainer(LibrarianLibFacadeTestMod.simpleContainerType, windowId, player) {
-    override fun canInteractWith(playerIn: PlayerEntity): Boolean {
+    override fun stillValid(playerIn: PlayerEntity): Boolean {
         return true
     }
 
     @Message
     private fun buttonClick(position: Vec2d) {
         val prefix = if(isClientContainer) "[Client Container]" else "[Server Container]"
-        player.sendStatusMessage(StringTextComponent("$prefix button click: $position"), false)
+        player.displayClientMessage(StringTextComponent("$prefix button click: $position"), false)
     }
 }

@@ -24,7 +24,7 @@ public class SafetyNetErrorScreen(private val message: String, private val e: Ex
     init {
         val maxWidth = 300
 
-        parts.add(TextScreenPart(title.unformattedComponentText, maxWidth))
+        parts.add(TextScreenPart(title.contents, maxWidth))
         parts.add(TextScreenPart("§1§l${e.javaClass.simpleName}"))
         parts.add(TextScreenPart("Exception caught while $message", maxWidth))
         e.message?.also { exceptionMessage ->
@@ -69,7 +69,7 @@ public class SafetyNetErrorScreen(private val message: String, private val e: Ex
     }
 
     private fun drawCenteredStringNoShadow(matrixStack: MatrixStack, fontRenderer: FontRenderer, text: String, x: Int, y: Int, color: Int) {
-        fontRenderer.drawString(matrixStack, text, x - fontRenderer.getStringWidth(text) / 2f, y.toFloat(), color)
+        fontRenderer.draw(matrixStack, text, x - fontRenderer.width(text) / 2f, y.toFloat(), color)
     }
 
     private abstract class ScreenPart {
@@ -92,15 +92,15 @@ public class SafetyNetErrorScreen(private val message: String, private val e: Ex
         val widths: List<Int>
 
         init {
-            val fontRenderer = Client.minecraft.fontRenderer
+            val fontRenderer = Client.minecraft.font
             if (maxWidth == null) {
-                lines = listOf(StringTextComponent(text).func_241878_f())
+                lines = listOf(StringTextComponent(text).getVisualOrderText())
             } else {
-                lines = fontRenderer.trimStringToWidth(StringTextComponent(text), maxWidth)
+                lines = fontRenderer.split(StringTextComponent(text), maxWidth)
             }
-            widths = lines.map { fontRenderer.func_243245_a(it) }
+            widths = lines.map { fontRenderer.width(it) }
 
-            height = lines.size * fontRenderer.FONT_HEIGHT + // line height
+            height = lines.size * fontRenderer.lineHeight + // line height
                 (lines.size - 1) // 1px between lines
 
             width = (widths.maxOrNull() ?: 0) / 2 * 2
@@ -108,16 +108,16 @@ public class SafetyNetErrorScreen(private val message: String, private val e: Ex
 
         override fun render(matrixStack: MatrixStack, yPos: Int) {
             var y = yPos
-            val fontRenderer = Client.minecraft.fontRenderer
+            val fontRenderer = Client.minecraft.font
 
             if (lines.isNotEmpty()) {
                 if (lines.size == 1) {
-                    fontRenderer.func_238422_b_(matrixStack, lines[0], -widths[0] / 2f, y.toFloat(), 0)
-                    y += fontRenderer.FONT_HEIGHT + 1
+                    fontRenderer.draw(matrixStack, lines[0], -widths[0] / 2f, y.toFloat(), 0)
+                    y += fontRenderer.lineHeight + 1
                 } else {
                     lines.forEach { line ->
-                        fontRenderer.func_238422_b_(matrixStack, line, -guiWidth / 2f, y.toFloat(), 0)
-                        y += fontRenderer.FONT_HEIGHT + 1
+                        fontRenderer.draw(matrixStack, line, -guiWidth / 2f, y.toFloat(), 0)
+                        y += fontRenderer.lineHeight + 1
                     }
                 }
             }

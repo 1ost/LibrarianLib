@@ -2,6 +2,7 @@ package com.teamwizardry.librarianlib.testcore.objects
 
 import com.mojang.blaze3d.matrix.MatrixStack
 import com.mojang.blaze3d.vertex.IVertexBuilder
+import com.teamwizardry.librarianlib.core.util.kotlin.pos
 import com.teamwizardry.librarianlib.core.util.loc
 import net.minecraft.client.renderer.IRenderTypeBuffer
 import net.minecraft.util.math.vector.Matrix3f
@@ -22,16 +23,16 @@ public class TestEntityRenderer(renderManagerIn: EntityRendererManager): EntityR
     private val tex = loc("testcore:entity/testentity.png")
 
     override fun render(entity: TestEntity, entityYaw: Float, partialTicks: Float, matrixStack: MatrixStack, buffer: IRenderTypeBuffer, packedLight: Int) {
-        matrixStack.push()
-        matrixStack.rotate(Vector3f.YN.rotationDegrees(MathHelper.lerp(partialTicks, entity.prevRotationYaw, entity.rotationYaw) + 90.0f))
-        matrixStack.rotate(Vector3f.ZN.rotationDegrees(MathHelper.lerp(partialTicks, entity.prevRotationPitch, entity.rotationPitch)))
+        matrixStack.pushPose()
+        matrixStack.mulPose(Vector3f.YN.rotationDegrees(MathHelper.lerp(partialTicks, entity.yRotO, entity.yRot) + 90.0f))
+            matrixStack.mulPose(Vector3f.ZN.rotationDegrees(MathHelper.lerp(partialTicks, entity.xRotO, entity.xRotO)))
         matrixStack.scale(1 / 5f, 1 / 5f, 1 / 5f)
 
         fun draw(type: RenderType) {
             val builder = buffer.getBuffer(type)
-            val stackEntry: MatrixStack.Entry = matrixStack.last
-            val transform = stackEntry.matrix
-            val normalTransform = stackEntry.normal
+            val stackEntry: MatrixStack.Entry = matrixStack.last()
+            val transform = stackEntry.pose()
+            val normalTransform = stackEntry.normal()
 
             var len = sqrt(1 * 1f + 3 * 3f)
             var normalX = 1 / len
@@ -83,12 +84,12 @@ public class TestEntityRenderer(renderManagerIn: EntityRendererManager): EntityR
             builder.vertex(transform, -1, 0, 0, 1, 1, packedLight, normalTransform, -normalX, 0, -normalYZ)
         }
 
-        draw(RenderType.getEntityCutout(getEntityTexture(entity)))
+        draw(RenderType.entityCutout(getTextureLocation(entity)))
         if (entity.isGlowing) {
-            draw(RenderType.getOutline(getEntityTexture(entity)))
+            draw(RenderType.outline(getTextureLocation(entity)))
         }
 
-        matrixStack.pop()
+        matrixStack.popPose()
         super.render(entity, entityYaw, partialTicks, matrixStack, buffer, packedLight)
     }
 
@@ -101,11 +102,11 @@ public class TestEntityRenderer(renderManagerIn: EntityRendererManager): EntityR
         nx: Number, ny: Number, nz: Number
     ) {
         this
-            .pos(transform, x.toFloat(), y.toFloat(), z.toFloat())
+            .vertex(transform, x.toFloat(), y.toFloat(), z.toFloat())
             .color(255, 255, 255, 255)
-            .tex(u.toFloat(), v.toFloat())
-            .overlay(OverlayTexture.NO_OVERLAY)
-            .lightmap(lightmap)
+            .uv(u.toFloat(), v.toFloat())
+            .overlayCoords(OverlayTexture.NO_OVERLAY)
+            .uv2(lightmap)
             .normal(normalTransform, nx.toFloat(), ny.toFloat(), nz.toFloat())
             .endVertex()
     }
@@ -113,7 +114,8 @@ public class TestEntityRenderer(renderManagerIn: EntityRendererManager): EntityR
     /**
      * Returns the location of an entity's texture. Doesn't seem to be called unless you call Render.bindEntityTexture.
      */
-    override fun getEntityTexture(entity: TestEntity): ResourceLocation {
+
+    override fun getTextureLocation(entity: TestEntity): ResourceLocation {
 //        return ResourceLocation("textures/entity/projectiles/arrow.png")
         return loc("testcore:textures/entity/testentity.png")
     }

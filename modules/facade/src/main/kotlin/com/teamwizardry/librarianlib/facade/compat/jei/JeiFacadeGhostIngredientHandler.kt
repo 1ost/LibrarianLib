@@ -19,7 +19,7 @@ internal object JeiFacadeGhostIngredientHandler : IGhostIngredientHandler<Facade
 
         if (ingredient is ItemStack) {
             @Suppress("UNCHECKED_CAST")
-            targets.addAll(gui.container.inventorySlots
+            targets.addAll(gui.menu.slots
                 .filterIsInstance<GhostSlot>()
                 .filter { !it.disableJeiGhostIntegration }
                 .map { GhostSlotTarget(gui, it) as IGhostTarget<I> }
@@ -37,7 +37,7 @@ internal object JeiFacadeGhostIngredientHandler : IGhostIngredientHandler<Facade
         private val slot: GhostSlot
     ) : IGhostTarget<ItemStack> {
         override fun getArea(): Rectangle2d {
-            return Rectangle2d(gui.guiLeft + slot.xPos, gui.guiTop + slot.yPos, 16, 16)
+            return Rectangle2d(gui.guiLeft + slot.x, gui.guiTop + slot.y, 16, 16)
         }
 
         override fun accept(ingredient: ItemStack) {

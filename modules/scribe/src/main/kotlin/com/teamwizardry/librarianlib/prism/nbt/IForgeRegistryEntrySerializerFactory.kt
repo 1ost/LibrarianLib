@@ -36,7 +36,7 @@ internal open class IForgeRegistryEntrySerializerFactory(prism: NBTPrism): NBTSe
         }
 
         override fun deserialize(tag: INBT, existing: IForgeRegistryEntry<*>?): IForgeRegistryEntry<*> {
-            val entryName = ResourceLocation(tag.expectType<StringNBT>("tag").string)
+            val entryName = ResourceLocation(tag.expectType<StringNBT>("tag").asString)
             return registry.getValue(entryName)
                 ?: throw DeserializationException("Could not find entry $entryName in $registryName")
         }

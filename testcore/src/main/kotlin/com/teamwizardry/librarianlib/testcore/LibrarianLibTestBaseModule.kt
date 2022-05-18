@@ -32,7 +32,7 @@ public object LibrarianLibTestBaseModule : LibrarianLibModule("testbase", "Test 
         MOD_BUS.register(this)
     }
 
-    public val testTool: Item = Item(Item.Properties().maxStackSize(1)).also {
+    public val testTool: Item = Item(Item.Properties().durability(1)).also {
         it.registryName = ResourceLocation("testcore", "test_tool")
     }
 
@@ -73,7 +73,7 @@ public object LibrarianLibTestBaseModule : LibrarianLibModule("testbase", "Test 
 
     @SubscribeEvent
     internal fun blockBreak(event: BlockEvent.BreakEvent) {
-        val stack = event.player.heldItemMainhand
+        val stack = event.player.mainHandItem
         val item = stack.item
         if(item is TestItem) {
             if(item.config.leftClickBlock.exists) {

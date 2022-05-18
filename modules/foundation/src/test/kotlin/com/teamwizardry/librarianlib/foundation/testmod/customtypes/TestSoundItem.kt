@@ -17,6 +17,6 @@ class TestSoundItem(properties: Properties): BaseItem(properties) {
         if(worldIn.isRemote) {
             playerIn.playSound(ModSounds.testSound, 1f, 1f)
         }
-        return ActionResult.resultPass(playerIn.getHeldItem(handIn))
+        return ActionResult.resultPass(playerIn.getItemInHand(handIn))
     }
 }

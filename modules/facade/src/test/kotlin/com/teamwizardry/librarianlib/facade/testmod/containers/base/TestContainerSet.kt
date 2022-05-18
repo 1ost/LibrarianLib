@@ -28,7 +28,7 @@ class TestContainerSet(val name: String, config: Entry.Group.() -> Unit) {
     }
 
     fun getType(id: ResourceLocation): Type<*, *> {
-        return types.find { it.id == id }
+        return types.find { it.id.equals(id) }
             ?: throw IllegalArgumentException("No container type for id '$id'")
     }
 

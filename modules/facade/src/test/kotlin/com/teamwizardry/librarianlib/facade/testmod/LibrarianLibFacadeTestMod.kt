@@ -168,7 +168,7 @@ object LibrarianLibFacadeTestMod : TestMod(LibrarianLibFacadeModule) {
             add<RMValueTests>()
         }
 
-        +DirtSetterItem(Item.Properties().group(itemGroup).maxStackSize(1)).also {
+        +DirtSetterItem(Item.Properties().tab(itemGroup).durability(1)).also {
             it.registryName = loc("ll-facade-test", "dirt_setter")
         }
     }
@@ -189,14 +189,14 @@ object LibrarianLibFacadeTestMod : TestMod(LibrarianLibFacadeModule) {
 
     override fun clientSetup(event: FMLClientSetupEvent) {
         super.clientSetup(event)
-        ScreenManager.registerFactory(simpleContainerType, ::SimpleContainerScreen)
-        ScreenManager.registerFactory(simpleInventoryContainerType, ::SimpleInventoryContainerScreen)
-        ScreenManager.registerFactory(testContainerSelectorContainerType, ::TestContainerSelectorScreen)
-        ScreenManager.registerFactory(backpackContainerType, ::BackpackContainerScreen)
+        ScreenManager.register(simpleContainerType, ::SimpleContainerScreen)
+        ScreenManager.register(simpleInventoryContainerType, ::SimpleInventoryContainerScreen)
+        ScreenManager.register(testContainerSelectorContainerType, ::TestContainerSelectorScreen)
+        ScreenManager.register(backpackContainerType, ::BackpackContainerScreen)
         for ((_, containerSet) in containerSets) {
             for (type in containerSet.types) {
                 @Suppress("UNCHECKED_CAST")
-                ScreenManager.registerFactory(
+                ScreenManager.register(
                     type.containerType as ContainerType<FacadeContainer>
                 ) { container, inventory, title ->
                     (type.screenFactory.getClientFunction() as ContainerScreenFactory<FacadeContainer>)

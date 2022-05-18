@@ -14,11 +14,11 @@ class TestContainerSelectorContainer(windowId: Int, player: PlayerEntity, val po
     val containerSet: TestContainerSet
 
     init {
-        val tile = player.world.getTileEntity(pos) as TestContainerTile
+        val tile = player.level.getBlockEntity(pos) as TestContainerTile
         containerSet = tile.containerSet
     }
 
-    override fun canInteractWith(playerIn: PlayerEntity): Boolean {
+    override fun stillValid(playerIn: PlayerEntity): Boolean {
         return true
     }
 

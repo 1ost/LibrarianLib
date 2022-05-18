@@ -51,11 +51,11 @@ public abstract class BaseAnalogPressurePlateBlock(
         pos: BlockPos,
         respectEntityDoesNotTriggerPressurePlate: Boolean
     ): List<Entity> {
-        val entities = world.getEntitiesWithinAABBExcludingEntity(null as Entity?, PRESSURE_AABB.offset(pos))
+        val entities = world.getEntities(null as Entity?, TOUCH_AABB.move(pos))
         if (respectEntityDoesNotTriggerPressurePlate)
-            entities.removeIf { it.doesEntityNotTriggerPressurePlate() }
+            entities.removeIf { it.isIgnoringBlockTriggers() }
         return entities
     }
 
-    abstract override fun computeRedstoneStrength(world: World, pos: BlockPos): Int
+    abstract override fun getSignalStrength(world: World, pos: BlockPos): Int
 }

@@ -22,7 +22,7 @@ public class ExampleModContainers {
     }
 
     public static void clientSetup(FMLClientSetupEvent e) {
-        ScreenManager.registerFactory(
+        ScreenManager.register(
                 dirtSetterContainerType,
                 DirtSetterContainerScreen::new
         );

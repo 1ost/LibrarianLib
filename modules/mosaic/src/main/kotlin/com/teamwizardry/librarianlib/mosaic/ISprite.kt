@@ -175,10 +175,10 @@ public interface ISprite {
      * @param height The height to draw the sprite
      */
     public fun draw(matrix: Matrix4d, x: Float, y: Float, width: Float, height: Float, animTicks: Int, tint: Color) {
-        val buffer = IRenderTypeBuffer.getImpl(Client.tessellator.buffer)
+        val buffer = IRenderTypeBuffer.immediate(Client.tessellator.builder)
         val builder = buffer.getBuffer(renderType)
         DrawingUtil.draw(this, builder, matrix, x, y, width, height, animTicks, tint)
-        buffer.finish()
+        buffer.endBatch()
     }
 
     public fun pinnedWrapper(top: Boolean, bottom: Boolean, left: Boolean, right: Boolean): ISprite {

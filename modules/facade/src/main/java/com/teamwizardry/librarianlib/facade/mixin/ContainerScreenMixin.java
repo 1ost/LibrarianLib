@@ -10,7 +10,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(ContainerScreen.class)
 public class ContainerScreenMixin {
-    @Inject(method = "isSlotSelected", at = @At("RETURN"), cancellable = true)
+    @Inject(method = "isHovering", at = @At("RETURN"), cancellable = true)
     public void isSlotSelectedHook(Slot slotIn, double mouseX, double mouseY, CallbackInfoReturnable<Boolean> cir) {
         if(this instanceof FacadeContainerScreenHooks) {
             FacadeContainerScreenHooks hooks = (FacadeContainerScreenHooks) this;

@@ -28,16 +28,16 @@ internal object BoolUniform: ShaderTest<BoolUniform.Test>() {
         shader.vector3.set(true, false, true)
         shader.vector4.set(true, false, true, false)
 
-        val buffer = IRenderTypeBuffer.getImpl(Client.tessellator.buffer)
+        val buffer = IRenderTypeBuffer.immediate(Client.tessellator.builder)
         val vb = buffer.getBuffer(renderType)
 
-        vb.pos2d(minX, maxY).color(c).tex(0f, 1f).endVertex()
-        vb.pos2d(maxX, maxY).color(c).tex(1f, 1f).endVertex()
-        vb.pos2d(maxX, minY).color(c).tex(1f, 0f).endVertex()
-        vb.pos2d(minX, minY).color(c).tex(0f, 0f).endVertex()
+        vb.pos2d(minX, maxY).color(c).uv(0f, 1f).endVertex()
+        vb.pos2d(maxX, maxY).color(c).uv(1f, 1f).endVertex()
+        vb.pos2d(maxX, minY).color(c).uv(1f, 0f).endVertex()
+        vb.pos2d(minX, minY).color(c).uv(0f, 0f).endVertex()
 
         shader.bind()
-        buffer.finish()
+        buffer.endBatch()
         shader.unbind()
     }
 

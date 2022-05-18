@@ -43,10 +43,10 @@ public object UnitTestCommand {
     }
 
     private fun runTestSuite(source: CommandSource, input: String, suite: UnitTestSuite) {
-        source.sendFeedback(StringTextComponent("Running §5${suite.registryName}§r tests..."), true)
+        source.sendSuccess(StringTextComponent("Running §5${suite.registryName}§r tests..."), true)
         val report = UnitTestRunner.runUnitTests(suite.tests)
         logger.info("Unit tests for ${suite.registryName}\n" + report.roots.joinToString("\n") { UnitTestRunner.format(it) })
-        source.sendFeedback(makeTextComponent(input, report), true)
+        source.sendSuccess(makeTextComponent(input, report), true)
     }
 
     private fun makeTextComponent(input: String, report: TestSuiteResult): ITextComponent {
@@ -60,32 +60,32 @@ public object UnitTestCommand {
         }
 
         val passedStyle = Style.EMPTY
-            .applyFormatting(TextFormatting.GREEN)
-            .setHoverEvent(
+            .applyFormat(TextFormatting.GREEN)
+            .withHoverEvent(
                 HoverEvent(HoverEvent.Action.SHOW_TEXT,
-                    StringTextComponent("${passed.size} tests passed\n").mergeStyle(TextFormatting.GREEN)
+                    StringTextComponent("${passed.size} tests passed\n").withStyle(TextFormatting.GREEN)
                         .append(StringTextComponent(passed.values.joinToString("\n") { it.displayPath.joinToString(" > ") }))
                 )
             )
         val failedStyle = Style.EMPTY
-            .applyFormatting(TextFormatting.RED)
-            .setHoverEvent(
+            .applyFormat(TextFormatting.RED)
+            .withHoverEvent(
                 HoverEvent(HoverEvent.Action.SHOW_TEXT,
-                    StringTextComponent("${failed.size} tests failed\n").mergeStyle(TextFormatting.RED)
+                    StringTextComponent("${failed.size} tests failed\n").withStyle(TextFormatting.RED)
                         .append(StringTextComponent(failed.values.joinToString("\n") { it.displayPath.joinToString(" > ") }))
                 )
             )
         val rerunStyle = Style.EMPTY
-            .applyFormatting(TextFormatting.BLUE)
+            .applyFormat(TextFormatting.BLUE)
             .setUnderlined(true)
-            .setClickEvent(ClickEvent(ClickEvent.Action.RUN_COMMAND, input))
+            .withClickEvent(ClickEvent(ClickEvent.Action.RUN_COMMAND, input))
 
         return StringTextComponent("[ $fullCount tests found | ").append(
                 StringTextComponent("${passed.size} tests passed").setStyle(passedStyle)
-            ).appendString(" | ")
+            ).append(" | ")
             .append(
                 StringTextComponent("${failed.size} tests failed").setStyle(failedStyle)
-            ).appendString(" ] ")
+            ).append(" ] ")
             .append(
                 StringTextComponent("(Rerun)").setStyle(rerunStyle)
             )
@@ -102,8 +102,8 @@ public class UnitTestArgument: ArgumentType<UnitTestSuite> {
             ?: throw TEST_NOT_FOUND.create(resourcelocation)
     }
 
-    override fun <S> listSuggestions(p_listSuggestions_1_: CommandContext<S>, p_listSuggestions_2_: SuggestionsBuilder): CompletableFuture<Suggestions> {
-        return ISuggestionProvider.suggestIterable(registry.keys, p_listSuggestions_2_)
+    public override fun <S> listSuggestions(p_listSuggestions_1_: CommandContext<S>, p_listSuggestions_2_: SuggestionsBuilder): CompletableFuture<Suggestions> {
+        return ISuggestionProvider.suggestResource(registry.keys, p_listSuggestions_2_)
     }
 
     public companion object {

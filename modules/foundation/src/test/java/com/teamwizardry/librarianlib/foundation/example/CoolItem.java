@@ -14,13 +14,13 @@ public class CoolItem extends BaseItem {
     }
 
     @Override
-    public ActionResultType onItemUse(ItemUseContext context) {
-        if (!context.getWorld().isRemote) {
+    public ActionResultType useOn(ItemUseContext context) {
+        if (!context.getLevel().isClientSide) {
             ExampleModContainers.coolContainer.open(
                     (ServerPlayerEntity) context.getPlayer(),
                     new TranslationTextComponent("examplemod.cool_container.title"),
                     // additional constructor arguments:
-                    context.getPos()
+                    context.getClickedPos()
             );
         }
         return ActionResultType.SUCCESS;

@@ -21,14 +21,14 @@ class BackpackContainer(
     val lock: ContainerLock.ConsistencyLock
 
     init {
-        val stack = player.getHeldItem(hand)
+        val stack = player.getItemInHand(hand)
         if(stack.item != LibrarianLibFacadeTestMod.backpackItem)
             throw IllegalStateException("Held item isn't a backpack")
         val stackCap = stack.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY).getOrNull()
             ?: throw IllegalStateException("Held item doesn't have an item handler")
 
         lock = ContainerLock.ConsistencyLock(isClientContainer) {
-            player.getHeldItem(hand).getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY)
+            player.getItemInHand(hand).getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY)
         }
         contentsSlots = SlotManager(stackCap)
         contentsSlots.all.setFactory { inv, index -> LockingSlot(inv, index, lock) }
@@ -42,7 +42,7 @@ class BackpackContainer(
         createTransferRule().from(contentsSlots.all).into(playerSlots.main).into(playerSlots.hotbar)
     }
 
-    override fun canInteractWith(playerIn: PlayerEntity): Boolean {
+    override fun stillValid(playerIn: PlayerEntity): Boolean {
         return !lock.isLocked()
     }
 }

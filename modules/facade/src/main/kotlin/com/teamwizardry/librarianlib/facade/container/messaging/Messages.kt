@@ -56,7 +56,7 @@ internal object MessagePacketType: PacketType<MessagePacket>(MessagePacket::clas
                     "${context.get().direction}")
         }
         context.get().enqueueWork {
-            (player?.openContainer as? MessageHandler)?.receiveMessage(packet)
+            (player?.containerMenu as? MessageHandler)?.receiveMessage(packet)
         }
     }
 }

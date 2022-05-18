@@ -7,7 +7,7 @@ import net.minecraft.resources.data.IMetadataSectionSerializer
 
 internal class MosaicMetadataSectionSerializer : IMetadataSectionSerializer<MosaicJson> {
 
-    override fun deserialize(json: JsonObject): MosaicJson {
+    override fun fromJson(json: JsonObject): MosaicJson {
         return json.parse("mosaic") {
             val (width, height) = get("size") {
                 expectExactSize(2)
@@ -33,7 +33,7 @@ internal class MosaicMetadataSectionSerializer : IMetadataSectionSerializer<Mosa
         }
     }
 
-    override fun getSectionName(): String {
+    override fun getMetadataSectionName(): String {
         return "mosaic"
     }
 

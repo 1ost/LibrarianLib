@@ -11,10 +11,10 @@ class TestCapabilityItem(properties: Properties): BaseItem(properties) {
         val te = context.world.getTileEntity(context.pos)
         val cap = te?.getCapability(TestCapability.capability)?.getOrNull()
         if(cap == null) {
-            context.player?.sendStatusMessage(StringTextComponent("No capability. Try clicking the test Tile Entity block."), false)
+            context.player?.displayClientMessage(StringTextComponent("No capability. Try clicking the test Tile Entity block."), false)
             return ActionResultType.FAIL
         }
-        context.player?.sendStatusMessage(StringTextComponent("Capability present! Data is ${cap.data}++"), false)
+        context.player?.displayClientMessage(StringTextComponent("Capability present! Data is ${cap.data}++"), false)
         cap.data++
         te.markDirty()
 

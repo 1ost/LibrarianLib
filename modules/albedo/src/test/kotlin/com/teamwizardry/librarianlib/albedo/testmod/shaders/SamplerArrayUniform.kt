@@ -36,20 +36,20 @@ internal object SamplerArrayUniform: ShaderTest<SamplerArrayUniform.Test>() {
 
         val c = Color.WHITE
 
-        Client.textureManager.bindTexture(successLocation1)
-        Client.textureManager.bindTexture(successLocation2)
-        val tex1 = Client.textureManager.getTexture(successLocation1)?.glTextureId ?: throw IllegalStateException("sampler_success1 not found")
-        val tex2 = Client.textureManager.getTexture(successLocation2)?.glTextureId ?: throw IllegalStateException("sampler_success2 not found")
-        Client.textureManager.bindTexture(failureLocation)
+        Client.textureManager.bind(successLocation1)
+        Client.textureManager.bind(successLocation2)
+        val tex1 = Client.textureManager.getTexture(successLocation1)?.id ?: throw IllegalStateException("sampler_success1 not found")
+        val tex2 = Client.textureManager.getTexture(successLocation2)?.id ?: throw IllegalStateException("sampler_success2 not found")
+        Client.textureManager.bind(failureLocation)
 
-        val buffer = IRenderTypeBuffer.getImpl(Client.tessellator.buffer)
+        val buffer = IRenderTypeBuffer.immediate(Client.tessellator.builder)
         var vb = buffer.getBuffer(renderType)
-        vb.pos2d(minX, maxY).color(c).tex(0f, 1f).endVertex()
-        vb.pos2d(maxX, maxY).color(c).tex(1f, 1f).endVertex()
-        vb.pos2d(maxX, minY).color(c).tex(1f, 0f).endVertex()
-        vb.pos2d(minX, minY).color(c).tex(0f, 0f).endVertex()
+        vb.pos2d(minX, maxY).color(c).uv(0f, 1f).endVertex()
+        vb.pos2d(maxX, maxY).color(c).uv(1f, 1f).endVertex()
+        vb.pos2d(maxX, minY).color(c).uv(1f, 0f).endVertex()
+        vb.pos2d(minX, minY).color(c).uv(0f, 0f).endVertex()
 
-        buffer.finish()
+        buffer.endBatch()
 
         val index = (Client.time.seconds % 2).toInt()
         shader.index.set(index)
@@ -60,22 +60,22 @@ internal object SamplerArrayUniform: ShaderTest<SamplerArrayUniform.Test>() {
 
         vb = buffer.getBuffer(renderType)
 
-        vb.pos2d(minX, maxY).color(c).tex(0f, 2f).endVertex()
-        vb.pos2d(maxX, maxY).color(c).tex(1f, 2f).endVertex()
-        vb.pos2d(maxX, minY).color(c).tex(1f, 0f).endVertex()
-        vb.pos2d(minX, minY).color(c).tex(0f, 0f).endVertex()
+        vb.pos2d(minX, maxY).color(c).uv(0f, 2f).endVertex()
+        vb.pos2d(maxX, maxY).color(c).uv(1f, 2f).endVertex()
+        vb.pos2d(maxX, minY).color(c).uv(1f, 0f).endVertex()
+        vb.pos2d(minX, minY).color(c).uv(0f, 0f).endVertex()
 
-        buffer.finish()
+        buffer.endBatch()
     }
 
     private val renderType: RenderType
     init {
 
-        val renderState = RenderType.State.getBuilder()
-            .alpha(DefaultRenderStates.DEFAULT_ALPHA)
-            .depthTest(DefaultRenderStates.DEPTH_LEQUAL)
-            .transparency(DefaultRenderStates.TRANSLUCENT_TRANSPARENCY)
-            .build(true)
+        val renderState = RenderType.State.builder()
+            .setAlphaState(DefaultRenderStates.DEFAULT_ALPHA)
+            .setDepthTestState(DefaultRenderStates.DEPTH_LEQUAL)
+            .setTransparencyState(DefaultRenderStates.TRANSLUCENT_TRANSPARENCY)
+            .createCompositeState(true)
 
         mixinCast<IMutableRenderTypeState>(renderState).addState("albedo", { shader.bind() }, { shader.unbind() })
 

@@ -23,30 +23,30 @@ object Particles {
 @OnlyIn(Dist.CLIENT)
 class HitParticle private constructor(world: ClientWorld, x: Double, y: Double, z: Double): SpriteTexturedParticle(world, x, y, z, 0.0, 0.0, 0.0) {
     init {
-        maxAge = 1
-        canCollide = false
+        age = 1
+        hasPhysics = false
     }
 
     override fun getRenderType(): IParticleRenderType {
         return IParticleRenderType.PARTICLE_SHEET_OPAQUE
     }
 
-    override fun getScale(p_217561_1_: Float): Float {
+    override fun getQuadSize(p_217561_1_: Float): Float {
         return 0.5f
     }
 
     override fun tick() {
-        prevPosX = posX
-        prevPosY = posY
-        prevPosZ = posZ
-        if (age++ >= maxAge) {
-            setExpired()
+        xo = x
+        yo = y
+        zo = z
+        if (age++ >= age) {
+            remove()
         }
     }
 
     @OnlyIn(Dist.CLIENT)
     class Factory(private val spriteSet: IAnimatedSprite): IParticleFactory<BasicParticleType> {
-        override fun makeParticle(
+        override fun createParticle(
             typeIn: BasicParticleType,
             worldIn: ClientWorld,
             x: Double,
@@ -57,7 +57,7 @@ class HitParticle private constructor(world: ClientWorld, x: Double, y: Double, 
             zSpeed: Double
         ): Particle {
             val hitParticle = HitParticle(worldIn, x, y, z)
-            hitParticle.selectSpriteRandomly(spriteSet)
+            hitParticle.pickSprite(spriteSet)
             return hitParticle
         }
     }

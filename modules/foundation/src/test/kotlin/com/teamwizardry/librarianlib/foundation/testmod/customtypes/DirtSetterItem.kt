@@ -8,12 +8,12 @@ import net.minecraft.entity.player.ServerPlayerEntity
 import net.minecraft.util.text.TranslationTextComponent
 
 class DirtSetterItem(properties: Properties): BaseItem(properties) {
-    override fun onItemUse(context: ItemUseContext): ActionResultType {
-        if (!context.world.isRemote) {
+    override fun useOn(context: ItemUseContext): ActionResultType {
+        if (!context.level.isClientSide) {
             ModContainers.dirtSetter.open(
                 (context.player as ServerPlayerEntity?)!!,
                 TranslationTextComponent("librarianlib-foundation.test_container.title"),
-                context.pos
+                context.clickedPos
             )
         }
         return ActionResultType.SUCCESS

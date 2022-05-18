@@ -35,7 +35,7 @@ public open class BaseLeavesBlock(override val properties: FoundationBlockProper
                 .material(Material.LEAVES)
                 .hardnessAndResistance(0.2f)
                 .tickRandomly()
-                .sound(SoundType.PLANT)
+                .sound(SoundType.GRASS)
                 .notSolid()
                 .fireInfo(30, 60)
     }

@@ -320,7 +320,7 @@ public class Raycaster {
      * @return true if the block was hit
      */
     private fun castBlock(world: World, blockMode: BlockMode, fluidMode: FluidMode, blockX: Int, blockY: Int, blockZ: Int): Boolean {
-        mutablePos.setPos(blockX, blockY, blockZ)
+        mutablePos.set(blockX, blockY, blockZ)
         val hitBlock = when (blockMode) {
             BlockMode.NONE -> {
                 false
@@ -418,7 +418,7 @@ public class Raycaster {
         relativeStartY = startY - blockY
         relativeStartZ = startZ - blockZ
         didHitShape = false
-        shape.forEachBox(boxConsumer)
+        shape.forAllBoxes(boxConsumer)
         return didHitShape
     }
 
@@ -477,9 +477,9 @@ public class Raycaster {
                 break
 
             if (visitedEntityChunks.add(ChunkPos.asLong(chunkPos.x, chunkPos.z))) {
-                val chunk = world.chunkProvider.getChunk(chunkPos.x, chunkPos.z, false) ?: continue
+                val chunk = world.chunkSource.getChunk(chunkPos.x, chunkPos.z, false) ?: continue
                 entityList.clear()
-                chunk.getEntitiesWithinAABBForEntity(null, boundingBox, entityList, entityFilter)
+                chunk.getEntities(null, boundingBox, entityList, entityFilter)
                 for (i in entityList.indices) {
                     castEntity(entityList[i])
                 }

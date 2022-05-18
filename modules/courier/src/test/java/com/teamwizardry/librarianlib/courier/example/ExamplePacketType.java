@@ -52,10 +52,10 @@ public class ExamplePacketType extends PacketType<ExamplePacketType.Packet> {
                 // **NEVER** trust the client. If we don't do this
                 // it would allow a hacked client to generate and load
                 // arbitrary chunks.
-                if (!player.world.isBlockLoaded(packet.pos)) {
+                if (!player.level.isLoaded(packet.pos)) {
                     return;
                 }
-                if (player.world.getBlockState(packet.pos).getBlock() != packet.block) {
+                if (player.level.getBlockState(packet.pos).getBlock() != packet.block) {
                     // do something
                 }
             });

@@ -39,7 +39,7 @@ public class FluidSprite(private val fluid: Supplier<Fluid?>, private val flow: 
             lastFluidSprite = null
         } else {
             val spriteName = if (flow == null) fluid.attributes.stillTexture else fluid.attributes.flowingTexture
-            if (spriteName == null) {
+            if (spriteName === null) {
                 lastFluidSprite = null
             } else {
                 val atlasSprite = Client.getBlockAtlasSprite(spriteName)

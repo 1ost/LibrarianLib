@@ -114,7 +114,7 @@ internal class MinecraftSimpleTests: NBTPrismTest() {
 
     @Test
     fun `read+write for SectionPos should be symmetrical`() {
-        simple<SectionPos, SectionPosSerializer>(SectionPos.from(ChunkPos(1, 3), 2), NBTBuilder.compound {
+        simple<SectionPos, SectionPosSerializer>(SectionPos.of(ChunkPos(1, 3), 2), NBTBuilder.compound {
             "X" *= int(1)
             "Y" *= int(2)
             "Z" *= int(3)
@@ -170,8 +170,8 @@ internal class MinecraftSimpleTests: NBTPrismTest() {
             "MaxY" *= int(2)
             "MaxZ" *= int(3)
         }, { a, b ->
-            a.minX == b.minX && a.minY == b.minY && a.minZ == b.minZ &&
-                a.maxX == b.maxX && a.maxY == b.maxY && a.maxZ == b.maxZ
+            a.x0 == b.x0 && a.y0 == b.y0 && a.z0 == b.z0 &&
+                a.x1 == b.x1 && a.y1 == b.y1 && a.z1 == b.z1
         })
     }
 
@@ -186,7 +186,7 @@ internal class MinecraftSimpleTests: NBTPrismTest() {
     @Test
     fun `read+write for Tuple with a null value should exclude that key`() {
         @Suppress("NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS") // stupid @MethodsReturnNonnullByDefault
-        simple<Tuple<String, Int?>, TupleSerializerFactory.TupleSerializer>(Tuple<String, Int?>("test", null), NBTBuilder.compound {
+        simple<Tuple<String, Int?>, TupleSerializerFactory.TupleSerializer>(Tuple<String, Int?>("test", 0), NBTBuilder.compound {
             "A" *= string("test")
         }, { a, b -> a.a == b.a && a.b == b.b })
     }
@@ -285,7 +285,7 @@ internal class MinecraftSimpleTests: NBTPrismTest() {
     @Test
     fun `read+write for BlockState should be symmetrical`() {
         simple<BlockState, BlockStateSerializer>(
-            Blocks.BONE_BLOCK.stateContainer.validStates[0],
+            Blocks.BONE_BLOCK.stateDefinition.any(),
             NBTBuilder.compound {
                 "Name" *= string("minecraft:bone_block")
                 "Properties" *= compound {
@@ -304,7 +304,7 @@ internal class MinecraftSimpleTests: NBTPrismTest() {
                 "id" *= string("minecraft:diamond")
                 "Count" *= byte(16)
             },
-            { a, b -> ItemStack.areItemStacksEqual(a, b) && ItemStack.areItemStackTagsEqual(a, b) }
+            { a, b -> ItemStack.matches(a, b) && ItemStack.matches(a, b) }
         )
     }
 
@@ -323,7 +323,7 @@ internal class MinecraftSimpleTests: NBTPrismTest() {
                     "Custom" *= string("value")
                 }
             },
-            { a, b -> ItemStack.areItemStacksEqual(a, b) && ItemStack.areItemStackTagsEqual(a, b) }
+            { a, b -> ItemStack.matches(a, b) && ItemStack.matches(a, b) }
         )
     }
 
@@ -361,7 +361,7 @@ internal class MinecraftSimpleTests: NBTPrismTest() {
 
     @Test
     fun `read+write for EffectInstance should be symmetrical`() {
-        val stack = EffectInstance(Effects.JUMP_BOOST, 20, 2)
+        val stack = EffectInstance(Effects.JUMP, 20, 2)
         simple<EffectInstance, EffectInstanceSerializer>(
             stack,
             NBTBuilder.compound {
@@ -390,7 +390,7 @@ internal class MinecraftSimpleTests: NBTPrismTest() {
                 "Enchantment" *= string("minecraft:sharpness")
                 "Level" *= int(3)
             },
-            { a, b -> a.enchantment == b.enchantment && a.enchantmentLevel == b.enchantmentLevel }
+            { a, b -> a.enchantment == b.enchantment && a.level == b.level }
         )
     }
 

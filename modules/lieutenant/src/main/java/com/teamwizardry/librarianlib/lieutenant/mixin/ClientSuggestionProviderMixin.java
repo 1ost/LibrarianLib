@@ -15,20 +15,20 @@ import org.spongepowered.asm.mixin.Shadow;
 public abstract class ClientSuggestionProviderMixin implements ClientCommandSource {
     @Shadow
     @Final
-    private Minecraft mc;
+    private Minecraft minecraft;
 
     @Override
     public void logFeedback(@NotNull ITextComponent message) {
-        mc.player.sendStatusMessage(message, false);
+        minecraft.player.displayClientMessage(message, false);
     }
 
     @Override
     public void sendFeedback(@NotNull ITextComponent message, boolean actionBar) {
-        mc.player.sendStatusMessage(message, actionBar);
+        minecraft.player.displayClientMessage(message, actionBar);
     }
 
     @Override
     public void sendErrorMessage(@NotNull ITextComponent text) {
-        mc.player.sendStatusMessage(new StringTextComponent("").append(text).mergeStyle(TextFormatting.RED), false);
+        minecraft.player.displayClientMessage(new StringTextComponent("").append(text).withStyle(TextFormatting.RED), false);
     }
 }

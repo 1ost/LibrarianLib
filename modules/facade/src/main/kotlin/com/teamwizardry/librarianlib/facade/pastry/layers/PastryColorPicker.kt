@@ -132,7 +132,7 @@ public class PastryColorPicker : GuiLayer(0, 0, 80, 50) {
                 val maxX = size.xi.toDouble()
                 val maxY = size.yi.toDouble()
 
-                val buffer = IRenderTypeBuffer.getImpl(Client.tessellator.buffer)
+                val buffer = IRenderTypeBuffer.immediate(Client.tessellator.builder)
 
                 ColorPickerShader.hue.set(hue)
 
@@ -142,7 +142,7 @@ public class PastryColorPicker : GuiLayer(0, 0, 80, 50) {
                 vb.pos2d(context.transform, minX, maxY).tex(0, 0).endVertex()
                 vb.pos2d(context.transform, maxX, maxY).tex(1, 0).endVertex()
                 vb.pos2d(context.transform, maxX, minY).tex(1, 1).endVertex()
-                buffer.finish()
+                buffer.endBatch()
             }
         }
     }
@@ -153,7 +153,7 @@ public class PastryColorPicker : GuiLayer(0, 0, 80, 50) {
         private var dragging = false
 
         init {
-            Client.minecraft.textureManager.bindTexture(hueLoc)
+            Client.minecraft.textureManager.bind(hueLoc)
             Client.minecraft.textureManager.getTexture(hueLoc)?.setBlurMipmap(false, false)
 
             add(background, sprite)
@@ -226,8 +226,8 @@ public class PastryColorPicker : GuiLayer(0, 0, 80, 50) {
         val hueSprite = Mosaic(hueLoc, 8, 256).getSprite("")
 
         private val colorPickerRenderType: RenderType = run {
-            val renderState = RenderType.State.getBuilder()
-                .build(false)
+            val renderState = RenderType.State.builder()
+                .createCompositeState(false)
 
             mixinCast<IMutableRenderTypeState>(renderState).addState(ColorPickerShader.renderState)
 

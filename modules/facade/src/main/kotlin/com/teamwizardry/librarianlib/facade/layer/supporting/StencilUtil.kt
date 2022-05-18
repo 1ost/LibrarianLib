@@ -20,7 +20,7 @@ public object StencilUtil {
      */
     @JvmStatic
     public fun enableStencilBuffer() {
-        enableStencilBuffer(Client.minecraft.framebuffer)
+        enableStencilBuffer(Client.minecraft.mainRenderTarget)
     }
 
     /**

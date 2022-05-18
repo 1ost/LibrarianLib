@@ -62,8 +62,8 @@ internal object UniformBinder {
     private fun getUniformInfos(program: Int): Map<String, UniformInfo> {
         val uniformInfos = mutableMapOf<String, UniformInfo>()
         MemoryStack.stackPush().use { stack ->
-            val uniformCount = GlStateManager.getProgram(program, GL20.GL_ACTIVE_UNIFORMS)
-            val maxNameLength = GlStateManager.getProgram(program, GL20.GL_ACTIVE_UNIFORM_MAX_LENGTH)
+            val uniformCount = GlStateManager.glGetProgrami(program, GL20.GL_ACTIVE_UNIFORMS)
+            val maxNameLength = GlStateManager.glGetProgrami(program, GL20.GL_ACTIVE_UNIFORM_MAX_LENGTH)
 
             val glType = stack.mallocInt(1)
             val size = stack.mallocInt(1)
@@ -76,7 +76,7 @@ internal object UniformBinder {
                 nameBuffer.rewind()
                 GL20.glGetActiveUniform(program, index, nameLength, size, glType, nameBuffer)
                 val name = MemoryUtil.memASCII(nameBuffer, nameLength.get())
-                val location = GlStateManager.getUniformLocation(program, name)
+                val location = GlStateManager._glGetUniformLocation(program, name)
                 uniformInfos[name] = UniformInfo(name, glType.get(), size.get(), location)
             }
         }

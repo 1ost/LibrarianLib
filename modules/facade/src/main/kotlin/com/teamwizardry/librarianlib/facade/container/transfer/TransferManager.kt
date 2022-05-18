@@ -38,7 +38,7 @@ public class TransferManager {
      * I'm just going to return EMPTY, because fuck all that I'm gonna handle it myself.
      */
     public fun transferStackInSlot(slot: Slot): ItemStack {
-        var stack = slot.stack.copy()
+        var stack = slot.item.copy()
         for (rule in rules) {
             if (stack.isEmpty)
                 return ItemStack.EMPTY
@@ -49,7 +49,7 @@ public class TransferManager {
                 // it would be much easier for poorly implemented rules to create item duplication glitches.
                 stack = result.remaining
                 if (result.successful) {
-                    slot.putStack(stack)
+                    slot.set(stack)
                     break
                 }
             }

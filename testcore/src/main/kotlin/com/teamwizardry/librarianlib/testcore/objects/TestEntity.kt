@@ -29,23 +29,15 @@ public open class TestEntity(public val config: TestEntityConfig, world: World):
         return true
     }
 
-    override fun hitByEntity(entity: Entity): Boolean {
+    override fun skipAttackInteraction(entity: Entity): Boolean {
         val context = TestEntityConfig.HitContext(this, entity, entity is PlayerEntity)
 
-        config.hit.run(this.world.isRemote, context)
+        config.hit.run(this.level.isClientSide, context)
         if (context.kill) {
             this.remove()
             return true
         }
         return false
-    }
-
-    override fun onCollideWithPlayer(entityIn: PlayerEntity) {
-        super.onCollideWithPlayer(entityIn)
-    }
-
-    override fun hasNoGravity(): Boolean {
-        return super.hasNoGravity()
     }
 
     override fun getPickedResult(target: RayTraceResult?): ItemStack {
@@ -55,55 +47,51 @@ public open class TestEntity(public val config: TestEntityConfig, world: World):
     override fun isGlowing(): Boolean {
         var heldGlow = false
         clientOnly {
-            heldGlow = Client.minecraft.player?.getHeldItem(Hand.MAIN_HAND)?.item == config.spawnerItem ||
-                    Client.minecraft.player?.getHeldItem(Hand.OFF_HAND)?.item == config.spawnerItem
+            heldGlow = Client.minecraft.player?.getItemInHand(Hand.MAIN_HAND)?.item == config.spawnerItem ||
+                    Client.minecraft.player?.getItemInHand(Hand.OFF_HAND)?.item == config.spawnerItem
         }
         return config.enableGlow || heldGlow || super.isGlowing()
     }
 
     override fun tick() {
         super.tick()
-        config.tick.run(this.world.isRemote, TestEntityConfig.TickContext(this))
+        config.tick.run(this.level.isClientSide, TestEntityConfig.TickContext(this))
     }
 
-    override fun attackEntityFrom(source: DamageSource, amount: Float): Boolean {
-        config.attack.run(this.world.isRemote, TestEntityConfig.AttackContext(this, source, amount))
+    override fun hurt(source: DamageSource, amount: Float): Boolean {
+        config.attack.run(this.level.isClientSide, TestEntityConfig.AttackContext(this, source, amount))
         return false
-    }
-
-    override fun applyEntityCollision(entityIn: Entity) {
-        super.applyEntityCollision(entityIn)
     }
 
     override fun onRemovedFromWorld() {
         super.onRemovedFromWorld()
     }
 
-    override fun applyPlayerInteraction(player: PlayerEntity, vec: Vector3d, hand: Hand): ActionResultType {
-        config.rightClick.run(this.world.isRemote, TestEntityConfig.RightClickContext(this, player, hand, vec))
+    override fun interactAt(player: PlayerEntity, vec: Vector3d, hand: Hand): ActionResultType {
+        config.rightClick.run(this.level.isClientSide, TestEntityConfig.RightClickContext(this, player, hand, vec))
         if (config.rightClick.exists)
             return ActionResultType.SUCCESS
-        return super.applyPlayerInteraction(player, vec, hand)
+        return super.interactAt(player, vec, hand)
     }
 
     // miscellaneous boilerplate =======================================================================================
 
-    override fun createSpawnPacket(): IPacket<*> {
+    override fun getAddEntityPacket(): IPacket<*> {
         return NetworkHooks.getEntitySpawningPacket(this)
     }
 
-    override fun readAdditional(compound: CompoundNBT) {
+    override fun readAdditionalSaveData(compound: CompoundNBT) {
     }
 
-    override fun writeAdditional(compound: CompoundNBT) {
+    override fun addAdditionalSaveData(compound: CompoundNBT) {
     }
 
-    override fun registerData() {
+    override fun defineSynchedData() {
         configHolder!!.entityProperties.forEach {
             @Suppress("UNCHECKED_CAST")
             it as TestEntityConfig.Property<Any>
 
-            dataManager.register(it.parameter, it.defaultValue)
+            entityData.define(it.parameter, it.defaultValue)
         }
     }
 
@@ -123,9 +111,9 @@ public open class TestEntity(public val config: TestEntityConfig, world: World):
     }
 
     public val relativeBoundingBox: AxisAlignedBB = run {
-        val size = this.getSize(Pose.STANDING)
-        val width = size.width.toDouble()
-        val height = size.height.toDouble()
+        val size = 1.0 //idk
+        val width = 1.0
+        val height = 1.0
         AxisAlignedBB(
             -width / 2, -height / 2, -width / 2,
             +width / 2, +height / 2, +width / 2
@@ -133,7 +121,7 @@ public open class TestEntity(public val config: TestEntityConfig, world: World):
     }
 
     override fun getBoundingBox(): AxisAlignedBB {
-        return relativeBoundingBox.offset(this.posX, this.posY, this.posZ)
+        return relativeBoundingBox.move(this.x, this.y, this.z)
     }
 
     private companion object {

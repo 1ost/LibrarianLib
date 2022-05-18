@@ -31,17 +31,17 @@ public class FoundationButtonBlock(
     textureName: String
 ) : BaseButtonBlock(properties, textureName) {
 
-    override fun getSoundEvent(isOn: Boolean): SoundEvent {
+    override fun getSound(isOn: Boolean): SoundEvent {
         return if(isOn) pressSoundEvent else unpressSoundEvent
     }
 
-    override fun tick(state: BlockState, world: ServerWorld, pos: BlockPos, rand: Random?) {
-        if (state.get(POWERED)) {
+    override fun tick(state: BlockState, world: ServerWorld, pos: BlockPos, rand: Random) {
+        if (state.getValue(POWERED)) {
             if (canBePressedByArrows) {
                 val isPressedByArrow = isPressedByArrow(state, world, pos)
                 setPressed(state, world, pos, isPressedByArrow, playSound = true)
                 if(isPressedByArrow) {
-                    world.pendingBlockTicks.scheduleTick(BlockPos(pos), this, pressDuration)
+                    world.blockTicks.scheduleTick(BlockPos(pos), this, pressDuration)
                 }
             } else {
                 setPressed(state, world, pos, false, playSound = true)
@@ -49,15 +49,15 @@ public class FoundationButtonBlock(
         }
     }
 
-    override fun onEntityCollision(state: BlockState, world: World, pos: BlockPos, entityIn: Entity) {
-        if (!world.isRemote && canBePressedByArrows && !state.get(POWERED)) {
+    override fun entityInside(state: BlockState, world: World, pos: BlockPos, entityIn: Entity) {
+        if (!world.isClientSide && canBePressedByArrows && !state.getValue(POWERED)) {
             setPressed(state, world, pos, isPressedByArrow(state, world, pos), playSound = true)
         }
     }
 
     private fun isPressedByArrow(state: BlockState, world: World, pos: BlockPos): Boolean {
-        return world.getEntitiesWithinAABB(
-            AbstractArrowEntity::class.java, state.getShape(world, pos).boundingBox.offset(pos)
+        return world.getEntitiesOfClass(
+            AbstractArrowEntity::class.java, state.getShape(world, pos).bounds().move(pos)
         ).isNotEmpty()
     }
 

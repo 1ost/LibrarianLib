@@ -25,46 +25,46 @@ public open class TestItem(public val config: TestItemConfig): Item(config.prope
         this.registryName = ResourceLocation(ModLoadingContext.get().activeContainer.modId, config.id)
     }
 
-    override fun addInformation(stack: ItemStack, worldIn: World?, tooltip: MutableList<ITextComponent>, flagIn: ITooltipFlag) {
-        super.addInformation(stack, worldIn, tooltip, flagIn)
+    override fun appendHoverText(stack: ItemStack, worldIn: World?, tooltip: MutableList<ITextComponent>, flagIn: ITooltipFlag) {
+        super.appendHoverText(stack, worldIn, tooltip, flagIn)
         if (config.description != null) {
             val description = TranslationTextComponent(registryName!!.translationKey("item", "tooltip"))
-            description.style.applyFormatting(TextFormatting.GRAY)
+            description.style.applyFormat(TextFormatting.GRAY)
             tooltip.add(description)
         }
     }
 
-    override fun onItemRightClick(worldIn: World, playerIn: PlayerEntity, handIn: Hand): ActionResult<ItemStack> {
+    override fun use(worldIn: World, playerIn: PlayerEntity, handIn: Hand): ActionResult<ItemStack> {
         var used = false
         if (config.rightClickHoldDuration != 0) {
-            playerIn.activeHand = handIn
+            playerIn.swingingArm = handIn
             used = true
         }
 
         val context = TestItemConfig.RightClickContext(worldIn, playerIn, handIn)
 
-        config.rightClick.run(worldIn.isRemote, context)
-        config.rightClickAir.run(worldIn.isRemote, context)
+        config.rightClick.run(worldIn.isClientSide, context)
+        config.rightClickAir.run(worldIn.isClientSide, context)
         if (config.rightClick.exists || config.rightClickAir.exists)
             used = true
 
         return if (used) {
-            ActionResult(ActionResultType.SUCCESS, playerIn.getHeldItem(handIn))
+            ActionResult(ActionResultType.SUCCESS, playerIn.getItemInHand(handIn))
         } else {
-            ActionResult(ActionResultType.PASS, playerIn.getHeldItem(handIn))
+            ActionResult(ActionResultType.PASS, playerIn.getItemInHand(handIn))
         }
     }
 
-    override fun onItemUse(context: ItemUseContext): ActionResultType {
+    override fun useOn(context: ItemUseContext): ActionResultType {
         var result = ActionResultType.PASS
 
-        if (context.player == null) return result
+        if (context.player === null) return result
 
-        val clickContext = TestItemConfig.RightClickContext(context.world, context.player!!, context.hand)
+        val clickContext = TestItemConfig.RightClickContext(context.level, context.player!!, context.hand)
         val clickBlockContext = TestItemConfig.RightClickBlockContext(context)
 
-        config.rightClick.run(context.world.isRemote, clickContext)
-        config.rightClickBlock.run(context.world.isRemote, clickBlockContext)
+        config.rightClick.run(context.level.isClientSide, clickContext)
+        config.rightClickBlock.run(context.level.isClientSide, clickBlockContext)
         if (config.rightClick.exists || config.rightClickBlock.exists)
             result = ActionResultType.SUCCESS
         return result
@@ -74,7 +74,7 @@ public open class TestItem(public val config: TestItemConfig): Item(config.prope
         return config.rightClickHoldDuration
     }
 
-    override fun getUseAction(stack: ItemStack): UseAction {
+    override fun getUseAnimation(stack: ItemStack): UseAction {
         if (config.rightClickHoldDuration != 0) {
             return UseAction.BOW
         }
@@ -86,36 +86,36 @@ public open class TestItem(public val config: TestItemConfig): Item(config.prope
 
         val context = TestItemConfig.RightClickHoldContext(stack, player, count)
 
-        config.rightClickHold.run(player.world.isRemote, context)
+        config.rightClickHold.run(player.level.isClientSide, context)
     }
 
-    override fun onPlayerStoppedUsing(stack: ItemStack, worldIn: World, entityLiving: LivingEntity, timeLeft: Int) {
+    override fun releaseUsing(stack: ItemStack, worldIn: World, entityLiving: LivingEntity, timeLeft: Int) {
         if (entityLiving !is PlayerEntity) return
 
         val context = TestItemConfig.RightClickReleaseContext(stack, worldIn, entityLiving, timeLeft)
 
-        config.rightClickRelease.run(worldIn.isRemote, context)
+        config.rightClickRelease.run(worldIn.isClientSide, context)
     }
 
     override fun onBlockStartBreak(itemstack: ItemStack, pos: BlockPos, player: PlayerEntity): Boolean {
         val context = TestItemConfig.LeftClickBlockContext(itemstack, pos, player)
-        config.leftClickBlock.run(player.world.isRemote, context)
+        config.leftClickBlock.run(player.level.isClientSide, context)
 
         return super<Item>.onBlockStartBreak(itemstack, pos, player)
     }
 
     override fun onLeftClickEntity(stack: ItemStack, player: PlayerEntity, entity: Entity): Boolean {
         val context = TestItemConfig.LeftClickEntityContext(stack, player, entity)
-        config.leftClickEntity.run(player.world.isRemote, context)
+        config.leftClickEntity.run(player.level.isClientSide, context)
         return config.leftClickEntity.exists
     }
 
-    override fun itemInteractionForEntity(stack: ItemStack, playerIn: PlayerEntity, target: LivingEntity, hand: Hand): ActionResultType {
+    override fun interactLivingEntity(stack: ItemStack, playerIn: PlayerEntity, target: LivingEntity, hand: Hand): ActionResultType {
         val context = TestItemConfig.RightClickEntityContext(stack, playerIn, target, hand)
-        val clickContext = TestItemConfig.RightClickContext(playerIn.world, playerIn, hand)
+        val clickContext = TestItemConfig.RightClickContext(playerIn.level, playerIn, hand)
 
-        config.rightClickEntity.run(playerIn.world.isRemote, context)
-        config.rightClick.run(playerIn.world.isRemote, clickContext)
+        config.rightClickEntity.run(playerIn.level.isClientSide, context)
+        config.rightClick.run(playerIn.level.isClientSide, clickContext)
 
         return if(config.rightClickEntity.exists) ActionResultType.SUCCESS else ActionResultType.PASS
     }
@@ -124,10 +124,10 @@ public open class TestItem(public val config: TestItemConfig): Item(config.prope
         if (entityIn !is PlayerEntity) return
 
         val context = TestItemConfig.InventoryTickContext(stack, worldIn, entityIn, itemSlot, isSelected)
-        config.inventoryTick.run(worldIn.isRemote, context)
+        config.inventoryTick.run(worldIn.isClientSide, context)
 
         if (isSelected) {
-            config.tickInHand.run(worldIn.isRemote, context)
+            config.tickInHand.run(worldIn.isClientSide, context)
         }
     }
 

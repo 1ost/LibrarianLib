@@ -75,7 +75,7 @@ public class GlLineBeamRenderModule(
             RenderSystem.disableBlend()
         }
         if (blendFactors != null) {
-            RenderSystem.blendFunc(blendFactors.first.param, blendFactors.second.param)
+            RenderSystem.blendFunc(blendFactors.first.value, blendFactors.second.value)
         }
         RenderSystem.depthMask(depthMask)
         RenderSystem.alphaFunc(GL11.GL_GREATER, 0.003921569F)
@@ -85,7 +85,7 @@ public class GlLineBeamRenderModule(
         RenderSystem.lineWidth(size)
 
         val tessellator = Tessellator.getInstance()
-        val vb = tessellator.buffer
+        val vb = tessellator.builder
         vb.begin(GL11.GL_LINES, DefaultVertexFormats.POSITION_COLOR)
 
         var isStart = true
@@ -122,8 +122,8 @@ public class GlLineBeamRenderModule(
             if (isStart) {
                 isStart = false
             } else {
-                vb.pos(prevX, prevY, prevZ).color(prevR, prevG, prevB, prevA).endVertex()
-                vb.pos(x, y, z).color(r, g, b, a).endVertex()
+                vb.vertex(prevX, prevY, prevZ).color(prevR, prevG, prevB, prevA).endVertex()
+                vb.vertex(x, y, z).color(r, g, b, a).endVertex()
             }
 
             if (isEnd.contents[0] != 0.0) {
@@ -139,9 +139,9 @@ public class GlLineBeamRenderModule(
             }
         }
 
-        tessellator.draw()
+        tessellator.end()
 
-        RenderSystem.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA.param, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA.param)
+        RenderSystem.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA.value, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA.value)
         RenderSystem.enableCull()
         RenderSystem.alphaFunc(GL11.GL_GREATER, 0.1F)
         RenderSystem.depthMask(true)

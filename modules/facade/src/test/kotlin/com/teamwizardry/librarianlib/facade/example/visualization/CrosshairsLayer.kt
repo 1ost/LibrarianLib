@@ -14,12 +14,12 @@ import java.awt.Color
 class CrosshairsLayer(val color: Color = DistinctColors.blue, val length: Double = 1000.0): GuiLayer() {
     override fun draw(context: GuiDrawContext) {
         RenderSystem.lineWidth(2f)
-        val buffer = IRenderTypeBuffer.getImpl(Client.tessellator.buffer)
+        val buffer = IRenderTypeBuffer.immediate(Client.tessellator.builder)
         val vb = buffer.getBuffer(SimpleRenderTypes.flatLines)
         vb.pos2d(context.transform, -length, 0).color(color).endVertex()
         vb.pos2d(context.transform, length, 0).color(color).endVertex()
         vb.pos2d(context.transform, 0, -length).color(color).endVertex()
         vb.pos2d(context.transform, 0, length).color(color).endVertex()
-        buffer.finish()
+        buffer.endBatch()
     }
 }

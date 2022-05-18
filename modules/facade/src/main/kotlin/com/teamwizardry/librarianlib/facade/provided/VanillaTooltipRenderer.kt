@@ -31,7 +31,7 @@ public object VanillaTooltipRenderer {
     ) {
         TooltipProvider.renderToolTip(
             matrixStack,
-            LanguageMap.getInstance().func_244260_a(text.map { ITextProperties.func_240652_a_(it) }),
+            LanguageMap.getInstance().getVisualOrder(text.map { ITextProperties.of(it) }),
             mouseX,
             mouseY,
             font
@@ -45,12 +45,12 @@ public object VanillaTooltipRenderer {
 
     private object TooltipProvider : Screen(StringTextComponent("")) {
         init {
-            this.init(Client.minecraft, Client.window.scaledWidth, Client.window.scaledHeight)
+            this.init(Client.minecraft, Client.window.guiScaledWidth, Client.window.guiScaledHeight)
         }
 
         private fun initIfNeeded() {
-            if (width != Client.window.scaledWidth || height != Client.window.scaledHeight)
-                this.init(Client.minecraft, Client.window.scaledWidth, Client.window.scaledHeight)
+            if (width != Client.window.guiScaledWidth || height != Client.window.guiScaledHeight)
+                this.init(Client.minecraft, Client.window.guiScaledWidth, Client.window.guiScaledHeight)
         }
 
         public override fun renderTooltip(

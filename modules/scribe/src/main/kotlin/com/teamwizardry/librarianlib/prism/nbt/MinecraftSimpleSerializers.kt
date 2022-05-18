@@ -40,7 +40,7 @@ import net.minecraftforge.fml.common.registry.GameRegistry
 
 internal object ResourceLocationSerializer: NBTSerializer<ResourceLocation>() {
     override fun deserialize(tag: INBT, existing: ResourceLocation?): ResourceLocation {
-        return ResourceLocation(tag.expectType<StringNBT>("tag").string)
+        return ResourceLocation(tag.expectType<StringNBT>("tag").asString)
     }
 
     override fun serialize(value: ResourceLocation): INBT {
@@ -54,9 +54,9 @@ internal object Vector3dSerializer: NBTSerializer<Vector3d>() {
     override fun deserialize(tag: INBT, existing: Vector3d?): Vector3d {
         @Suppress("NAME_SHADOWING") val tag = tag.expectType<CompoundNBT>("tag")
         return Vector3d(
-            tag.expect<NumberNBT>("X").double,
-            tag.expect<NumberNBT>("Y").double,
-            tag.expect<NumberNBT>("Z").double
+            tag.expect<NumberNBT>("X").asDouble,
+            tag.expect<NumberNBT>("Y").asDouble,
+            tag.expect<NumberNBT>("Z").asDouble
         )
     }
 
@@ -73,8 +73,8 @@ internal object Vector2fSerializer: NBTSerializer<Vector2f>() {
     override fun deserialize(tag: INBT, existing: Vector2f?): Vector2f {
         @Suppress("NAME_SHADOWING") val tag = tag.expectType<CompoundNBT>("tag")
         return Vector2f(
-            tag.expect<NumberNBT>("X").float,
-            tag.expect<NumberNBT>("Y").float
+            tag.expect<NumberNBT>("X").asFloat,
+            tag.expect<NumberNBT>("Y").asFloat
         )
     }
 
@@ -101,8 +101,8 @@ internal object ChunkPosSerializer: NBTSerializer<ChunkPos>() {
     override fun deserialize(tag: INBT, existing: ChunkPos?): ChunkPos {
         @Suppress("NAME_SHADOWING") val tag = tag.expectType<CompoundNBT>("tag")
         return ChunkPos(
-            tag.expect<NumberNBT>("X").int,
-            tag.expect<NumberNBT>("Z").int
+            tag.expect<NumberNBT>("X").asInt,
+            tag.expect<NumberNBT>("Z").asInt
         )
     }
 
@@ -118,8 +118,8 @@ internal object ColumnPosSerializer: NBTSerializer<ColumnPos>() {
     override fun deserialize(tag: INBT, existing: ColumnPos?): ColumnPos {
         @Suppress("NAME_SHADOWING") val tag = tag.expectType<CompoundNBT>("tag")
         return ColumnPos(
-            tag.expect<NumberNBT>("X").int,
-            tag.expect<NumberNBT>("Z").int
+            tag.expect<NumberNBT>("X").asInt,
+            tag.expect<NumberNBT>("Z").asInt
         )
     }
 
@@ -134,12 +134,12 @@ internal object ColumnPosSerializer: NBTSerializer<ColumnPos>() {
 internal object SectionPosSerializer: NBTSerializer<SectionPos>() {
     override fun deserialize(tag: INBT, existing: SectionPos?): SectionPos {
         @Suppress("NAME_SHADOWING") val tag = tag.expectType<CompoundNBT>("tag")
-        return SectionPos.from(
+        return SectionPos.of(
             ChunkPos(
-                tag.expect<NumberNBT>("X").int,
-                tag.expect<NumberNBT>("Z").int
+                tag.expect<NumberNBT>("X").asInt,
+                tag.expect<NumberNBT>("Z").asInt
             ),
-            tag.expect<NumberNBT>("Y").int
+            tag.expect<NumberNBT>("Y").asInt
         )
     }
 
@@ -181,9 +181,9 @@ internal object RotationsSerializer: NBTSerializer<Rotations>() {
     override fun deserialize(tag: INBT, existing: Rotations?): Rotations {
         @Suppress("NAME_SHADOWING") val tag = tag.expectType<CompoundNBT>("tag")
         return Rotations(
-            tag.expect<NumberNBT>("X").float,
-            tag.expect<NumberNBT>("Y").float,
-            tag.expect<NumberNBT>("Z").float
+            tag.expect<NumberNBT>("X").asFloat,
+            tag.expect<NumberNBT>("Y").asFloat,
+            tag.expect<NumberNBT>("Z").asFloat
         )
     }
 
@@ -200,12 +200,12 @@ internal object AxisAlignedBBSerializer: NBTSerializer<AxisAlignedBB>() {
     override fun deserialize(tag: INBT, existing: AxisAlignedBB?): AxisAlignedBB {
         @Suppress("NAME_SHADOWING") val tag = tag.expectType<CompoundNBT>("tag")
         return AxisAlignedBB(
-            tag.expect<NumberNBT>("MinX").double,
-            tag.expect<NumberNBT>("MinY").double,
-            tag.expect<NumberNBT>("MinZ").double,
-            tag.expect<NumberNBT>("MaxX").double,
-            tag.expect<NumberNBT>("MaxY").double,
-            tag.expect<NumberNBT>("MaxZ").double
+            tag.expect<NumberNBT>("MinX").asDouble,
+            tag.expect<NumberNBT>("MinY").asDouble,
+            tag.expect<NumberNBT>("MinZ").asDouble,
+            tag.expect<NumberNBT>("MaxX").asDouble,
+            tag.expect<NumberNBT>("MaxY").asDouble,
+            tag.expect<NumberNBT>("MaxZ").asDouble
         )
     }
 
@@ -225,23 +225,23 @@ internal object MutableBoundingBoxSerializer: NBTSerializer<MutableBoundingBox>(
     override fun deserialize(tag: INBT, existing: MutableBoundingBox?): MutableBoundingBox {
         @Suppress("NAME_SHADOWING") val tag = tag.expectType<CompoundNBT>("tag")
         return MutableBoundingBox(
-            tag.expect<NumberNBT>("MinX").int,
-            tag.expect<NumberNBT>("MinY").int,
-            tag.expect<NumberNBT>("MinZ").int,
-            tag.expect<NumberNBT>("MaxX").int,
-            tag.expect<NumberNBT>("MaxY").int,
-            tag.expect<NumberNBT>("MaxZ").int
+            tag.expect<NumberNBT>("MinX").asInt,
+            tag.expect<NumberNBT>("MinY").asInt,
+            tag.expect<NumberNBT>("MinZ").asInt,
+            tag.expect<NumberNBT>("MaxX").asInt,
+            tag.expect<NumberNBT>("MaxY").asInt,
+            tag.expect<NumberNBT>("MaxZ").asInt
         )
     }
 
     override fun serialize(value: MutableBoundingBox): INBT {
         val tag = CompoundNBT()
-        tag.put("MinX", IntNBT.valueOf(value.minX))
-        tag.put("MinY", IntNBT.valueOf(value.minY))
-        tag.put("MinZ", IntNBT.valueOf(value.minZ))
-        tag.put("MaxX", IntNBT.valueOf(value.maxX))
-        tag.put("MaxY", IntNBT.valueOf(value.maxY))
-        tag.put("MaxZ", IntNBT.valueOf(value.maxZ))
+        tag.put("MinX", IntNBT.valueOf(value.x0))
+        tag.put("MinY", IntNBT.valueOf(value.y0))
+        tag.put("MinZ", IntNBT.valueOf(value.z0))
+        tag.put("MaxX", IntNBT.valueOf(value.x1))
+        tag.put("MaxY", IntNBT.valueOf(value.y1))
+        tag.put("MaxZ", IntNBT.valueOf(value.z1))
         return tag
     }
 }
@@ -261,8 +261,8 @@ internal class TupleSerializerFactory(prism: NBTPrism): NBTSerializerFactory(pri
             @Suppress("NAME_SHADOWING") val tag = tag.expectType<CompoundNBT>("tag")
             @Suppress("NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS") // stupid @MethodsReturnNonnullByDefault
             return Tuple(
-                if (tag.contains("A")) firstSerializer.read(tag.expect("A"), existing?.a) else null,
-                if (tag.contains("B")) secondSerializer.read(tag.expect("B"), existing?.b) else null
+                (if (tag.contains("A")) firstSerializer.read(tag.expect("A"), existing?.a) else null) as Any,
+                (if (tag.contains("B")) secondSerializer.read(tag.expect("B"), existing?.b) else null) as Any
             )
         }
 
@@ -305,7 +305,7 @@ internal class ITextComponentSerializerFactory(prism: NBTPrism): NBTSerializerFa
         private val componentClass = type.erasure
 
         override fun deserialize(tag: INBT, existing: ITextComponent?): ITextComponent {
-            val component = ITextComponent.Serializer.getComponentFromJson(tag.expectType<StringNBT>("tag").string)
+            val component = ITextComponent.Serializer.fromJson(tag.expectType<StringNBT>("tag").asString)
                 ?: inconceivable("ITextComponent.Serializer.fromJson doesn't seem to ever return null")
             if(!componentClass.isAssignableFrom(component.javaClass))
                 throw DeserializationException("Wrong ITextComponent type. Expected ${componentClass.simpleName}, " +
@@ -344,11 +344,11 @@ internal object BlockStateSerializer: NBTSerializer<BlockState>() {
 
 internal object ItemStackSerializer: NBTSerializer<ItemStack>() {
     override fun deserialize(tag: INBT, existing: ItemStack?): ItemStack {
-        return ItemStack.read(tag.expectType("tag"))
+        return ItemStack.of(tag.expectType("tag"))
     }
 
     override fun serialize(value: ItemStack): INBT {
-        return value.write(CompoundNBT())
+        return value.save(CompoundNBT())
     }
 }
 
@@ -364,11 +364,11 @@ internal object FluidStackSerializer: NBTSerializer<FluidStack>() {
 
 internal object EffectInstanceSerializer: NBTSerializer<EffectInstance>() {
     override fun deserialize(tag: INBT, existing: EffectInstance?): EffectInstance {
-        return EffectInstance.read(tag.expectType("tag"))
+        return EffectInstance.load(tag.expectType("tag"))
     }
 
     override fun serialize(value: EffectInstance): INBT {
-        return value.write(CompoundNBT())
+        return value.save(CompoundNBT())
     }
 }
 
@@ -379,19 +379,19 @@ internal object EnchantmentDataSerializer: NBTSerializer<EnchantmentData>() {
 
     override fun deserialize(tag: INBT, existing: EnchantmentData?): EnchantmentData {
         @Suppress("NAME_SHADOWING") val tag = tag.expectType<CompoundNBT>("tag")
-        val dimensionName = ResourceLocation(tag.expect<StringNBT>("Enchantment").string)
+        val dimensionName = ResourceLocation(tag.expect<StringNBT>("Enchantment").asString)
         val enchantment = registry.getValue(dimensionName)
             ?: throw DeserializationException("Unknown enchantment type $dimensionName")
         return EnchantmentData(
             enchantment,
-            tag.expect<NumberNBT>("Level").int
+            tag.expect<NumberNBT>("Level").asInt
         )
     }
 
     override fun serialize(value: EnchantmentData): INBT {
         val tag = CompoundNBT()
         tag.put("Enchantment", StringNBT.valueOf(value.enchantment.registryName.toString()))
-        tag.put("Level", IntNBT.valueOf(value.enchantmentLevel))
+        tag.put("Level", IntNBT.valueOf(value.level))
         return tag
     }
 }

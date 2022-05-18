@@ -8,11 +8,11 @@ import net.minecraft.util.IItemProvider
 public class DefaultRecipeBuilders {
     @JvmOverloads
     public fun shaped(result: IItemProvider, count: Int = 1): ShapedRecipeBuilder =
-        ShapedRecipeBuilder.shapedRecipe(result, count)
+        ShapedRecipeBuilder.shaped(result, count)
 
     @JvmOverloads
     public fun shapeless(result: IItemProvider, count: Int = 1): ShapelessRecipeBuilder =
-        ShapelessRecipeBuilder.shapelessRecipe(result, count)
+        ShapelessRecipeBuilder.shapeless(result, count)
 
     /**
      * Used for furnaces
@@ -23,7 +23,7 @@ public class DefaultRecipeBuilders {
         experience: Float,
         cookingTime: Int
     ): CookingRecipeBuilder =
-        CookingRecipeBuilder.cookingRecipe(ingredient, result, experience, cookingTime, IRecipeSerializer.SMELTING)
+        CookingRecipeBuilder.cooking(ingredient, result, experience, cookingTime, IRecipeSerializer.SMELTING_RECIPE)
 
     /**
      * Used for ores and general "melting" recipes, with a 0.5x cooking time multiplier
@@ -34,7 +34,7 @@ public class DefaultRecipeBuilders {
         experience: Float,
         cookingTime: Int
     ): CookingRecipeBuilder =
-        CookingRecipeBuilder.cookingRecipe(ingredient, result, experience, cookingTime, IRecipeSerializer.BLASTING)
+        CookingRecipeBuilder.cooking(ingredient, result, experience, cookingTime, IRecipeSerializer.BLASTING_RECIPE)
 
     /**
      * Used for food, with a 0.5x cooking time multiplier
@@ -45,7 +45,7 @@ public class DefaultRecipeBuilders {
         experience: Float,
         cookingTime: Int
     ): CookingRecipeBuilder =
-        CookingRecipeBuilder.cookingRecipe(ingredient, result, experience, cookingTime, IRecipeSerializer.SMOKING)
+        CookingRecipeBuilder.cooking(ingredient, result, experience, cookingTime, IRecipeSerializer.SMOKING_RECIPE)
 
     /**
      * Used for food, with a 3x cooking time multiplier
@@ -55,18 +55,18 @@ public class DefaultRecipeBuilders {
         result: IItemProvider,
         experience: Float,
         cookingTime: Int
-    ): CookingRecipeBuilder = CookingRecipeBuilder.cookingRecipe(
+    ): CookingRecipeBuilder = CookingRecipeBuilder.cooking(
         ingredient,
         result,
         experience,
         cookingTime,
-        IRecipeSerializer.CAMPFIRE_COOKING
+        IRecipeSerializer.CAMPFIRE_COOKING_RECIPE
     )
 
     @JvmOverloads
     public fun stonecutting(ingredient: Ingredient, result: IItemProvider, count: Int = 1): SingleItemRecipeBuilder =
-        SingleItemRecipeBuilder.stonecuttingRecipe(ingredient, result, count)
+        SingleItemRecipeBuilder.stonecutting(ingredient, result, count)
 
     public fun smithing(base: Ingredient, addition: Ingredient, output: IItemProvider): SmithingRecipeBuilder =
-        SmithingRecipeBuilder.smithingRecipe(base, addition, output.asItem())
+        SmithingRecipeBuilder.smithing(base, addition, output.asItem())
 }

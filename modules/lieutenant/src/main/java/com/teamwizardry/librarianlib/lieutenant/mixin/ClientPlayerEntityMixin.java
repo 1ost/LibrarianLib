@@ -25,16 +25,16 @@ public abstract class ClientPlayerEntityMixin {
 
     @Shadow
     @Final
-    protected Minecraft mc;
+    protected Minecraft minecraft;
 
     @Shadow
     @Final
     public ClientPlayNetHandler connection;
 
     @Shadow
-    public abstract void sendStatusMessage(ITextComponent chatComponent, boolean actionBar);
+    public abstract void displayClientMessage(ITextComponent chatComponent, boolean actionBar);
 
-    @Inject(method = "sendChatMessage", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "chat", at = @At("HEAD"), cancellable = true)
     private void onChatMessage(String msg, CallbackInfo info) {
         if (msg.length() < 2 || !msg.startsWith("/")) return;
         if (!ClientCommandCache.INSTANCE.hasCommand(msg.substring(1).split(" ")[0])) return;
@@ -42,19 +42,19 @@ public abstract class ClientPlayerEntityMixin {
         try {
             // The game freezes when using heavy commands. Run your heavy code somewhere else pls
             int result = ClientCommandCache.INSTANCE.execute(
-                    msg.substring(1), mixinCast(new ClientSuggestionProvider(connection, mc))
+                    msg.substring(1), mixinCast(new ClientSuggestionProvider(connection, minecraft))
             );
             if (result != 0)
                 // Prevent sending the message
                 cancel = true;
         } catch (CommandException e) {
-            sendStatusMessage(e.getComponent().deepCopy().mergeStyle(TextFormatting.RED), false);
+            displayClientMessage(e.getComponent().copy().withStyle(TextFormatting.RED), false);
             cancel = true;
         } catch (CommandSyntaxException e) {
-            sendStatusMessage(new StringTextComponent(e.getMessage()).mergeStyle(TextFormatting.RED), false);
+            displayClientMessage(new StringTextComponent(e.getMessage()).withStyle(TextFormatting.RED), false);
             cancel = true;
         } catch (Exception e) {
-            sendStatusMessage(new TranslationTextComponent("command.failed").mergeStyle(TextFormatting.RED), false);
+            displayClientMessage(new TranslationTextComponent("command.failed").withStyle(TextFormatting.RED), false);
             cancel = true;
         }
 

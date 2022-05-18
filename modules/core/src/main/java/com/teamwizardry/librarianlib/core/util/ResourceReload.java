@@ -23,7 +23,7 @@ public class ResourceReload {
     }
 
     public void register(IFutureReloadListener listener) {
-        ((IReloadableResourceManager) Minecraft.getInstance().getResourceManager()).addReloadListener(listener);
+        ((IReloadableResourceManager) Minecraft.getInstance().getResourceManager()).registerReloadListener(listener);
     }
 
     public <T> void register(ISimpleReloadListener<T> listener) {
@@ -40,7 +40,7 @@ public class ResourceReload {
                 runnable.run();
         };
 
-        ((IReloadableResourceManager) Minecraft.getInstance().getResourceManager()).addReloadListener(listener);
+        ((IReloadableResourceManager) Minecraft.getInstance().getResourceManager()).registerReloadListener(listener);
     }
 
     public void register(IResourceType type, ClientRunnable runnable) {

@@ -112,7 +112,7 @@ internal class Rect2dUnionTestScreen(title: ITextComponent): FacadeScreen(title)
             val endColor = Color.RED
             val arrowColor = Color.RED
 
-            val buffer = IRenderTypeBuffer.getImpl(Client.tessellator.buffer)
+            val buffer = IRenderTypeBuffer.immediate(Client.tessellator.builder)
             val vb = buffer.getBuffer(SimpleRenderTypes.flatLines)
 
             for(segment in rect2dUnion.horizontalSegments + rect2dUnion.verticalSegments) {
@@ -131,7 +131,7 @@ internal class Rect2dUnionTestScreen(title: ITextComponent): FacadeScreen(title)
             }
 
             RenderSystem.lineWidth(2f)
-            buffer.finish()
+            buffer.endBatch()
             RenderSystem.lineWidth(1f)
         }
     }

@@ -45,16 +45,16 @@ internal object StructUniform: ShaderTest<StructUniform.Test>() {
         shader.simpleArray[1].embeddedArray[0].embed.set(25f)
         shader.simpleArray[1].embeddedArray[1].embed.set(26f)
 
-        val buffer = IRenderTypeBuffer.getImpl(Client.tessellator.buffer)
+        val buffer = IRenderTypeBuffer.immediate(Client.tessellator.builder)
         val vb = buffer.getBuffer(renderType)
 
-        vb.pos2d(minX, maxY).color(c).tex(0f, 1f).endVertex()
-        vb.pos2d(maxX, maxY).color(c).tex(1f, 1f).endVertex()
-        vb.pos2d(maxX, minY).color(c).tex(1f, 0f).endVertex()
-        vb.pos2d(minX, minY).color(c).tex(0f, 0f).endVertex()
+        vb.pos2d(minX, maxY).color(c).uv(0f, 1f).endVertex()
+        vb.pos2d(maxX, maxY).color(c).uv(1f, 1f).endVertex()
+        vb.pos2d(maxX, minY).color(c).uv(1f, 0f).endVertex()
+        vb.pos2d(minX, minY).color(c).uv(0f, 0f).endVertex()
 
         shader.bind()
-        buffer.finish()
+        buffer.endBatch()
         shader.unbind()
     }
 

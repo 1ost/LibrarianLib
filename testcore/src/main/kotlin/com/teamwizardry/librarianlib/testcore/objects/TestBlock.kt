@@ -1,5 +1,6 @@
 package com.teamwizardry.librarianlib.testcore.objects
 
+import com.mojang.datafixers.types.constant.EmptyPart
 import com.teamwizardry.librarianlib.core.util.kotlin.threadLocal
 import com.teamwizardry.librarianlib.core.util.sided.ClientMetaSupplier
 import com.teamwizardry.librarianlib.core.util.sided.ClientSideFunction
@@ -45,7 +46,7 @@ public open class TestBlock(public val config: TestBlockConfig): Block(config.al
     init {
         this.registryName = ResourceLocation(ModLoadingContext.get().activeContainer.modId, config.id)
         if (config.directional) {
-            this.defaultState = this.stateContainer.baseState.with(FACING, Direction.UP)
+            this.registerDefaultState(this.stateDefinition.any().setValue(FACING, Direction.UP))
         }
         @Suppress("UNCHECKED_CAST")
         val tileConfig = config.tileConfig as TestTileConfig<TileEntity>?
@@ -54,9 +55,9 @@ public open class TestBlock(public val config: TestBlockConfig): Block(config.al
                 @Suppress("UNCHECKED_CAST")
                 tileConfig.factory(tileEntityType as TileEntityType<TileEntity>)
             }
-            val type = TileEntityType.Builder.create(tileFactory, this).build(null)
-            type.registryName = this.registryName
-            tileEntityType = type
+//            val type = TileEntityType.Builder.of(tileFactory!!, this).build(TileEntityType)
+//            type.registryName = this.registryName
+//            tileEntityType = type
             tileEntityRenderer = tileConfig.renderer
         } else {
             tileEntityRenderer = null
@@ -73,25 +74,25 @@ public open class TestBlock(public val config: TestBlockConfig): Block(config.al
     override fun rotate(state: BlockState, rot: Rotation): BlockState {
         if (!config.directional)
             return state
-        return state.with(DirectionalBlock.FACING, rot.rotate(state.get(FACING)))
+        return state.setValue(DirectionalBlock.FACING, rot.rotate(state.getValue(FACING)))
     }
 
     override fun mirror(state: BlockState, mirrorIn: Mirror): BlockState {
         if (!config.directional)
             return state
-        return state.with(DirectionalBlock.FACING, mirrorIn.mirror(state.get(FACING)))
+        return state.setValue(DirectionalBlock.FACING, mirrorIn.mirror(state.getValue(FACING)))
     }
 
     override fun getStateForPlacement(context: BlockItemUseContext): BlockState? {
         if (!config.directional)
             return super.getStateForPlacement(context)
 
-        val direction = context.face
-        val blockstate = context.world.getBlockState(context.pos.offset(direction.opposite))
-        return if (blockstate.block === this && blockstate.get(FACING) == direction) this.defaultState.with(FACING, direction.opposite) else this.defaultState.with(FACING, direction)
+        val direction = context.clickedFace
+        val blockstate = context.level.getBlockState(context.clickedPos.offset(direction.opposite.normal))
+        return if (blockstate.block === this && blockstate.getValue(FACING) == direction) this.defaultBlockState().setValue(FACING, direction.opposite) else this.defaultBlockState().setValue(FACING, direction)
     }
 
-    override fun fillStateContainer(builder: StateContainer.Builder<Block, BlockState>) {
+    override fun createBlockStateDefinition(builder: StateContainer.Builder<Block, BlockState>) {
         if (!configHolder!!.directional)
             return
         builder.add(FACING)
@@ -114,67 +115,67 @@ public open class TestBlock(public val config: TestBlockConfig): Block(config.al
 
     // placed/broken ===================================================================================================
     @Suppress("DEPRECATION")
-    override fun onBlockAdded(p_220082_1_: BlockState, worldIn: World, pos: BlockPos, p_220082_4_: BlockState, p_220082_5_: Boolean) {
-        super.onBlockAdded(p_220082_1_, worldIn, pos, p_220082_4_, p_220082_5_)
+    override fun onPlace(p_220082_1_: BlockState, worldIn: World, pos: BlockPos, p_220082_4_: BlockState, p_220082_5_: Boolean) {
+        super.onPlace(p_220082_1_, worldIn, pos, p_220082_4_, p_220082_5_)
     }
 
     @Suppress("DEPRECATION")
-    override fun updatePostPlacement(stateIn: BlockState, facing: Direction, facingState: BlockState, worldIn: IWorld, currentPos: BlockPos, facingPos: BlockPos): BlockState {
-        return super.updatePostPlacement(stateIn, facing, facingState, worldIn, currentPos, facingPos)
+    override fun updateShape(stateIn: BlockState, facing: Direction, facingState: BlockState, worldIn: IWorld, currentPos: BlockPos, facingPos: BlockPos): BlockState {
+        return super.updateShape(stateIn, facing, facingState, worldIn, currentPos, facingPos)
     }
 
-    override fun onLanded(worldIn: IBlockReader, entityIn: Entity) {
-        super.onLanded(worldIn, entityIn)
+    override fun updateEntityAfterFallOn(worldIn: IBlockReader, entityIn: Entity) {
+        super.updateEntityAfterFallOn(worldIn, entityIn)
     }
 
-    override fun onBlockHarvested(worldIn: World, pos: BlockPos, state: BlockState, player: PlayerEntity) {
+    override fun playerWillDestroy(worldIn: World, pos: BlockPos, state: BlockState, player: PlayerEntity) {
         if (config.destroy.exists)
-            config.destroy.run(worldIn.isRemote, TestBlockConfig.DestroyContext(state, worldIn, pos, player))
+            config.destroy.run(worldIn.isClientSide, TestBlockConfig.DestroyContext(state, worldIn, pos, player))
         else
-            super.onBlockHarvested(worldIn, pos, state, player)
+            super.playerWillDestroy(worldIn, pos, state, player)
     }
 
-    override fun onBlockPlacedBy(worldIn: World, pos: BlockPos, state: BlockState, placer: LivingEntity?, stack: ItemStack) {
+    override fun setPlacedBy(worldIn: World, pos: BlockPos, state: BlockState, placer: LivingEntity?, stack: ItemStack) {
         if (placer is PlayerEntity)
-            config.place.run(worldIn.isRemote, TestBlockConfig.PlaceContext(state, worldIn, pos, placer, stack))
+            config.place.run(worldIn.isClientSide, TestBlockConfig.PlaceContext(state, worldIn, pos, placer, stack))
         else
-            super.onBlockPlacedBy(worldIn, pos, state, placer, stack)
+            super.setPlacedBy(worldIn, pos, state, placer, stack)
     }
 
     // interaction =====================================================================================================
     @Suppress("DEPRECATION")
-    override fun onBlockActivated(state: BlockState, worldIn: World, pos: BlockPos, player: PlayerEntity, handIn: Hand, hit: BlockRayTraceResult): ActionResultType {
-        config.rightClick.run(worldIn.isRemote(), TestBlockConfig.RightClickContext(state, worldIn, pos, player, handIn, hit))
+    override fun use(state: BlockState, worldIn: World, pos: BlockPos, player: PlayerEntity, handIn: Hand, hit: BlockRayTraceResult): ActionResultType {
+        config.rightClick.run(worldIn.isClientSide, TestBlockConfig.RightClickContext(state, worldIn, pos, player, handIn, hit))
         if (config.rightClick.exists)
             return ActionResultType.CONSUME
         else
-            return super.onBlockActivated(state, worldIn, pos, player, handIn, hit)
+            return super.use(state, worldIn, pos, player, handIn, hit)
     }
 
     @Suppress("DEPRECATION")
-    override fun onBlockClicked(state: BlockState, worldIn: World, pos: BlockPos, player: PlayerEntity) {
+    override fun attack(state: BlockState, worldIn: World, pos: BlockPos, player: PlayerEntity) {
         if (config.leftClick.exists)
-            config.leftClick.run(worldIn.isRemote(), TestBlockConfig.LeftClickContext(state, worldIn, pos, player))
+            config.leftClick.run(worldIn.isClientSide, TestBlockConfig.LeftClickContext(state, worldIn, pos, player))
         else
-            super.onBlockClicked(state, worldIn, pos, player)
+            super.attack(state, worldIn, pos, player)
     }
 
     // entity interaction ==============================================================================================
     @Suppress("DEPRECATION")
-    override fun onEntityCollision(state: BlockState, worldIn: World, pos: BlockPos, entityIn: Entity) {
-        super.onEntityCollision(state, worldIn, pos, entityIn)
+    override fun entityInside(state: BlockState, worldIn: World, pos: BlockPos, entityIn: Entity) {
+        super.entityInside(state, worldIn, pos, entityIn)
     }
 
-    override fun onEntityWalk(worldIn: World, pos: BlockPos, entityIn: Entity) {
-        super.onEntityWalk(worldIn, pos, entityIn)
+    override fun stepOn(worldIn: World, pos: BlockPos, entityIn: Entity) {
+        super.stepOn(worldIn, pos, entityIn)
     }
 
-    override fun onFallenUpon(worldIn: World, pos: BlockPos, entityIn: Entity, fallDistance: Float) {
-        super.onFallenUpon(worldIn, pos, entityIn, fallDistance)
+    override fun fallOn(worldIn: World, pos: BlockPos, entityIn: Entity, fallDistance: Float) {
+        super.fallOn(worldIn, pos, entityIn, fallDistance)
     }
 
-    override fun onProjectileCollision(worldIn: World, state: BlockState, hit: BlockRayTraceResult, projectile: ProjectileEntity) {
-        super.onProjectileCollision(worldIn, state, hit, projectile)
+    override fun onProjectileHit(worldIn: World, state: BlockState, hit: BlockRayTraceResult, projectile: ProjectileEntity) {
+        super.onProjectileHit(worldIn, state, hit, projectile)
     }
 
     // misc ============================================================================================================
@@ -183,8 +184,8 @@ public open class TestBlock(public val config: TestBlockConfig): Block(config.al
         super.onNeighborChange(state, world, pos, neighbor)
     }
 
-    override fun isSideInvisible(state: BlockState, adjacentBlockState: BlockState, side: Direction): Boolean {
-        return if (adjacentBlockState.block === this) true else super.isSideInvisible(state, adjacentBlockState, side)
+    override fun skipRendering(state: BlockState, adjacentBlockState: BlockState, side: Direction): Boolean {
+        return if (adjacentBlockState.block === this) true else super.skipRendering(state, adjacentBlockState, side)
     }
 
     override fun hasTileEntity(state: BlockState?): Boolean {

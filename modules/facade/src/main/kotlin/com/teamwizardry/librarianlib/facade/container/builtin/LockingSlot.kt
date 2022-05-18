@@ -12,11 +12,11 @@ public class LockingSlot(
     public var lock: ContainerLock
 ): FacadeSlot(itemHandler, index) {
 
-    override fun isItemValid(stack: ItemStack): Boolean {
-        return !lock.isLocked() && super.isItemValid(stack)
+    override fun mayPlace(stack: ItemStack): Boolean {
+        return !lock.isLocked() && super.mayPlace(stack)
     }
 
-    override fun canTakeStack(playerIn: PlayerEntity): Boolean {
-        return !lock.isLocked() && super.canTakeStack(playerIn)
+    override fun mayPickup(playerIn: PlayerEntity): Boolean {
+        return !lock.isLocked() && super.mayPickup(playerIn)
     }
 }

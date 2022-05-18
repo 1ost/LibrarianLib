@@ -80,7 +80,7 @@ class VelocityRenderModule(
         RenderSystem.disableCull()
         RenderSystem.lineWidth(size)
 
-        val modelViewMatrix = matrixStack.last.matrix
+        val modelViewMatrix = matrixStack.last().pose()
         val transformMatrix = mixinCast<IMatrix4f>(modelViewMatrix)
         val tm00 = transformMatrix.m00
         val tm01 = transformMatrix.m01

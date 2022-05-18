@@ -22,10 +22,10 @@ internal object FramebufferPool {
     fun getFramebuffer(): Framebuffer {
         val fbo = bufferPool.pollFirst() ?: createFramebuffer()
         if (
-            fbo.framebufferWidth != Client.window.framebufferWidth ||
-            fbo.framebufferHeight != Client.window.framebufferHeight
+            fbo.viewWidth != Client.window.width ||
+            fbo.viewHeight != Client.window.height
         ) {
-            fbo.resize(Client.window.framebufferWidth, Client.window.framebufferHeight, Minecraft.IS_RUNNING_ON_MAC)
+            fbo.resize(Client.window.width, Client.window.height, Minecraft.ON_OSX)
         }
 
         return fbo
@@ -59,9 +59,9 @@ internal object FramebufferPool {
 
     private fun useFramebuffer(framebuffer: Framebuffer?) {
         if (framebuffer == null) {
-            Client.minecraft.framebuffer.bindFramebuffer(true)
+            Client.minecraft.mainRenderTarget.bindWrite(true)
         } else {
-            framebuffer.bindFramebuffer(true)
+            framebuffer.bindWrite(true)
         }
         current = framebuffer
     }
@@ -69,9 +69,9 @@ internal object FramebufferPool {
     private fun createFramebuffer(): Framebuffer {
         if (createdBuffers == maxFramebufferCount)
             throw IllegalStateException("Exceeded maximum of $maxFramebufferCount nested framebuffers")
-        val fbo = Framebuffer(Client.window.framebufferWidth, Client.window.framebufferHeight, true, Minecraft.IS_RUNNING_ON_MAC)
+        val fbo = Framebuffer(Client.window.width, Client.window.height, true, Minecraft.ON_OSX)
         fbo.enableStencil()
-        fbo.setFramebufferColor(0f, 0f, 0f, 0f)
+        fbo.setClearColor(0f, 0f, 0f, 0f)
         createdBuffers++
         return fbo
     }

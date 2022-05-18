@@ -49,10 +49,10 @@ public class ExamplePrismPacket implements CourierPacket {
                 // **NEVER** trust the client. If we don't do this
                 // it would allow a hacked client to generate and load
                 // arbitrary chunks.
-                if (!player.world.isBlockLoaded(this.pos)) {
+                if (!player.level.isLoaded(this.pos)) {
                     return;
                 }
-                if (player.world.getBlockState(this.pos).getBlock() != this.block) {
+                if (player.level.getBlockState(this.pos).getBlock() != this.block) {
                     // do something
                 }
             });

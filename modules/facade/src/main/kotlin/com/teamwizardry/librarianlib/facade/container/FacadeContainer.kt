@@ -98,21 +98,21 @@ public abstract class FacadeContainer(
         return transferManager.createBasicRule()
     }
 
-    override fun transferStackInSlot(playerIn: PlayerEntity, index: Int): ItemStack {
-        return transferManager.transferStackInSlot(inventorySlots[index])
+    override fun quickMoveStack(playerIn: PlayerEntity, index: Int): ItemStack {
+        return transferManager.transferStackInSlot(slots[index])
     }
 
-    override fun slotClick(slotId: Int, mouseButton: Int, clickTypeIn: ClickType, player: PlayerEntity): ItemStack {
+    override fun clicked(slotId: Int, mouseButton: Int, clickTypeIn: ClickType, player: PlayerEntity): ItemStack {
         val customClickResult =
-            (inventorySlots.getOrNull(slotId) as? CustomClickSlot?)?.handleClick(this, mouseButton, clickTypeIn, player)
+            (slots.getOrNull(slotId) as? CustomClickSlot?)?.handleClick(this, mouseButton, clickTypeIn, player)
         if (customClickResult != null) {
             return customClickResult
         }
-        return super.slotClick(slotId, mouseButton, clickTypeIn, player)
+        return super.clicked(slotId, mouseButton, clickTypeIn, player)
     }
 
-    override fun detectAndSendChanges() {
-        super.detectAndSendChanges()
+    override fun broadcastChanges() {
+        super.broadcastChanges()
 
         for(i in fluidSlots.indices) {
             val slot = fluidSlots[i]
@@ -131,7 +131,7 @@ public abstract class FacadeContainer(
 
     @Message
     private fun acceptJeiGhostStack(slotNumber: Int, stack: ItemStack) {
-        val slot = inventorySlots[slotNumber]
+        val slot = slots[slotNumber]
         if(slot is GhostSlot && !slot.disableJeiGhostIntegration)
             slot.acceptJeiGhostStack(stack)
     }

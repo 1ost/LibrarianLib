@@ -12,15 +12,15 @@ import net.minecraft.client.renderer.texture.TextureAtlasSprite
  */
 public class LTextureAtlasSprite(private val tas: TextureAtlasSprite) : ISprite {
 
-    override val renderType: RenderType = SimpleRenderTypes.flat(tas.atlasTexture.textureLocation)
+    override val renderType: RenderType = SimpleRenderTypes.flat(tas.atlas().location())
 
-    override fun minU(animFrames: Int): Float = tas.minU
+    override fun minU(animFrames: Int): Float = tas.u0
 
-    override fun minV(animFrames: Int): Float = tas.minV
+    override fun minV(animFrames: Int): Float = tas.v0
 
-    override fun maxU(animFrames: Int): Float = tas.maxU
+    override fun maxU(animFrames: Int): Float = tas.u1
 
-    override fun maxV(animFrames: Int): Float = tas.maxV
+    override fun maxV(animFrames: Int): Float = tas.v1
 
     override val width: Int
         get() = tas.width
@@ -32,7 +32,7 @@ public class LTextureAtlasSprite(private val tas: TextureAtlasSprite) : ISprite 
         get() = 1
 
     override val uSize: Float
-        get() = tas.maxU - tas.minU
+        get() = tas.u1 - tas.u0
     override val vSize: Float
-        get() = tas.maxV - tas.minV
+        get() = tas.v1 - tas.v0
 }

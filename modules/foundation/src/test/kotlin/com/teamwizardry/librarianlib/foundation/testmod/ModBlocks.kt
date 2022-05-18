@@ -63,7 +63,7 @@ object ModBlocks {
 
         val buildingBlockCollection = BuildingBlockCollection("building_block", "building_block")
         buildingBlockCollection.blockProperties
-            .material(Material.ROCK)
+            .material(Material.STONE)
             .hardnessAndResistance(2f, 6f)
             .mapColor(MaterialColor.MAGENTA)
         buildingBlock.from(registrationManager.add(buildingBlockCollection.full))

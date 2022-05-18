@@ -14,9 +14,9 @@ public class GuiDrawContext(
         @JvmSynthetic
         internal set
 
-    private val rootTransform = Matrix4d(rootStack.last.matrix)
+    private val rootTransform = Matrix4d(rootStack.last().pose())
     private val combinedTransform = MutableMatrix4d()
-    private val normal = Matrix3d(rootStack.last.normal) // this won't change, since our transforms are 2d
+    private val normal = Matrix3d(rootStack.last().normal()) // this won't change, since our transforms are 2d
     private val managedStack = MatrixStack()
     private var lastMatrixVersion = -1
 
@@ -52,9 +52,9 @@ public class GuiDrawContext(
      */
     public val transformStack: MatrixStack
         get() {
-            transform.copyToMatrix4f(managedStack.last.matrix)
+            transform.copyToMatrix4f(managedStack.last().pose())
             // at the moment we only do 3d transforms, so the normal is always the same
-            normal.copyToMatrix3f(managedStack.last.normal)
+            normal.copyToMatrix3f(managedStack.last().normal())
             return managedStack
         }
 

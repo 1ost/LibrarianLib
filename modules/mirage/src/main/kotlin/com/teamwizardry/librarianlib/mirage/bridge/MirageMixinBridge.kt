@@ -37,16 +37,16 @@ private class MirageResourcePack : IResourcePack {
     // the FallbackResourceManager type can be null, but we can treat the parameters as not nullable because we
     // don't add the resource pack when it's null.
 
-    override fun getResourceStream(type: ResourcePackType, location: ResourceLocation): InputStream {
+    override fun getResource(type: ResourcePackType, location: ResourceLocation): InputStream {
         return Mirage.resourceManager(type).mixinBridge.getResourceStream(location)
             ?: throw FileNotFoundException("Virtual resource $location not found")
     }
 
-    override fun resourceExists(type: ResourcePackType, location: ResourceLocation): Boolean {
+    override fun hasResource(type: ResourcePackType, location: ResourceLocation): Boolean {
         return Mirage.resourceManager(type).mixinBridge.resourceExists(location)
     }
 
-    override fun getAllResourceLocations(
+    override fun getResources(
         type: ResourcePackType,
         namespaceIn: String,
         pathIn: String,
@@ -64,14 +64,14 @@ private class MirageResourcePack : IResourcePack {
     override fun getName(): String = "LibrarianLib Mirage Resources"
 
     // The LibrarianLib virtual resource pack is added using ASM, so this is never normally called
-    override fun getResourceNamespaces(type: ResourcePackType): Set<String> = setOf()
+    override fun getNamespaces(type: ResourcePackType): Set<String> = setOf()
 
-    override fun getRootResourceStream(fileName: String): InputStream {
+    override fun getRootResource(fileName: String): InputStream {
         return javaClass.getResourceAsStream("/assets/librarianlib/mirage/root_resources/$fileName")
     }
 
-    override fun <T : Any?> getMetadata(deserializer: IMetadataSectionSerializer<T>): T? {
-        return ResourcePack.getResourceMetadata(deserializer, getRootResourceStream("pack.mcmeta"))
+    override fun <T : Any?> getMetadataSection(deserializer: IMetadataSectionSerializer<T>): T? {
+        return ResourcePack.getMetadataFromStream(deserializer, getRootResource("pack.mcmeta"))
     }
 
     override fun close() {

@@ -23,7 +23,7 @@ import java.util.function.Consumer
  */
 @RecipeDslMarker
 public class ShapelessRecipeDsl(result: IItemProvider, count: Int) {
-    private val builder: ShapelessRecipeBuilder = ShapelessRecipeBuilder.shapelessRecipe(result, count)
+    private val builder: ShapelessRecipeBuilder = ShapelessRecipeBuilder.shapeless(result, count)
 
     public var inputs: List<Ingredient> = emptyList()
     public var group: String = ""

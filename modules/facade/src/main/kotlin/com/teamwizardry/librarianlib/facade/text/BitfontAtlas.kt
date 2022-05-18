@@ -21,14 +21,14 @@ public object BitfontAtlas: Texture() {
     public var height: Int = 128
         private set
 
-    private val gpuMaxTexSize = GlStateManager.getInteger(GL11.GL_MAX_TEXTURE_SIZE)
+    private val gpuMaxTexSize = GlStateManager._getInteger(GL11.GL_MAX_TEXTURE_SIZE)
 
     private var packer = RectanglePacker<BitGrid>(width, height, 1)
     private val rects = mutableMapOf<BitGrid, RectanglePacker.Rectangle>()
     private var solidRect: Rect2d = Rect2d.ZERO
 
     init {
-        Client.textureManager.loadTexture(ATLAS_LOCATION, this)
+        Client.textureManager.register(ATLAS_LOCATION, this)
     }
 
     public fun solidTex(): Rect2d {
@@ -74,8 +74,8 @@ public object BitfontAtlas: Texture() {
             }
         }
 
-        this.bindTexture()
-        native.uploadTextureSub(0, xOrigin, yOrigin, false)
+        this.bind()
+        native.upload(0, xOrigin, yOrigin, false)
         native.close()
     }
 
@@ -86,19 +86,19 @@ public object BitfontAtlas: Texture() {
             throw IllegalStateException("Ran out of atlas space! OpenGL max texture size: " +
                 "$gpuMaxTexSize x $gpuMaxTexSize and managed to fit ${rects.size} glyphs.")
         packer.expand(width, height)
-        TextureUtil.prepareImage(glTextureId, width, height)
+        TextureUtil.prepareImage(id, width, height)
         rects.forEach { (image, rect) ->
             draw(image, rect.x, rect.y)
         }
     }
 
-    override fun loadTexture(manager: IResourceManager) {
+    override fun load(manager: IResourceManager) {
         packer = RectanglePacker<BitGrid>(width, height, 1)
         rects.clear()
-        this.bindTexture()
-        TextureUtil.prepareImage(glTextureId, width, height)
+        this.bind()
+        TextureUtil.prepareImage(id, width, height)
         val native = NativeImage(width, height, true)
-        native.uploadTextureSub(0, 0, 0, false)
+        native.upload(0, 0, 0, false)
         native.close()
 
         val solidGrid = BitGrid(3, 3)

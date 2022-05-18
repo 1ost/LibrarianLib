@@ -37,7 +37,7 @@ class AnchorVisualizationLayer(val target: GuiLayer): GuiLayer() {
 
         RenderSystem.lineWidth(3f)
 
-        val buffer = IRenderTypeBuffer.getImpl(Client.tessellator.buffer)
+        val buffer = IRenderTypeBuffer.immediate(Client.tessellator.builder)
         val vb = buffer.getBuffer(SimpleRenderTypes.flatLines)
 
         // get into parent's space
@@ -50,7 +50,7 @@ class AnchorVisualizationLayer(val target: GuiLayer): GuiLayer() {
         vb.pos2d(context.transform, target.pos.x + anchorSize, target.pos.y - anchorSize).color(color).endVertex()
         vb.pos2d(context.transform, target.pos.x - anchorSize, target.pos.y + anchorSize).color(color).endVertex()
 
-        buffer.finish()
+        buffer.endBatch()
         RenderSystem.lineWidth(1f)
     }
 }

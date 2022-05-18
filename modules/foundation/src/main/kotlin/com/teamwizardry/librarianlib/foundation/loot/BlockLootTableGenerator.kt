@@ -27,11 +27,11 @@ public open class BlockLootTableGenerator: LootTableGenerator(LootParameterSets.
      * @param immuneToExplosions Whether explosions have a chance to prevent the item from dropping
      */
     public fun createSingleItemDrop(item: IItemProvider, immuneToExplosions: Boolean): LootPool.Builder {
-        val pool = LootPool.builder()
-            .rolls(ConstantRange.of(1))
-            .addEntry(ItemLootEntry.builder(item))
+        val pool = LootPool.lootPool()
+            .setRolls(ConstantRange.exactly(1))
+            .add(ItemLootEntry.lootTableItem(item))
         if(!immuneToExplosions)
-            pool.acceptCondition(SurvivesExplosion.builder())
+            pool.`when`(SurvivesExplosion.survivesExplosion())
         return pool
     }
 
@@ -39,21 +39,21 @@ public open class BlockLootTableGenerator: LootTableGenerator(LootParameterSets.
      * Creates a loot pool for slabs
      */
     public fun createDefaultSlabDrops(block: Block): LootPool.Builder {
-        return LootPool.builder()
-            .rolls(ConstantRange.of(1))
-            .addEntry(
-                ItemLootEntry.builder(block)
-                    .acceptFunction(
-                        SetCount.builder(ConstantRange.of(2))
-                            .acceptCondition(
-                                BlockStateProperty.builder(block)
-                                    .fromProperties(
-                                        StatePropertiesPredicate.Builder.newBuilder()
-                                            .withProp(SlabBlock.TYPE, SlabType.DOUBLE)
+        return LootPool.lootPool()
+            .setRolls(ConstantRange.exactly(1))
+            .add(
+                ItemLootEntry.lootTableItem(block)
+                    .apply(
+                        SetCount.setCount(ConstantRange.exactly(2))
+                            .`when`(
+                                BlockStateProperty.hasBlockStateProperties(block)
+                                    .setProperties(
+                                        StatePropertiesPredicate.Builder.properties()
+                                            .hasProperty(SlabBlock.TYPE, SlabType.DOUBLE)
                                     )
                             )
                     )
-                    .acceptFunction(ExplosionDecay.builder())
+                    .apply(ExplosionDecay.explosionDecay())
             )
     }
 }

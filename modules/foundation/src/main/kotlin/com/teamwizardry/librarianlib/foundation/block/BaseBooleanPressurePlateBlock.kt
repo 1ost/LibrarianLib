@@ -49,9 +49,9 @@ public abstract class BaseBooleanPressurePlateBlock(
         pos: BlockPos,
         respectEntityDoesNotTriggerPressurePlate: Boolean
     ): List<Entity> {
-        val entities = world.getEntitiesWithinAABBExcludingEntity(null as Entity?, PRESSURE_AABB.offset(pos))
+        val entities = world.getEntities(null as Entity?, TOUCH_AABB.move(pos))
         if (respectEntityDoesNotTriggerPressurePlate)
-            entities.removeIf { it.doesEntityNotTriggerPressurePlate() }
+            entities.removeIf { it.isIgnoringBlockTriggers() }
         return entities
     }
 }

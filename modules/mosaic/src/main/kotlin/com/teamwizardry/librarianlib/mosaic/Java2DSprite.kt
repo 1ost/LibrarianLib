@@ -39,18 +39,18 @@ public class Java2DSprite(override val width: Int, override val height: Int) : I
 
     init {
         TextureUtil.prepareImage(texID, width, height)
-        native.uploadTextureSub(0, 0, 0, false)
+        native.upload(0, 0, 0, false)
 
-        val renderState = RenderType.State.getBuilder()
-            .texture(RenderState.TextureState(loc("minecraft:missingno"), false, false))
-            .alpha(DefaultRenderStates.DEFAULT_ALPHA)
-            .depthTest(DefaultRenderStates.DEPTH_LEQUAL)
-            .transparency(DefaultRenderStates.TRANSLUCENT_TRANSPARENCY)
+        val renderState = RenderType.State.builder()
+            .setTextureState(RenderState.TextureState(loc("minecraft:missingno"), false, false))
+            .setAlphaState(DefaultRenderStates.DEFAULT_ALPHA)
+            .setDepthTestState(DefaultRenderStates.DEPTH_LEQUAL)
+            .setTransparencyState(DefaultRenderStates.TRANSLUCENT_TRANSPARENCY)
 //        if(deleted) throw IllegalStateException("Texture has been deleted")
 
         @Suppress("INACCESSIBLE_TYPE")
-        renderType = RenderType.makeType("sprite_type",
-            DefaultVertexFormats.POSITION_COLOR_TEX, GL11.GL_QUADS, 256, false, false, renderState.build(true)
+        renderType = RenderType.create("sprite_type",
+            DefaultVertexFormats.POSITION_COLOR_TEX, GL11.GL_QUADS, 256, false, false, renderState.createCompositeState(true)
         )
     }
 
@@ -70,7 +70,7 @@ public class Java2DSprite(override val width: Int, override val height: Int) : I
     public fun end() {
         if(deleted) return
         AWTTextureUtil.fillNativeImage(image, native)
-        native.uploadTextureSub(0, 0, 0, false)
+        native.upload(0, 0, 0, false)
     }
 
     public fun delete() {

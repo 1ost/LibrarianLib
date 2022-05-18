@@ -13,7 +13,7 @@ import net.minecraft.nbt.StringNBT
 
 internal object StringSerializer: NBTSerializer<String>() {
     override fun deserialize(tag: INBT, existing: String?): String {
-        return tag.expectType<StringNBT>("tag").string
+        return tag.expectType<StringNBT>("tag").asString
     }
 
     override fun serialize(value: String): INBT {
@@ -23,7 +23,7 @@ internal object StringSerializer: NBTSerializer<String>() {
 
 internal object PrimitiveDoubleSerializer: NBTSerializer<Double>(Mirror.types.double) {
     override fun deserialize(tag: INBT, existing: Double?): Double {
-        return tag.expectType<NumberNBT>("tag").double
+        return tag.expectType<NumberNBT>("tag").asDouble
     }
 
     override fun serialize(value: Double): INBT {
@@ -32,7 +32,7 @@ internal object PrimitiveDoubleSerializer: NBTSerializer<Double>(Mirror.types.do
 }
 internal object PrimitiveFloatSerializer: NBTSerializer<Float>(Mirror.types.float) {
     override fun deserialize(tag: INBT, existing: Float?): Float {
-        return tag.expectType<NumberNBT>("tag").float
+        return tag.expectType<NumberNBT>("tag").asFloat
     }
 
     override fun serialize(value: Float): INBT {
@@ -41,7 +41,7 @@ internal object PrimitiveFloatSerializer: NBTSerializer<Float>(Mirror.types.floa
 }
 internal object PrimitiveLongSerializer: NBTSerializer<Long>(Mirror.types.long) {
     override fun deserialize(tag: INBT, existing: Long?): Long {
-        return tag.expectType<NumberNBT>("tag").long
+        return tag.expectType<NumberNBT>("tag").asLong
     }
 
     override fun serialize(value: Long): INBT {
@@ -50,7 +50,7 @@ internal object PrimitiveLongSerializer: NBTSerializer<Long>(Mirror.types.long) 
 }
 internal object PrimitiveIntSerializer: NBTSerializer<Int>(Mirror.types.int) {
     override fun deserialize(tag: INBT, existing: Int?): Int {
-        return tag.expectType<NumberNBT>("tag").int
+        return tag.expectType<NumberNBT>("tag").asInt
     }
 
     override fun serialize(value: Int): INBT {
@@ -59,7 +59,7 @@ internal object PrimitiveIntSerializer: NBTSerializer<Int>(Mirror.types.int) {
 }
 internal object PrimitiveShortSerializer: NBTSerializer<Short>(Mirror.types.short) {
     override fun deserialize(tag: INBT, existing: Short?): Short {
-        return tag.expectType<NumberNBT>("tag").short
+        return tag.expectType<NumberNBT>("tag").asShort
     }
 
     override fun serialize(value: Short): INBT {
@@ -68,7 +68,7 @@ internal object PrimitiveShortSerializer: NBTSerializer<Short>(Mirror.types.shor
 }
 internal object PrimitiveCharSerializer: NBTSerializer<Char>(Mirror.types.char) {
     override fun deserialize(tag: INBT, existing: Char?): Char {
-        return tag.expectType<NumberNBT>("tag").int.toChar()
+        return tag.expectType<NumberNBT>("tag").asInt.toChar()
     }
 
     override fun serialize(value: Char): INBT {
@@ -77,7 +77,7 @@ internal object PrimitiveCharSerializer: NBTSerializer<Char>(Mirror.types.char) 
 }
 internal object PrimitiveByteSerializer: NBTSerializer<Byte>(Mirror.types.byte) {
     override fun deserialize(tag: INBT, existing: Byte?): Byte {
-        return tag.expectType<NumberNBT>("tag").byte
+        return tag.expectType<NumberNBT>("tag").asByte
     }
 
     override fun serialize(value: Byte): INBT {
@@ -86,7 +86,7 @@ internal object PrimitiveByteSerializer: NBTSerializer<Byte>(Mirror.types.byte) 
 }
 internal object PrimitiveBooleanSerializer: NBTSerializer<Boolean>(Mirror.types.boolean) {
     override fun deserialize(tag: INBT, existing: Boolean?): Boolean {
-        return tag.expectType<NumberNBT>("tag").byte != 0.toByte()
+        return tag.expectType<NumberNBT>("tag").asByte != 0.toByte()
     }
 
     override fun serialize(value: Boolean): INBT {

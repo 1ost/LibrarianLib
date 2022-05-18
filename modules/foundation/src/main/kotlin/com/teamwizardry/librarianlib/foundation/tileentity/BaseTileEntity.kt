@@ -21,17 +21,17 @@ public abstract class BaseTileEntity(tileEntityTypeIn: TileEntityType<*>): TileE
      * Triggers a block update to send updated tile information to clients
      */
     public fun notifyStateChange() {
-        world?.notifyBlockUpdate(pos, blockState, blockState, Constants.BlockFlags.BLOCK_UPDATE)
+        level?.sendBlockUpdated(blockPos, blockState, blockState, Constants.BlockFlags.BLOCK_UPDATE)
     }
 
-    override fun write(compound: CompoundNBT): CompoundNBT {
-        super.write(compound)
+    override fun save(compound: CompoundNBT): CompoundNBT {
+        super.save(compound)
         compound.put("ll", serializer.createTag(this, Save::class.java))
         return compound
     }
 
-    override fun read(blockState: BlockState, compound: CompoundNBT) {
-        super.read(blockState, compound)
+    override fun load(blockState: BlockState, compound: CompoundNBT) {
+        super.load(blockState, compound)
         serializer.applyTag(compound.getCompound("ll"), this, Save::class.java)
     }
 
@@ -48,11 +48,11 @@ public abstract class BaseTileEntity(tileEntityTypeIn: TileEntityType<*>): TileE
 
     override fun getUpdatePacket(): SUpdateTileEntityPacket? {
         val tag = serializer.createTag(this, Sync::class.java)
-        return SUpdateTileEntityPacket(getPos(), -1, tag)
+        return SUpdateTileEntityPacket(blockPos, -1, tag)
     }
 
     override fun onDataPacket(net: NetworkManager?, pkt: SUpdateTileEntityPacket) {
-        val tag = pkt.nbtCompound
+        val tag = pkt.tag
         serializer.applyTag(tag, this, Sync::class.java)
     }
 }

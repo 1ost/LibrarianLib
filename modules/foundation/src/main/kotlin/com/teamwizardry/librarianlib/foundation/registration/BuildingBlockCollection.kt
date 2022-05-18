@@ -52,7 +52,7 @@ public class BuildingBlockCollection(private val fullName: String, private val s
             .applyFrom(blockProperties)
             .renderLayer(renderLayer)
             .itemGroup(itemGroup)
-            .block { BaseStairsBlock({ full.lazy.get().defaultState }, it.blockProperties, fullName) }
+            .block { BaseStairsBlock({ full.lazy.get().defaultBlockState() }, it.blockProperties, fullName) }
             .datagen {
                 tags(BlockTags.STAIRS)
             }

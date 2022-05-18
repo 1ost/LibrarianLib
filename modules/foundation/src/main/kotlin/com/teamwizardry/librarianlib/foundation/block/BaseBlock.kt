@@ -23,21 +23,21 @@ public open class BaseBlock(override val properties: FoundationBlockProperties):
         @JvmStatic
         public val defaultStoneProperties: FoundationBlockProperties
             get() = FoundationBlockProperties()
-                .material(Material.ROCK)
+                .material(Material.STONE)
                 .mapColor(MaterialColor.STONE)
                 .hardnessAndResistance(1.5f, 6f)
 
         @JvmStatic
         public val defaultMetalBlockProperties: FoundationBlockProperties
             get() = FoundationBlockProperties()
-                .material(Material.IRON)
+                .material(Material.METAL)
                 .hardnessAndResistance(3f, 6f)
                 .sound(SoundType.METAL)
 
         @JvmStatic
         public val defaultGemBlockProperties: FoundationBlockProperties
             get() = FoundationBlockProperties()
-                .material(Material.IRON)
+                .material(Material.METAL)
                 .hardnessAndResistance(5f, 6f)
                 .sound(SoundType.METAL)
     }

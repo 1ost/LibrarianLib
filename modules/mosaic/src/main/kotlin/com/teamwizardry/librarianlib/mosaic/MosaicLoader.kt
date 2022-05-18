@@ -33,7 +33,7 @@ internal object MosaicLoader : ReloadListener<Map<ResourceLocation, MosaicDefini
         val def = definitions.getOrPut(location) {
             load(Client.minecraft.resourceManager, location)
         }
-        if(def == null && location == missingno)
+        if(def == null && location.equals(missingno))
             inconceivable("Could not find the missingno sprite sheet")
         return def ?: getDefinition(missingno)
     }
@@ -183,7 +183,7 @@ internal object MosaicLoader : ReloadListener<Map<ResourceLocation, MosaicDefini
                 sprite.size = sheet.uvSize
                 sprite.frameUVs = listOf(sprite.uv).unmodifiableView()
             } else {
-                if(animation.isInterpolate) {
+                if(animation.isInterpolatedFrames) {
                     logger.warn("Ignoring interpolation for raw animation of $location")
                 }
                 sprite.size = ivec(sheet.uvSize.x, sheet.uvSize.x * animation.getFrameHeight(1) / animation.getFrameWidth(1))
@@ -191,7 +191,7 @@ internal object MosaicLoader : ReloadListener<Map<ResourceLocation, MosaicDefini
                 val frames = mutableListOf<Vec2i>()
                 for(it in 0 until animation.frameCount) {
                     val index = animation.getFrameIndex(it)
-                    val duration = animation.getFrameTimeSingle(it)
+                    val duration = animation.getFrameTime(it)
                     val uv = sprite.uv + offset * index
 
                     repeat(duration) { frames.add(uv) }

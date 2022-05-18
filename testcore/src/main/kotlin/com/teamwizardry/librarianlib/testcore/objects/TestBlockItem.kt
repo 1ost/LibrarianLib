@@ -18,17 +18,17 @@ public open class TestBlockItem(block: TestBlock, builder: Properties): BlockIte
 
     override fun placeBlock(context: BlockItemUseContext, state: BlockState): Boolean {
         if (super.placeBlock(context, state)) {
-            context.item.grow(1)
+            context.itemInHand.grow(1)
             return true
         }
         return false
     }
 
-    override fun addInformation(stack: ItemStack, worldIn: World?, tooltip: MutableList<ITextComponent>, flagIn: ITooltipFlag) {
-        super.addInformation(stack, worldIn, tooltip, flagIn)
+    public override fun appendHoverText(stack: ItemStack, worldIn: World?, tooltip: MutableList<ITextComponent>, flagIn: ITooltipFlag) {
+        super.appendHoverText(stack, worldIn, tooltip, flagIn)
         if (block.config.description != null) {
             val description = TranslationTextComponent(registryName!!.translationKey("block", "tooltip"))
-            description.style.applyFormatting(TextFormatting.GRAY)
+            description.style.applyFormat(TextFormatting.GRAY)
             tooltip.add(description)
         }
     }

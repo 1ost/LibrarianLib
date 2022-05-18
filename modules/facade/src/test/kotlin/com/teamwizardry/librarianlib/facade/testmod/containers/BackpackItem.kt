@@ -20,21 +20,21 @@ import net.minecraftforge.common.util.LazyOptional
 import net.minecraftforge.items.CapabilityItemHandler
 import net.minecraftforge.items.ItemStackHandler
 
-class BackpackItem(group: ItemGroup): Item(Properties().group(group).maxStackSize(1)), ITestItem {
+class BackpackItem(group: ItemGroup): Item(Properties().tab(group).durability(1)), ITestItem {
     override val itemName: String
         get() = "Backpack"
     override val itemDescription: String?
         get() = "A simple backpack"
 
-    override fun onItemRightClick(world: World, player: PlayerEntity, hand: Hand): ActionResult<ItemStack> {
-        if(!player.world.isRemote) {
+    override fun use(world: World, player: PlayerEntity, hand: Hand): ActionResult<ItemStack> {
+        if(!player.level.isClientSide) {
             LibrarianLibFacadeTestMod.backpackContainerType.open(
                 player as ServerPlayerEntity,
                 StringTextComponent("Backpack"),
                 hand
             )
         }
-        return ActionResult.resultSuccess(player.getHeldItem(hand))
+        return ActionResult.success(player.getItemInHand(hand))
     }
 
     override fun initCapabilities(stack: ItemStack, nbt: CompoundNBT?): ICapabilityProvider? {

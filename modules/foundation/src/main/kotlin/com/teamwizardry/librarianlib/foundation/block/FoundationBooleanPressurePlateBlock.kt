@@ -31,11 +31,11 @@ public class FoundationBooleanPressurePlateBlock(
         textureName: String
     ): this(properties, { true }, resetTime, textureName)
 
-    override fun getPoweredDuration(): Int {
+    override fun getPressedTime(): Int {
         return resetTime
     }
 
-    override fun computeRedstoneStrength(world: World, pos: BlockPos): Int {
+    override fun getSignalStrength(world: World, pos: BlockPos): Int {
         val entities = getEntitiesOnPressurePlate(
             world, pos,
             true

@@ -55,7 +55,7 @@ public class Cursor @JvmOverloads constructor(
         val stream = Client.resourceManager.getResource(resourceLocation).inputStream
         var bytebuffer: ByteBuffer? = null
         try {
-            bytebuffer = TextureUtil.readToBuffer(stream)
+            bytebuffer = TextureUtil.readResource(stream)
             bytebuffer!!.rewind()
 
             MemoryStack.stackPush().use { stack ->
@@ -308,7 +308,7 @@ public class Cursor @JvmOverloads constructor(
 
         @JvmStatic
         public fun setCursor(cursor: Cursor?) {
-            GLFW.glfwSetCursor(Client.window.handle, cursor?.glfwCursor ?: 0L)
+            GLFW.glfwSetCursor(Client.window.window, cursor?.glfwCursor ?: 0L)
         }
     }
 }

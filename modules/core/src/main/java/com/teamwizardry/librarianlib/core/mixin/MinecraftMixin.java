@@ -9,7 +9,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(Minecraft.class)
 public class MinecraftMixin {
-    @Inject(method = "runGameLoop", at = @At("HEAD"))
+    @Inject(method = "runTick", at = @At("HEAD"))
     public void runGlResourceGc(boolean renderWorldIn, CallbackInfo ci) {
         GlResourceGc.INSTANCE.releaseCollectedResources$core();
     }

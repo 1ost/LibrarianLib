@@ -1,10 +1,6 @@
 @file:Suppress("PublicApiImplicitType", "UnstableApiUsage", "PropertyName")
 
-import net.minecraftforge.gradle.mcp.task.GenerateSRG
-import net.minecraftforge.gradle.userdev.tasks.RenameJar
 import org.apache.tools.ant.filters.ReplaceTokens
-import org.jetbrains.kotlin.gradle.plugin.KotlinPlatformType
-import org.jetbrains.kotlin.gradle.plugin.ProjectLocalConfigurations
 
 plugins {
     `maven-publish`

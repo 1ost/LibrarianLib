@@ -79,7 +79,7 @@ public class ArcLayer(color: Color, x: Int, y: Int, width: Int, height: Int): Gu
 
         val c = color
 
-        val buffer = IRenderTypeBuffer.getImpl(Client.tessellator.buffer)
+        val buffer = IRenderTypeBuffer.immediate(Client.tessellator.builder)
         val vb = buffer.getBuffer(renderType)
 
         context.matrix.translate(size.x / 2, size.y / 2)
@@ -102,7 +102,7 @@ public class ArcLayer(color: Color, x: Int, y: Int, width: Int, height: Int): Gu
             vb.pos2d(context.transform, rX * sin, rY * -cos).color(c).endVertex()
         }
 
-        buffer.finish()
+        buffer.endBatch()
     }
 
     private companion object {

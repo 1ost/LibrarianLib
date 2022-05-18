@@ -83,11 +83,11 @@ private class FacadeContainerFactory<T: FacadeContainer>(clazz: Class<T>): ICont
             }
             list.add(tag)
         }.toTypedArray()
-        buffer.writeCompoundTag(CompoundNBT().also { it.put("ll", list) })
+        buffer.writeNbt(CompoundNBT().also { it.put("ll", list) })
     }
 
     fun readArguments(buffer: PacketBuffer): Array<Any?> {
-        val list = buffer.readCompoundTag()!!.getList("ll", Constants.NBT.TAG_COMPOUND)
+        val list = buffer.readNbt()!!.getList("ll", Constants.NBT.TAG_COMPOUND)
         return argumentSerializers.mapIndexed { i, serializer ->
             list.getCompound(i).get("V")?.let {
                 serializer.read(it, null)

@@ -27,10 +27,10 @@ public abstract class PlayerTestContext(player: PlayerEntity): TestContext() {
     }
 
     public fun chat(text: String) {
-        _player.sendStatusMessage(StringTextComponent(text), false)
+        _player.displayClientMessage(StringTextComponent(text), false)
     }
 
     public fun status(text: String) {
-        _player.sendStatusMessage(StringTextComponent(text), true)
+        _player.displayClientMessage(StringTextComponent(text), true)
     }
 }

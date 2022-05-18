@@ -35,7 +35,7 @@ class ScaleVisualizationLayer(gridSize: Double): GuiLayer() {
     override fun draw(context: GuiDrawContext) {
         RenderSystem.lineWidth(2f)
 
-        val buffer = IRenderTypeBuffer.getImpl(Client.tessellator.buffer)
+        val buffer = IRenderTypeBuffer.immediate(Client.tessellator.builder)
         val vb = buffer.getBuffer(SimpleRenderTypes.flatLines)
 
         val gridSize = this.gridSize
@@ -55,7 +55,7 @@ class ScaleVisualizationLayer(gridSize: Double): GuiLayer() {
             y += gridSize
         }
 
-        buffer.finish()
+        buffer.endBatch()
         RenderSystem.lineWidth(1f)
     }
 }

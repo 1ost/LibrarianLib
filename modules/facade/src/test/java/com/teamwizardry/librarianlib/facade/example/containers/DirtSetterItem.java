@@ -14,13 +14,13 @@ public class DirtSetterItem extends Item {
     }
 
     @Override
-    public ActionResultType onItemUse(ItemUseContext context) {
-        if (!context.getWorld().isRemote) {
+    public ActionResultType useOn(ItemUseContext context) {
+        if (!context.getLevel().isClientSide) {
             ExampleModContainers.dirtSetterContainerType.open(
                     (ServerPlayerEntity) context.getPlayer(),
                     new TranslationTextComponent("modid.container.dirt_setter"),
                     // additional constructor arguments:
-                    context.getPos()
+                    context.getClickedPos()
             );
         }
         return ActionResultType.SUCCESS;

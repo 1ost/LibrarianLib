@@ -23,31 +23,31 @@ public class PlayerEquipmentSlot(
      * Returns the maximum stack size for a given slot (usually the same as getInventoryStackLimit(), but 1 in
      * the case of armor slots)
      */
-    override fun getSlotStackLimit(): Int {
+    override fun getMaxStackSize(): Int {
         return 1
     }
 
     /**
      * Check if the stack is allowed to be placed in this slot, used for armor slots as well as furnace fuel.
      */
-    override fun isItemValid(stack: ItemStack): Boolean {
+    override fun mayPlace(stack: ItemStack): Boolean {
         return stack.canEquip(type, player)
     }
 
     /**
      * Return whether this slot's stack can be taken from this slot.
      */
-    override fun canTakeStack(playerIn: PlayerEntity): Boolean {
-        val itemstack = this.stack
+    override fun mayPickup(playerIn: PlayerEntity): Boolean {
+        val itemstack = this.item
         return if (!itemstack.isEmpty && !playerIn.isCreative && EnchantmentHelper.hasBindingCurse(itemstack))
             false
         else
-            super.canTakeStack(playerIn)
+            super.mayPickup(playerIn)
     }
 
     @OnlyIn(Dist.CLIENT)
-    override fun getBackground(): Pair<ResourceLocation, ResourceLocation>? {
-        return EQUIPMENT_TYPE_TEXTURES[type.ordinal]?.let { Pair.of(AtlasTexture.LOCATION_BLOCKS_TEXTURE, it) }
+    override fun getNoItemIcon(): Pair<ResourceLocation, ResourceLocation>? {
+        return EQUIPMENT_TYPE_TEXTURES[type.ordinal]?.let { Pair.of(AtlasTexture.LOCATION_BLOCKS, it) }
     }
 
     private companion object {

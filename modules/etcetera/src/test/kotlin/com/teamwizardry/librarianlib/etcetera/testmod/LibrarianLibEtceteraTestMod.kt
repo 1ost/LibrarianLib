@@ -58,9 +58,9 @@ object LibrarianLibEtceteraTestMod: TestMod(LibrarianLibEtceteraModule) {
             rightClickHold.server {
                 notSneaking {
                     val eyePos = player.getEyePosition(0f)
-                    val look = player.lookVec * 100
+                    val look = player.lookAngle * 100
                     serverRaycaster.cast(
-                        player.world, Raycaster.BlockMode.COLLISION, Raycaster.FluidMode.ANY, Predicate { true },
+                        player.level, Raycaster.BlockMode.COLLISION, Raycaster.FluidMode.ANY, Predicate { true },
                         eyePos.x, eyePos.y, eyePos.z,
                         eyePos.x + look.x, eyePos.y + look.y, eyePos.z + look.z
                     )
@@ -70,7 +70,7 @@ object LibrarianLibEtceteraTestMod: TestMod(LibrarianLibEtceteraModule) {
                             return@notSneaking
                         }
                         Raycaster.HitType.BLOCK -> {
-                            val state = player.world.getBlockState(BlockPos(serverRaycaster.blockX, serverRaycaster.blockY, serverRaycaster.blockZ))
+                            val state = player.level.getBlockState(BlockPos(serverRaycaster.blockX, serverRaycaster.blockY, serverRaycaster.blockZ))
                             BlockParticleData(ParticleTypes.BLOCK, state)
                         }
                         Raycaster.HitType.FLUID -> {
@@ -81,7 +81,7 @@ object LibrarianLibEtceteraTestMod: TestMod(LibrarianLibEtceteraModule) {
                             ParticleTypes.FLAME
                         }
                     }
-                    (player.world as ServerWorld).spawnParticle(particleData,
+                    (player.level as ServerWorld).sendParticles(particleData,
                         eyePos.x + look.x * serverRaycaster.fraction,
                         eyePos.y + look.y * serverRaycaster.fraction,
                         eyePos.z + look.z * serverRaycaster.fraction,
@@ -104,7 +104,7 @@ object LibrarianLibEtceteraTestMod: TestMod(LibrarianLibEtceteraModule) {
             client {
                 tick {
                     val eyePos = target.getEyePosition(0f)
-                    val look = target.lookVec * 100
+                    val look = target.lookAngle * 100
                     clientRaycaster.cast(
                         world, blockMode, fluidMode, entityFilter,
                         eyePos.x, eyePos.y, eyePos.z,
@@ -123,13 +123,13 @@ object LibrarianLibEtceteraTestMod: TestMod(LibrarianLibEtceteraModule) {
             server {
                 tick {
                     val eyePos = target.getEyePosition(0f)
-                    val look = target.lookVec * 100
+                    val look = target.lookAngle * 100
                     serverRaycaster.cast(
                         world, blockMode, fluidMode, entityFilter,
                         eyePos.x, eyePos.y, eyePos.z,
                         eyePos.x + look.x, eyePos.y + look.y, eyePos.z + look.z
                     )
-                    (world as ServerWorld).spawnParticle(Particles.TARGET_RED,
+                    (world as ServerWorld).sendParticles(Particles.TARGET_RED,
                         eyePos.x + look.x * serverRaycaster.fraction,
                         eyePos.y + look.y * serverRaycaster.fraction,
                         eyePos.z + look.z * serverRaycaster.fraction,
@@ -152,13 +152,13 @@ object LibrarianLibEtceteraTestMod: TestMod(LibrarianLibEtceteraModule) {
                 rightClickHold.server {
                     notSneaking {
                         val eyePos = player.getEyePosition(0f)
-                        val look = player.lookVec * 20
+                        val look = player.lookAngle * 20
                         serverRaycaster.cast(
-                            player.world, blockMode, fluidMode, entityFilter,
+                            player.level, blockMode, fluidMode, entityFilter,
                             eyePos.x, eyePos.y, eyePos.z,
                             eyePos.x + look.x, eyePos.y + look.y, eyePos.z + look.z
                         )
-                        (player.world as ServerWorld).spawnParticle(Particles.TARGET_RED,
+                        (player.level as ServerWorld).sendParticles(Particles.TARGET_RED,
                             eyePos.x + look.x * serverRaycaster.fraction,
                             eyePos.y + look.y * serverRaycaster.fraction,
                             eyePos.z + look.z * serverRaycaster.fraction,
@@ -171,13 +171,13 @@ object LibrarianLibEtceteraTestMod: TestMod(LibrarianLibEtceteraModule) {
 
                 rightClickHold.client {
                     val eyePos = player.getEyePosition(0f)
-                    val look = player.lookVec * 20
+                    val look = player.lookAngle * 20
                     clientRaycaster.cast(
-                        player.world, blockMode, fluidMode, entityFilter,
+                        player.level, blockMode, fluidMode, entityFilter,
                         eyePos.x, eyePos.y, eyePos.z,
                         eyePos.x + look.x, eyePos.y + look.y, eyePos.z + look.z
                     )
-                    player.world.addParticle(Particles.TARGET_BLUE, true,
+                    player.level.addParticle(Particles.TARGET_BLUE, true,
                         eyePos.x + look.x * clientRaycaster.fraction,
                         eyePos.y + look.y * clientRaycaster.fraction,
                         eyePos.z + look.z * clientRaycaster.fraction,
@@ -198,8 +198,8 @@ object LibrarianLibEtceteraTestMod: TestMod(LibrarianLibEtceteraModule) {
     @SubscribeEvent
     @OnlyIn(Dist.CLIENT)
     fun registerParticleFactories(e: ParticleFactoryRegisterEvent) {
-        Client.minecraft.particles.registerFactory(Particles.TARGET_RED, HitParticle::Factory)
-        Client.minecraft.particles.registerFactory(Particles.TARGET_BLUE, HitParticle::Factory)
+        Client.minecraft.particleEngine.register(Particles.TARGET_RED, HitParticle::Factory)
+        Client.minecraft.particleEngine.register(Particles.TARGET_BLUE, HitParticle::Factory)
     }
 }
 

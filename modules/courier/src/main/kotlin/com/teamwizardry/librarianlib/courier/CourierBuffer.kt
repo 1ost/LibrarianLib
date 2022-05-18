@@ -44,10 +44,10 @@ import java.util.*
 
 public class CourierBuffer(public val buf: PacketBuffer) : ByteBuf() {
     @Throws(IOException::class)
-    public fun <T> decode(codec: Codec<T>): T = buf.func_240628_a_(codec)
+    public fun <T> decode(codec: Codec<T>): T = buf.readWithCodec(codec)
 
     @Throws(IOException::class)
-    public fun <T> encode(codec: Codec<T>, value: T): CourierBuffer = build { buf.func_240629_a_(codec, value) }
+    public fun <T> encode(codec: Codec<T>, value: T): CourierBuffer = build { buf.writeWithCodec(codec, value) }
 
     public fun writeByteArray(array: ByteArray): CourierBuffer = build { buf.writeByteArray(array) }
 
@@ -98,18 +98,18 @@ public class CourierBuffer(public val buf: PacketBuffer) : ByteBuf() {
 
     //@OnlyIn(Dist.CLIENT)
     public fun readSectionPos(): SectionPos {
-        return SectionPos.from(readLong())
+        return SectionPos.of(readLong())
     }
 
-    public fun readTextComponent(): ITextComponent? = buf.readTextComponent()
+    public fun readTextComponent(): ITextComponent? = buf.readComponent()
     public fun writeTextComponent(component: ITextComponent): CourierBuffer =
-        build { buf.writeTextComponent(component) }
+        build { buf.writeComponent(component) }
 
-    public fun <T : Enum<T>> readEnumValue(enumClass: Class<T>): T = buf.readEnumValue(enumClass)
+    public fun <T : Enum<T>> readEnumValue(enumClass: Class<T>): T = buf.readEnum(enumClass)
 
     @JvmSynthetic
-    public inline fun <reified T : Enum<T>> readEnumValue(): T = buf.readEnumValue(T::class.java) as T
-    public fun writeEnumValue(value: Enum<*>): CourierBuffer = build { buf.writeEnumValue(value) }
+    public inline fun <reified T : Enum<T>> readEnumValue(): T = buf.readEnum(T::class.java) as T
+    public fun writeEnumValue(value: Enum<*>): CourierBuffer = build { buf.writeEnum(value) }
 
     /**
      * Reads a compressed int from the buffer. To do so it maximally reads 5 byte-sized chunks whose most significant bit
@@ -118,8 +118,8 @@ public class CourierBuffer(public val buf: PacketBuffer) : ByteBuf() {
     public fun readVarInt(): Int = buf.readVarInt()
     public fun readVarLong(): Long = buf.readVarLong()
 
-    public fun writeUniqueId(uuid: UUID): CourierBuffer = build { buf.writeUniqueId(uuid) }
-    public fun readUniqueId(): UUID = buf.readUniqueId()
+    public fun writeUniqueId(uuid: UUID): CourierBuffer = build { buf.writeUUID(uuid) }
+    public fun readUniqueId(): UUID = buf.readUUID()
 
     /**
      * Writes a compressed int to the buffer. The smallest number of bytes to fit the passed int will be written. Of each
@@ -133,13 +133,13 @@ public class CourierBuffer(public val buf: PacketBuffer) : ByteBuf() {
     /**
      * Writes a compressed NBTTagCompound to this buffer
      */
-    public fun writeCompoundTag(nbt: CompoundNBT?): CourierBuffer = build { buf.writeCompoundTag(nbt) }
+    public fun writeCompoundTag(nbt: CompoundNBT?): CourierBuffer = build { buf.writeNbt    (nbt) }
     /**
      * Reads a compressed NBTTagCompound from this buffer
      */
-    public fun readCompoundTag(): CompoundNBT? = buf.readCompoundTag()
-    public fun readUnlimitedSizeCompoundTag(): CompoundNBT? = buf.func_244273_m()
-    public fun readCompoundTag(sizeTracker: NBTSizeTracker): CompoundNBT? = buf.func_244272_a(sizeTracker)
+    public fun readCompoundTag(): CompoundNBT? = buf.readNbt()
+    public fun readUnlimitedSizeCompoundTag(): CompoundNBT? = buf.readAnySizeNbt()
+    public fun readCompoundTag(sizeTracker: NBTSizeTracker): CompoundNBT? = buf.readNbt(sizeTracker)
 
     /**
      * Writes the ItemStack's ID (short), then size (byte), then damage. (short)
@@ -154,7 +154,7 @@ public class CourierBuffer(public val buf: PacketBuffer) : ByteBuf() {
     /**
      * Reads an ItemStack from this buffer
      */
-    public fun readItemStack(): ItemStack = buf.readItemStack()
+    public fun readItemStack(): ItemStack = buf.readItem()
 
     //@OnlyIn(Dist.CLIENT)
     /**
@@ -194,11 +194,11 @@ public class CourierBuffer(public val buf: PacketBuffer) : ByteBuf() {
     public fun writeResourceLocation(resourceLocationIn: ResourceLocation): CourierBuffer =
         build { buf.writeResourceLocation(resourceLocationIn) }
 
-    public fun readTime(): Date = buf.readTime()
-    public fun writeTime(time: Date): CourierBuffer = build { buf.writeTime(time) }
+    public fun readTime(): Date = buf.readDate()
+    public fun writeTime(time: Date): CourierBuffer = build { buf.writeDate(time) }
 
-    public fun readBlockRay(): BlockRayTraceResult = buf.readBlockRay()
-    public fun writeBlockRay(resultIn: BlockRayTraceResult): CourierBuffer = build { buf.writeBlockRay(resultIn) }
+    public fun readBlockRay(): BlockRayTraceResult = buf.readBlockHitResult()
+    public fun writeBlockRay(resultIn: BlockRayTraceResult): CourierBuffer = build { buf.writeBlockHitResult(resultIn) }
 
     //region forge
 
@@ -520,7 +520,7 @@ public class CourierBuffer(public val buf: PacketBuffer) : ByteBuf() {
     override fun toString(index: Int, length: Int, charset: Charset): String = buf.toString(index, length, charset)
 
     override fun hashCode(): Int = buf.hashCode()
-    override fun equals(other: Any?): Boolean = buf == other
+    override fun equals(other: Any?): Boolean = buf.equals(other)
     override fun compareTo(other: ByteBuf): Int = buf.compareTo(other)
     override fun toString(): String = buf.toString()
 

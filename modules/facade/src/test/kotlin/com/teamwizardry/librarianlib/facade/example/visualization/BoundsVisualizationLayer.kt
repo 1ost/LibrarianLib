@@ -31,14 +31,14 @@ class BoundsVisualizationLayer: GuiLayer() {
     override fun draw(context: GuiDrawContext) {
         RenderSystem.lineWidth(2f)
 
-        val buffer = IRenderTypeBuffer.getImpl(Client.tessellator.buffer)
+        val buffer = IRenderTypeBuffer.immediate(Client.tessellator.builder)
         val vb = buffer.getBuffer(SimpleRenderTypes.flatLineStrip)
 
         getBoundingBoxPoints().forEach {
             vb.pos2d(context.transform, it.x, it.y).color(color).endVertex()
         }
 
-        buffer.finish()
+        buffer.endBatch()
         RenderSystem.lineWidth(1f)
     }
 }

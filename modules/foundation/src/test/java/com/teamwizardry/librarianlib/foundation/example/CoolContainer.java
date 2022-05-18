@@ -25,14 +25,14 @@ public class CoolContainer extends FacadeContainer {
         // NEVER trust the client
         if(offset > 1) offset = 1;
         if(offset < -1) offset = -1;
-        getPlayer().world.setBlockState(
-                pos.add(0, offset, 0),
-                Blocks.DIRT.getDefaultState()
+        getPlayer().level.setBlockAndUpdate(
+                pos.offset(0, offset, 0),
+                Blocks.DIRT.defaultBlockState()
         );
     }
 
     @Override
-    public boolean canInteractWith(PlayerEntity playerIn) {
+    public boolean stillValid(PlayerEntity playerIn) {
         return true;
     }
 }

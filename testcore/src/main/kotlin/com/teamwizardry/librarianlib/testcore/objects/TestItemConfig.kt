@@ -47,8 +47,8 @@ public class TestItemConfig(public val id: String, public val name: String, grou
      * constructor.
      */
     public val properties: Item.Properties = Item.Properties()
-        .group(group)
-        .maxStackSize(stackSize)
+        .tab(group)
+        .durability(stackSize)
 
     /**
      * Execute the passed block with this object as the receiver. Useful for using this object as a DSL
@@ -130,18 +130,18 @@ public class TestItemConfig(public val id: String, public val name: String, grou
     public var tickInHand: SidedAction<InventoryTickContext> = SidedAction()
 
     public data class RightClickContext(val world: World, val player: PlayerEntity, val hand: Hand): PlayerTestContext(player) {
-        val stack: ItemStack = player.getHeldItem(hand)
+        val stack: ItemStack = player.getItemInHand(hand)
     }
 
     public data class RightClickBlockContext(private val context: ItemUseContext): PlayerTestContext(context.player!!) {
-        val stack: ItemStack = context.item
+        val stack: ItemStack = context.itemInHand
 
-        val world: World = context.world
+        val world: World = context.level
         val player: PlayerEntity = context.player!!
         val hand: Hand = context.hand
-        val side: Direction = context.face
-        val block: BlockPos = context.pos
-        val hitVec: Vector3d = context.hitVec
+        val side: Direction = context.clickedFace
+        val block: BlockPos = context.clickedPos
+        val hitVec: Vector3d = context.clickLocation
     }
 
     public data class RightClickHoldContext(val stack: ItemStack, val player: PlayerEntity, val count: Int): PlayerTestContext(player)

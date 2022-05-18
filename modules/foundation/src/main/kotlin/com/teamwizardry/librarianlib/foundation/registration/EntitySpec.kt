@@ -44,7 +44,7 @@ public class EntitySpec<T: Entity>(
     public val registryName: ResourceLocation
         get() = ResourceLocation(modid, id)
 
-    private val builder = EntityType.Builder.create(factory, classification)
+    private val builder = EntityType.Builder.of(factory, classification)
     @get:JvmSynthetic
     internal var renderFactory: ClientMetaSupplier<EntityRendererFactory<T>>? = null
         private set
@@ -58,19 +58,19 @@ public class EntitySpec<T: Entity>(
     }
 
     public fun disableSummoning(): EntitySpec<T> = build {
-        builder.disableSummoning()
+        builder.noSummon()
     }
 
     public fun disableSerialization(): EntitySpec<T> = build {
-        builder.disableSerialization()
+        builder.noSave()
     }
 
     public fun immuneToFire(): EntitySpec<T> = build {
-        builder.immuneToFire()
+        builder.fireImmune()
     }
 
     public fun spawningIgnoresPlayerProximity(): EntitySpec<T> = build {
-        builder.func_225435_d()
+        builder.canSpawnFarFromPlayer()
     }
 
     public fun updateInterval(interval: Int): EntitySpec<T> = build {

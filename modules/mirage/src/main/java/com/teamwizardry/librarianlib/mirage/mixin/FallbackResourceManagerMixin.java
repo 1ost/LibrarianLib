@@ -17,12 +17,12 @@ import java.util.List;
 
 @Mixin(FallbackResourceManager.class)
 public class FallbackResourceManagerMixin {
-    @Shadow @Final public List<IResourcePack> resourcePacks;
+    @Shadow @Final public List<IResourcePack> fallbacks;
 
     @Inject(method = "<init>", at = @At("RETURN"))
     private void initHook(ResourcePackType type, String namespace, CallbackInfo ci) {
         if(type != null) {
-            resourcePacks.add(MirageMixinBridge.INSTANCE.getResourcePack());
+            fallbacks.add(MirageMixinBridge.INSTANCE.getResourcePack());
         }
     }
 }

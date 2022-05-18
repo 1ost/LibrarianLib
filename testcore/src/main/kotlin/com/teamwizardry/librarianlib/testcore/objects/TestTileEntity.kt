@@ -13,14 +13,14 @@ import net.minecraft.tileentity.TileEntityType
 public abstract class TestTileEntity(tileEntityTypeIn: TileEntityType<*>): TileEntity(tileEntityTypeIn) {
     private val serializer = SimpleSerializer.get(this.javaClass)
 
-    override fun write(compound: CompoundNBT): CompoundNBT {
-        super.write(compound)
+    override fun save(compound: CompoundNBT): CompoundNBT {
+        super.save(compound)
         compound.put("ll", serializer.createTag(this, Save::class.java))
         return compound
     }
 
-    override fun read(state: BlockState, compound: CompoundNBT) {
-        super.read(state, compound)
+    override fun load(state: BlockState, compound: CompoundNBT) {
+        super.load(state, compound)
         serializer.applyTag(compound.getCompound("ll"), this, Save::class.java)
     }
 
@@ -37,11 +37,11 @@ public abstract class TestTileEntity(tileEntityTypeIn: TileEntityType<*>): TileE
 
     override fun getUpdatePacket(): SUpdateTileEntityPacket? {
         val tag = serializer.createTag(this, Sync::class.java)
-        return SUpdateTileEntityPacket(getPos(), -1, tag)
+        return SUpdateTileEntityPacket(blockPos, -1, tag)
     }
 
     override fun onDataPacket(net: NetworkManager?, pkt: SUpdateTileEntityPacket) {
-        val tag = pkt.nbtCompound
+        val tag = pkt.tag
         serializer.applyTag(tag, this, Sync::class.java)
     }
 }

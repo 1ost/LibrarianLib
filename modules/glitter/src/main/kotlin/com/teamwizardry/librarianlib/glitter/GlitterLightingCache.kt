@@ -58,8 +58,8 @@ public object GlitterLightingCache {
 
     @Suppress("ReplacePutWithAssignment")
     public fun getCombinedLight(x: Int, y: Int, z: Int): Int {
-        mutablePos.setPos(x, y, z)
-        val toLong = mutablePos.toLong()
+        mutablePos.set(x, y, z)
+        val toLong = mutablePos.asLong()
         if(lightCache.containsKey(toLong))
             return lightCache.get(toLong)
 
@@ -70,15 +70,15 @@ public object GlitterLightingCache {
     }
 
     private fun computeCombinedLight(pos: BlockPos): Int {
-        val world = Client.minecraft.world ?: return 0
+            val world = Client.minecraft.level ?: return 0
 
         if (pos.y < 0 || pos.y > world.height)
             return 0
 
-        if (!world.isBlockLoaded(pos))
+        if (!world.isLoaded(pos))
             return 0
 
-        return WorldRenderer.getCombinedLight(world, pos)
+        return WorldRenderer.getLightColor(world, pos)
     }
 
     @Suppress("UNUSED_PARAMETER")

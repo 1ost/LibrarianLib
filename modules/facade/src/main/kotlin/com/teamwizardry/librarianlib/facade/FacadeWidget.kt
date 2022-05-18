@@ -143,7 +143,7 @@ public open class FacadeWidget(
                     debugConfigurator.isOpen = false
                 } else {
                     if (screen.shouldCloseOnEsc()) {
-                        screen.closeScreen()
+                        screen.onClose()
                         return true
                     }
                 }
@@ -258,7 +258,7 @@ public open class FacadeWidget(
     public fun update() {
         safetyNet("updating") {
             root.pos = vec(0, 0)
-            root.size = vec(Client.window.scaledWidth, Client.window.scaledHeight)
+            root.size = vec(Client.window.guiScaledWidth, Client.window.guiScaledHeight)
             main.pos = ((root.size - main.size) / 2).round()
             tooltipContainer.frame = root.bounds
 
@@ -325,20 +325,20 @@ public open class FacadeWidget(
         val basisWidth = 320
         val basisHeight = 240
 
-        val windowWidth = Client.window.scaledWidth.toDouble()
-        val windowHeight = Client.window.scaledHeight.toDouble()
+        val windowWidth = Client.window.guiScaledWidth.toDouble()
+        val windowHeight = Client.window.guiScaledHeight.toDouble()
 
         val minSafeX = (windowWidth - basisWidth) / 2
         val minSafeY = (windowHeight - basisHeight) / 2
 
-        val buffer = IRenderTypeBuffer.getImpl(Client.tessellator.buffer)
+        val buffer = IRenderTypeBuffer.immediate(Client.tessellator.builder)
         val vb = buffer.getBuffer(SimpleRenderTypes.flatQuads)
 
         fun drawRect(minX: Double, minY: Double, maxX: Double, maxY: Double) {
-            vb.pos(minX, maxY, 0.0).color(color).endVertex()
-            vb.pos(maxX, maxY, 0.0).color(color).endVertex()
-            vb.pos(maxX, minY, 0.0).color(color).endVertex()
-            vb.pos(minX, minY, 0.0).color(color).endVertex()
+            vb.vertex(minX, maxY, 0.0).color(color).endVertex()
+            vb.vertex(maxX, maxY, 0.0).color(color).endVertex()
+            vb.vertex(maxX, minY, 0.0).color(color).endVertex()
+            vb.vertex(minX, minY, 0.0).color(color).endVertex()
         }
 
         drawRect(0.0, 0.0, windowWidth, minSafeY)
@@ -346,7 +346,7 @@ public open class FacadeWidget(
         drawRect(minSafeX + basisWidth, minSafeY, windowWidth, minSafeY + basisHeight)
         drawRect(0.0, minSafeY + basisHeight, windowWidth, windowHeight)
 
-        buffer.finish()
+        buffer.endBatch()
     }
 
     /**

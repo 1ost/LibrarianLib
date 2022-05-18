@@ -27,7 +27,7 @@ public class RectLayer(color: Color, x: Int, y: Int, width: Int, height: Int): G
 
         val c = color
 
-        val buffer = IRenderTypeBuffer.getImpl(Client.tessellator.buffer)
+        val buffer = IRenderTypeBuffer.immediate(Client.tessellator.builder)
         val vb = buffer.getBuffer(SimpleRenderTypes.flatQuads)
 
         vb.pos2d(context.transform, minX, maxY).color(c).endVertex()
@@ -35,6 +35,6 @@ public class RectLayer(color: Color, x: Int, y: Int, width: Int, height: Int): G
         vb.pos2d(context.transform, maxX, minY).color(c).endVertex()
         vb.pos2d(context.transform, minX, minY).color(c).endVertex()
 
-        buffer.finish()
+        buffer.endBatch()
     }
 }

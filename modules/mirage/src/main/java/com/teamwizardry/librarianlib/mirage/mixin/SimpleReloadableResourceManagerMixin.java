@@ -36,10 +36,10 @@ public class SimpleReloadableResourceManagerMixin {
             cir.setReturnValue(MirageMixinBridge.INSTANCE.fallbackManager(type).hasResource(path));
     }
 
-    @Inject(method = "getAllResources", at = @At(value = "NEW", target = "java/io/FileNotFoundException"), cancellable = true)
+    @Inject(method = "getResources", at = @At(value = "NEW", target = "java/io/FileNotFoundException"), cancellable = true)
     private void getAllResourcesMixin(ResourceLocation resourceLocationIn, CallbackInfoReturnable<List<IResource>> cir) throws IOException {
         if (type != null)
-            cir.setReturnValue(MirageMixinBridge.INSTANCE.fallbackManager(type).getAllResources(resourceLocationIn));
+            cir.setReturnValue(MirageMixinBridge.INSTANCE.fallbackManager(type).getResources(resourceLocationIn));
 
     }
 }

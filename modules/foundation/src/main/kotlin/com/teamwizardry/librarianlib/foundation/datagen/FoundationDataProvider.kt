@@ -28,11 +28,11 @@ public abstract class FoundationDataProvider(protected val gen: DataGenerator) :
     protected fun save(cache: DirectoryCache, path: String, data: String) {
         val fullPath = gen.outputFolder.resolve(path)
         @Suppress("UnstableApiUsage")
-        val hash = IDataProvider.HASH_FUNCTION.hashUnencodedChars(data).toString()
-        if (cache.getPreviousHash(fullPath) != hash || !Files.exists(fullPath)) {
+        val hash = IDataProvider.SHA1.hashUnencodedChars(data).toString()
+        if (cache.getHash(fullPath) != hash || !Files.exists(fullPath)) {
             Files.createDirectories(fullPath.parent)
             Files.newBufferedWriter(fullPath).use { bufferedwriter -> bufferedwriter.write(data) }
         }
-        cache.recordHash(fullPath, hash)
+        cache.putNew(fullPath, hash)
     }
 }

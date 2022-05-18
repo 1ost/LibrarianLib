@@ -51,7 +51,7 @@ class ParticleSpawnerItem(val type: String): Item(
         } else {
             playerIn.activeHand = handIn
         }
-        return ActionResult(ActionResultType.SUCCESS, playerIn.getHeldItem(handIn))
+        return ActionResult(ActionResultType.SUCCESS, playerIn.getItemInHand(handIn))
     }
 
     override fun getUseDuration(stack: ItemStack): Int {

@@ -67,38 +67,38 @@ public class FoundationBlockProperties: BlockPropertiesBuilder<FoundationBlockPr
      */
     public val vanillaProperties: AbstractBlock.Properties
         get() {
-            val properties = AbstractBlock.Properties.create(
+            val properties = AbstractBlock.Properties.of(
                 material ?: GENERIC_MATERIAL,
-                mapColor ?: Function { MaterialColor.AIR }
+                mapColor ?: Function { MaterialColor.NONE }
             )
             if (blocksMovement == false)
-                properties.doesNotBlockMovement()
+                properties.noCollission()
             soundType?.also { properties.sound(it) }
-            lightLevel?.also { properties.setLightLevel(it) }
-            hardnessAndResistance?.also { properties.hardnessAndResistance(it.first, it.second) }
+            lightLevel?.also { properties.lightLevel(it) }
+            hardnessAndResistance?.also { properties.strength(it.first, it.second) }
             if (ticksRandomly == true)
-                properties.tickRandomly()
-            slipperiness?.also { properties.slipperiness(it) }
+                properties.randomTicks()
+            slipperiness?.also { properties.friction(it) }
             speedFactor?.also { properties.speedFactor(it) }
             jumpFactor?.also { properties.jumpFactor(it) }
             if (noDrops == true)
                 properties.noDrops()
-            lootFrom?.also { properties.lootFrom(it) }
+            lootFrom?.also { properties.dropsLike(it) }
             if (isSolid == false)
-                properties.notSolid()
+                properties.noOcclusion()
             if (isAir == true)
-                properties.setAir()
+                properties.air()
             if (variableOpacity == true)
-                properties.variableOpacity()
+                properties.dynamicShape()
             harvestLevel?.also { properties.harvestLevel(it) }
             harvestTool?.also { properties.harvestTool(it) }
-            requiresTool?.also { properties.setRequiresTool() }
-            allowsSpawn?.also { properties.setAllowsSpawn(it) }
-            isOpaque?.also { properties.setOpaque(it) }
-            suffocates?.also { properties.setSuffocates(it) }
-            blocksVision?.also { properties.setBlocksVision(it) }
-            needsPostProcessing?.also { properties.setNeedsPostProcessing(it) }
-            emissiveRendering?.also { properties.setEmmisiveRendering(it) }
+            requiresTool?.also { properties.requiresCorrectToolForDrops() }
+            allowsSpawn?.also { properties.isValidSpawn(it) }
+            isOpaque?.also { properties.isRedstoneConductor(it) }
+            suffocates?.also { properties.isSuffocating(it) }
+            blocksVision?.also { properties.isViewBlocking(it) }
+            needsPostProcessing?.also { properties.hasPostProcess(it) }
+            emissiveRendering?.also { properties.emissiveRendering(it) }
 
             return properties
         }
@@ -124,7 +124,7 @@ public class FoundationBlockProperties: BlockPropertiesBuilder<FoundationBlockPr
 
     private companion object {
         private val GENERIC_MATERIAL = Material(
-            MaterialColor.AIR, // materialMapColor
+            MaterialColor.NONE, // materialMapColor
             false, // liquid
             true, // solid
             true, // doesBlockMovement

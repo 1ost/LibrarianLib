@@ -17,13 +17,13 @@ class DirtSetterContainer(
         if(isClientContainer)
             return
 
-        player.world.setBlockState(
-            pos.add(0, offset.clamp(-1, 1), 0),
-            Blocks.DIRT.defaultState
+        player.level.setBlockAndUpdate(
+            pos.offset(0, offset.clamp(-1, 1), 0),
+            Blocks.DIRT.defaultBlockState()
         )
     }
 
-    override fun canInteractWith(playerIn: PlayerEntity): Boolean {
+    override fun stillValid(playerIn: PlayerEntity): Boolean {
         return true
     }
 }

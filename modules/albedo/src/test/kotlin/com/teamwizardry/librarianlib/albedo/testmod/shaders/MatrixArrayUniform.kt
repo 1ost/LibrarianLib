@@ -132,32 +132,32 @@ internal object MatrixArrayUniform: ShaderTest<MatrixArrayUniform.Test>() {
             )
         }
 
-        val buffer = IRenderTypeBuffer.getImpl(Client.tessellator.buffer)
+        val buffer = IRenderTypeBuffer.immediate(Client.tessellator.builder)
         val vb = buffer.getBuffer(renderType)
 
-        vb.pos2d(minX, maxY).color(c).tex(0f, 1f).endVertex()
-        vb.pos2d(maxX, maxY).color(c).tex(1f, 1f).endVertex()
-        vb.pos2d(maxX, minY).color(c).tex(1f, 0f).endVertex()
-        vb.pos2d(minX, minY).color(c).tex(0f, 0f).endVertex()
+        vb.pos2d(minX, maxY).color(c).uv(0f, 1f).endVertex()
+        vb.pos2d(maxX, maxY).color(c).uv(1f, 1f).endVertex()
+        vb.pos2d(maxX, minY).color(c).uv(1f, 0f).endVertex()
+        vb.pos2d(minX, minY).color(c).uv(0f, 0f).endVertex()
 
         shader.bind()
-        buffer.finish()
+        buffer.endBatch()
         shader.unbind()
 
-        val fr = Client.minecraft.fontRenderer
+        val fr = Client.minecraft.font
         val cellSize = 16
-        fr.drawString(matrixStack, mat4Label,
-            (minX + cellSize * 2 - fr.getStringWidth(mat4Label)/2).toInt().toFloat(),
+        fr.draw(matrixStack, mat4Label,
+            (minX + cellSize * 2 - fr.width(mat4Label)/2).toInt().toFloat(),
             (minY + cellSize * 2 - 4).toInt().toFloat(),
             Color.WHITE.rgb
         )
-        fr.drawString(matrixStack, mat3Label,
-            (minX + cellSize * 5.5 - fr.getStringWidth(mat3Label)/2).toInt().toFloat(),
+        fr.draw(matrixStack, mat3Label,
+            (minX + cellSize * 5.5 - fr.width(mat3Label)/2).toInt().toFloat(),
             (minY + cellSize * 5.5 - 4).toInt().toFloat(),
             Color.WHITE.rgb
         )
-        fr.drawString(matrixStack, "$index",
-            (maxX - 2 - fr.getStringWidth("$index")).toInt().toFloat(),
+        fr.draw(matrixStack, "$index",
+            (maxX - 2 - fr.width("$index")).toInt().toFloat(),
             minY.toFloat() + 11,
             Color.WHITE.rgb
         )

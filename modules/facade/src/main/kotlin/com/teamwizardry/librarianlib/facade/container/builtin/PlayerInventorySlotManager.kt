@@ -16,7 +16,7 @@ public class PlayerInventorySlotManager(inventory: PlayerInventory): SlotManager
     public val hotbar: SlotRegion = all[0..8]
     public val main: SlotRegion = all[9..35]
     public val offhand: SlotRegion = all[40]
-    public val mainhand: SlotRegion = if(inventory.currentItem in 0..8) all[inventory.currentItem] else SlotRegion.EMPTY
+    public val mainhand: SlotRegion = if(inventory.selected in 0..8) all[inventory.selected] else SlotRegion.EMPTY
 
     init {
         head.setFactory { inv, i -> PlayerEquipmentSlot(inv, i, inventory.player, EquipmentSlotType.HEAD) }

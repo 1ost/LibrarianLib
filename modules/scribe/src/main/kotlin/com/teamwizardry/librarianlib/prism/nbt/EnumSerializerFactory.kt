@@ -23,7 +23,7 @@ internal class EnumSerializerFactory(prism: NBTPrism): NBTSerializerFactory(pris
 
         @Suppress("UNCHECKED_CAST")
         override fun deserialize(tag: INBT, existing: Enum<*>?): Enum<*> {
-            val name = tag.expectType<StringNBT>("tag").string
+            val name = tag.expectType<StringNBT>("tag").asString
             return cases[name] ?: throw DeserializationException("Unknown enum case name '$name'")
         }
 

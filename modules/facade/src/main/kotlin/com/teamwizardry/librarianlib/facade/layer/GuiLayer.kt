@@ -1172,27 +1172,27 @@ public open class GuiLayer(posX: Int, posY: Int, width: Int, height: Int): Coord
 
 //                layerFilter?.filter(this.layer, layerFBO, maskFBO) TODO: add back filters?
 
-                FlatLayerShader.layerImage.set(layerFBO.func_242996_f()) // func_242996_f = getFramebufferTexture
-                FlatLayerShader.maskImage.set(maskFBO?.func_242996_f() ?: 0)
+                FlatLayerShader.layerImage.set(layerFBO.getColorTextureId()) // getColorTextureId = getFramebufferTexture
+                FlatLayerShader.maskImage.set(maskFBO?.getColorTextureId() ?: 0)
                 FlatLayerShader.alphaMultiply.set(opacity.toFloat())
                 FlatLayerShader.maskMode.set(maskMode.ordinal)
                 FlatLayerShader.renderMode.set(renderMode.ordinal)
                 FlatLayerShader.blendMode = blendMode
 
-                val maxU = (size.xf * rasterizationScale * Client.guiScaleFactor.toFloat()) / Client.window.framebufferWidth
-                val maxV = (size.yf * rasterizationScale * Client.guiScaleFactor.toFloat()) / Client.window.framebufferHeight
+                val maxU = (size.xf * rasterizationScale * Client.guiScaleFactor.toFloat()) / Client.window.width
+                val maxV = (size.yf * rasterizationScale * Client.guiScaleFactor.toFloat()) / Client.window.height
 
-                val buffer = IRenderTypeBuffer.getImpl(Client.tessellator.buffer)
+                val buffer = IRenderTypeBuffer.immediate(Client.tessellator.builder)
                 val vb = buffer.getBuffer(flatLayerRenderType)
                 // why 1-maxV?
-                vb.pos2d(context.transform, 0, size.y).tex(0f, 1 - maxV).endVertex()
-                vb.pos2d(context.transform, size.x, size.y).tex(maxU, 1 - maxV).endVertex()
-                vb.pos2d(context.transform, size.x, 0).tex(maxU, 1f).endVertex()
-                vb.pos2d(context.transform, 0, 0).tex(0f, 1f).endVertex()
-                buffer.finish()
-                GlStateManager.activeTexture(GL13.GL_TEXTURE0)
-                GlStateManager.disableTexture()
-                GlStateManager.enableTexture()
+                vb.pos2d(context.transform, 0, size.y).uv(0f, 1 - maxV).endVertex()
+                vb.pos2d(context.transform, size.x, size.y).uv(maxU, 1 - maxV).endVertex()
+                vb.pos2d(context.transform, size.x, 0).uv(maxU, 1f).endVertex()
+                vb.pos2d(context.transform, 0, 0).uv(0f, 1f).endVertex()
+                buffer.endBatch()
+                GlStateManager._activeTexture(GL13.GL_TEXTURE0)
+                GlStateManager._disableTexture()
+                GlStateManager._enableTexture()
             } finally {
                 layerFBO?.also { FramebufferPool.releaseFramebuffer(it) }
                 maskFBO?.also { FramebufferPool.releaseFramebuffer(it) }
@@ -1235,13 +1235,13 @@ public open class GuiLayer(posX: Int, posY: Int, width: Int, height: Int): Coord
      * buffer when rendering to a texture
      */
     private fun clearBounds(context: GuiDrawContext) {
-        val buffer = IRenderTypeBuffer.getImpl(Client.tessellator.buffer)
+        val buffer = IRenderTypeBuffer.immediate(Client.tessellator.builder)
         val vb = buffer.getBuffer(clearBufferRenderType)
         vb.pos2d(context.transform, 0, size.y).endVertex()
         vb.pos2d(context.transform, size.x, size.y).endVertex()
         vb.pos2d(context.transform, size.x, 0).endVertex()
         vb.pos2d(context.transform, 0, 0).endVertex()
-        buffer.finish()
+        buffer.endBatch()
     }
 
     private fun stencil(context: GuiDrawContext) {
@@ -1253,7 +1253,7 @@ public open class GuiLayer(posX: Int, posY: Int, width: Int, height: Int): Coord
 
         val color = Color(1f, 0f, 1f, 0.5f)
 
-        val buffer = IRenderTypeBuffer.getImpl(Client.tessellator.buffer)
+        val buffer = IRenderTypeBuffer.immediate(Client.tessellator.builder)
         val vb = buffer.getBuffer(flatColorFanRenderType)
 
         val points = getBoundingBoxPoints()
@@ -1262,7 +1262,7 @@ public open class GuiLayer(posX: Int, posY: Int, width: Int, height: Int): Coord
             vb.pos2d(context.transform, it.x, it.y).color(color).endVertex()
         }
 
-        buffer.finish()
+        buffer.endBatch()
     }
 
     public fun shouldDrawSkeleton(): Boolean = false
@@ -1312,7 +1312,7 @@ public open class GuiLayer(posX: Int, posY: Int, width: Int, height: Int): Coord
      */
     private fun drawLayerOverlay(context: GuiDrawContext, color: Color) {
 
-        val buffer = IRenderTypeBuffer.getImpl(Client.tessellator.buffer)
+        val buffer = IRenderTypeBuffer.immediate(Client.tessellator.builder)
         val vb = buffer.getBuffer(flatColorFanRenderType)
 
         val points = getBoundingBoxPoints()
@@ -1321,7 +1321,7 @@ public open class GuiLayer(posX: Int, posY: Int, width: Int, height: Int): Coord
             vb.pos2d(context.transform, it.x, it.y).color(color).endVertex()
         }
 
-        buffer.finish()
+        buffer.endBatch()
     }
 
     /**
@@ -1330,14 +1330,14 @@ public open class GuiLayer(posX: Int, posY: Int, width: Int, height: Int): Coord
     private fun drawBoundingBox(context: GuiDrawContext, color: Color) {
         val points = getBoundingBoxPoints()
 
-        val buffer = IRenderTypeBuffer.getImpl(Client.tessellator.buffer)
+        val buffer = IRenderTypeBuffer.immediate(Client.tessellator.builder)
         val vb = buffer.getBuffer(debugBoundingBoxRenderType)
 
         points.forEach {
             vb.pos2d(context.transform, it.x, it.y).color(color).endVertex()
         }
 
-        buffer.finish()
+        buffer.endBatch()
     }
 
     public var cornerRadius: Double = 0.0
@@ -1779,8 +1779,8 @@ public open class GuiLayer(posX: Int, posY: Int, width: Int, height: Int): Coord
         private val debugBoundingBoxRenderType: RenderType = SimpleRenderTypes.flat(GL11.GL_LINE_LOOP)
         private val flatColorFanRenderType: RenderType = SimpleRenderTypes.flat(GL11.GL_TRIANGLE_FAN)
         private val flatLayerRenderType: RenderType = run {
-            val renderState = RenderType.State.getBuilder()
-                .build(false)
+            val renderState = RenderType.State.builder()
+                .createCompositeState(false)
             mixinCast<IMutableRenderTypeState>(renderState).addState(FlatLayerShader.renderState)
 
             SimpleRenderTypes.makeType("librarianlib.facade.flat_layer",
@@ -1789,9 +1789,9 @@ public open class GuiLayer(posX: Int, posY: Int, width: Int, height: Int): Coord
         }
 
         private val clearBufferRenderType: RenderType = run {
-            val renderState = RenderType.State.getBuilder()
-                .depthTest(DefaultRenderStates.DEPTH_ALWAYS)
-                .build(false)
+            val renderState = RenderType.State.builder()
+                .setDepthTestState(DefaultRenderStates.DEPTH_ALWAYS)
+                .createCompositeState(false)
 
             mixinCast<IMutableRenderTypeState>(renderState).addState(FramebufferClearShader.renderState)
 

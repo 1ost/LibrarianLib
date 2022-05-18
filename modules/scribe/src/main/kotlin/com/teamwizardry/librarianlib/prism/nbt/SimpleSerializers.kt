@@ -71,7 +71,7 @@ internal class TripleSerializerFactory(prism: NBTPrism): NBTSerializerFactory(pr
 
 internal object BigIntegerSerializer: NBTSerializer<BigInteger>() {
     override fun deserialize(tag: INBT, existing: BigInteger?): BigInteger {
-        return BigInteger(tag.expectType<ByteArrayNBT>("tag").byteArray)
+        return BigInteger(tag.expectType<ByteArrayNBT>("tag").asByteArray)
     }
 
     override fun serialize(value: BigInteger): INBT {
@@ -83,8 +83,8 @@ internal object BigDecimalSerializer: NBTSerializer<BigDecimal>() {
     override fun deserialize(tag: INBT, existing: BigDecimal?): BigDecimal {
         @Suppress("NAME_SHADOWING") val tag = tag.expectType<CompoundNBT>("tag")
         return BigDecimal(
-            BigInteger(tag.expect<ByteArrayNBT>("Value").byteArray),
-            tag.expect<NumberNBT>("Scale").int
+            BigInteger(tag.expect<ByteArrayNBT>("Value").asByteArray),
+            tag.expect<NumberNBT>("Scale").asInt
         )
     }
 
@@ -98,7 +98,7 @@ internal object BigDecimalSerializer: NBTSerializer<BigDecimal>() {
 
 internal object BitSetSerializer: NBTSerializer<BitSet>() {
     override fun deserialize(tag: INBT, existing: BitSet?): BitSet {
-        val bitset = BitSet.valueOf(tag.expectType<ByteArrayNBT>("tag").byteArray)
+        val bitset = BitSet.valueOf(tag.expectType<ByteArrayNBT>("tag").asByteArray)
         return existing?.also {
             it.clear()
             it.or(bitset)
@@ -112,11 +112,11 @@ internal object BitSetSerializer: NBTSerializer<BitSet>() {
 
 internal object UUIDSerializer: NBTSerializer<UUID>() {
     override fun deserialize(tag: INBT, existing: UUID?): UUID {
-        return NBTUtil.readUniqueId(tag.expectType("tag"))
+        return NBTUtil.loadUUID(tag.expectType("tag"))
     }
 
     override fun serialize(value: UUID): INBT {
-        return NBTUtil.func_240626_a_(value)
+        return NBTUtil.createUUID(value)
     }
 }
 

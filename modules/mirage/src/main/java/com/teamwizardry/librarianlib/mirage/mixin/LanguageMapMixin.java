@@ -15,7 +15,7 @@ import java.util.Objects;
  */
 @Mixin(value = {ClientLanguageMap.class}, targets = {"net.minecraft.util.text.LanguageMap$1"})
 public class LanguageMapMixin {
-    @Inject(method = "func_230503_a_(Ljava/lang/String;)Ljava/lang/String;", at = @At("RETURN"), cancellable = true)
+    @Inject(method = "getOrDefault(Ljava/lang/String;)Ljava/lang/String;", at = @At("RETURN"), cancellable = true)
     private void translateKeyPrivateHook(String key, CallbackInfoReturnable<String> cir) {
         if (Objects.equals(key, cir.getReturnValue())) {
             String mirageName = Mirage.languageMap.getMixinBridge().tryTranslateKey(key);
@@ -24,7 +24,7 @@ public class LanguageMapMixin {
         }
     }
 
-    @Inject(method = "func_230506_b_(Ljava/lang/String;)Z", at = @At("RETURN"), cancellable = true)
+    @Inject(method = "has(Ljava/lang/String;)Z", at = @At("RETURN"), cancellable = true)
     private void keyExistsHook(String key, CallbackInfoReturnable<Boolean> cir) {
         if (!cir.getReturnValueZ())
             cir.setReturnValue(Mirage.languageMap.getMixinBridge().keyExists(key));

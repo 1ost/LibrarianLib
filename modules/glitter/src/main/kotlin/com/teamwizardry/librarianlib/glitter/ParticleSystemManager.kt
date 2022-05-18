@@ -45,28 +45,28 @@ internal object ParticleSystemManager: ISimpleReloadListener<Unit> {
     fun tick(event: TickEvent.ClientTickEvent) {
         if (event.phase != TickEvent.Phase.START)
             return
-        if (Client.minecraft.isGamePaused)
+        if (Client.minecraft.isPaused)
             return
-        if (Minecraft.getInstance().world == null)
+        if (Minecraft.getInstance().level == null)
             return
 
         val profiler = Minecraft.getInstance().profiler
-        profiler.startSection("liblib_particles")
+        profiler.push("liblib_particles")
         try {
             systems.forEach {
-                profiler.startSection(it.javaClass.simpleName)
+                profiler.push(it.javaClass.simpleName)
                 it.update()
-                profiler.endSection()
+                profiler.pop()
             }
         } catch (e: ConcurrentModificationException) {
             e.printStackTrace()
         }
-        profiler.endSection()
+        profiler.pop()
     }
 
     @SubscribeEvent
     fun debug(event: RenderGameOverlayEvent.Text) {
-        if (!Minecraft.getInstance().gameSettings.showDebugInfo)
+        if (!Minecraft.getInstance().options.renderDebug)
             return
 
         if (systems.isNotEmpty()) {
@@ -86,15 +86,15 @@ internal object ParticleSystemManager: ISimpleReloadListener<Unit> {
     fun render(event: RenderWorldLastEvent) {
         val profiler = Minecraft.getInstance().profiler
 
-        profiler.startSection("liblib_glitter")
+        profiler.push("liblib_glitter")
 
-        event.matrixStack.push()
-        val viewPos = Client.minecraft.gameRenderer.activeRenderInfo.projectedView
+        event.matrixStack.pushPose()
+        val viewPos = Client.minecraft.gameRenderer.mainCamera.position
         event.matrixStack.translate(-viewPos.x, -viewPos.y, -viewPos.z)
 
-        val entity = Minecraft.getInstance().renderViewEntity
+        val entity = Minecraft.getInstance().cameraEntity
         RenderSystem.disableLighting()
-        if (entity != null) {
+        if (entity !== null) {
             try {
                 systems.forEach {
                     it.render(event.matrixStack, event.projectionMatrix)
@@ -103,9 +103,9 @@ internal object ParticleSystemManager: ISimpleReloadListener<Unit> {
                 e.printStackTrace()
             }
         }
-        event.matrixStack.pop()
+        event.matrixStack.popPose()
 
-        profiler.endSection()
+        profiler.pop()
     }
 
     //TODO forge event fires every frame

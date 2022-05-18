@@ -40,7 +40,7 @@ public class GradientLayer(public val axis: Axis2d, posX: Int, posY: Int, width:
 
 
         if (stops.isNotEmpty()) {
-            val buffer = IRenderTypeBuffer.getImpl(Client.tessellator.buffer)
+            val buffer = IRenderTypeBuffer.immediate(Client.tessellator.builder)
             val vb = buffer.getBuffer(renderType)
 
             if (axis == Axis2d.X) {
@@ -75,7 +75,7 @@ public class GradientLayer(public val axis: Axis2d, posX: Int, posY: Int, width:
                 }
             }
 
-            buffer.finish()
+            buffer.endBatch()
         }
     }
 

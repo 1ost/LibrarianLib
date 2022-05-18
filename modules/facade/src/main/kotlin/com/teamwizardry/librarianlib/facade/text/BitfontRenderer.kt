@@ -17,7 +17,7 @@ import java.awt.Color
 public object BitfontRenderer {
     @JvmStatic
     public fun draw(matrix: Matrix4d, container: TextContainer, defaultColor: Color) {
-        val buffer = IRenderTypeBuffer.getImpl(Client.tessellator.buffer)
+        val buffer = IRenderTypeBuffer.immediate(Client.tessellator.builder)
         val vb = buffer.getBuffer(renderType)
 
         for (line in container.lines) {
@@ -43,7 +43,7 @@ public object BitfontRenderer {
             }
         }
 
-        buffer.finish()
+        buffer.endBatch()
 
         deferredEmbeds.forEach {
             val color = it.glyph[BitfontFormatting.color] ?: defaultColor

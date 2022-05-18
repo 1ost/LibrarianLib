@@ -44,7 +44,7 @@ class PositionVisualizationLayer(val target: GuiLayer): GuiLayer() {
     override fun draw(context: GuiDrawContext) {
         RenderSystem.lineWidth(3f)
 
-        val buffer = IRenderTypeBuffer.getImpl(Client.tessellator.buffer)
+        val buffer = IRenderTypeBuffer.immediate(Client.tessellator.builder)
         val vb = buffer.getBuffer(SimpleRenderTypes.flatLines)
 
         val xDrawColor = Color(xColor.red, xColor.green, xColor.blue, 190)
@@ -55,7 +55,7 @@ class PositionVisualizationLayer(val target: GuiLayer): GuiLayer() {
         vb.pos2d(context.transform, target.pos.x, 0).color(yDrawColor).endVertex()
         vb.pos2d(context.transform, target.pos.x, target.pos.y).color(yDrawColor).endVertex()
 
-        buffer.finish()
+        buffer.endBatch()
         RenderSystem.lineWidth(1f)
     }
 }

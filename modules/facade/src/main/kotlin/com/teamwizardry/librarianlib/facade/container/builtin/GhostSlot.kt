@@ -17,14 +17,14 @@ public open class GhostSlot(itemHandler: IItemHandler, index: Int) : FacadeSlot(
      */
     public var disableJeiGhostIntegration: Boolean = false
 
-    override fun getSlotStackLimit(): Int {
+    override fun getMaxStackSize(): Int {
         return 1
     }
 
     protected open fun acceptGhostStack(stack: ItemStack) {
         val ghostStack = stack.copy()
-        ghostStack.count = min(slotStackLimit, ghostStack.count)
-        this.putStack(ghostStack)
+        ghostStack.count = min(maxStackSize, ghostStack.count)
+        this.set(ghostStack)
     }
 
     override fun handleClick(
@@ -33,8 +33,8 @@ public open class GhostSlot(itemHandler: IItemHandler, index: Int) : FacadeSlot(
         clickType: ClickType,
         player: PlayerEntity
     ): ItemStack? {
-        val ghostStack = player.inventory.itemStack
-        val isValid = isItemValid(ghostStack)
+        val ghostStack = player.inventory.carried
+        val isValid = mayPlace(ghostStack)
 
         when(clickType) {
             ClickType.PICKUP -> {
@@ -50,14 +50,14 @@ public open class GhostSlot(itemHandler: IItemHandler, index: Int) : FacadeSlot(
         return ItemStack.EMPTY
     }
 
-    override fun isStackSimilar(stack: ItemStack): Boolean = Container.areItemsAndTagsEqual(stack, this.stack)
+    override fun isStackSimilar(stack: ItemStack): Boolean = Container.consideredTheSameItem(stack, this.item)
 
     override fun transferIntoSlot(transfer: TransferState) {
         if(isStackSimilar(transfer.stack)) {
             transfer.foundSpot = true
             transfer.halt = true
         }
-        if(this.stack.isEmpty && isItemValid(transfer.stack)) {
+        if(this.item.isEmpty && mayPlace(transfer.stack)) {
             acceptGhostStack(transfer.stack)
             transfer.foundSpot = true
             transfer.halt = true
@@ -65,7 +65,7 @@ public open class GhostSlot(itemHandler: IItemHandler, index: Int) : FacadeSlot(
     }
 
     public open fun acceptJeiGhostStack(stack: ItemStack) {
-        if(isItemValid(stack)) {
+        if(mayPlace(stack)) {
             acceptGhostStack(stack)
         }
     }

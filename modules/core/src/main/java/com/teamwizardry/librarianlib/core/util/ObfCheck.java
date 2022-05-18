@@ -14,8 +14,8 @@ class ObfCheck extends Block {
     }
 
     @Override
-    public boolean isIn(ITag<Block> tagIn) {
-        String shouldBe = "isIn";
-        return super.isIn(tagIn);
+    public boolean is(ITag<Block> tagIn) {
+        String shouldBe = "is";
+        return super.is(tagIn);
     }
 }

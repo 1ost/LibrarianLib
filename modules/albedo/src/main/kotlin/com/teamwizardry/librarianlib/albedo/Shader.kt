@@ -2,6 +2,7 @@ package com.teamwizardry.librarianlib.albedo
 
 import com.mojang.blaze3d.platform.GlStateManager
 import com.mojang.blaze3d.systems.RenderSystem
+import com.teamwizardry.librarianlib.albedo.LibrarianLibAlbedoModule.equals
 import com.teamwizardry.librarianlib.core.bridge.IMutableRenderTypeState
 import com.teamwizardry.librarianlib.core.util.Client
 import com.teamwizardry.librarianlib.core.util.GlResourceGc
@@ -36,7 +37,7 @@ public abstract class Shader(
     /**
      * The OpenGL handle for the shader program
      */
-    public var glProgram: Int by GlResourceGc.track(this, 0) { GlStateManager.deleteProgram(it) }
+    public var glProgram: Int by GlResourceGc.track(this, 0) { GlStateManager.glDeleteProgram(it) }
         private set
 
     /**
@@ -90,7 +91,7 @@ public abstract class Shader(
      */
     public fun bind() {
         currentlyBound?.unbind()
-        GlStateManager.useProgram(glProgram)
+        GlStateManager._glUseProgram(glProgram)
         currentlyBound = this
         if (uniforms == null && glProgram != 0) {
             uniforms = UniformBinder.bindAllUniforms(this, glProgram)
@@ -123,7 +124,7 @@ public abstract class Shader(
      */
     public fun unbind() {
         teardownState()
-        GlStateManager.useProgram(0)
+        GlStateManager._glUseProgram(0)
         boundTextureUnits.forEach { (tex, unit) ->
             unbindTexture(tex.second, unit)
         }
@@ -144,7 +145,7 @@ public abstract class Shader(
                 // dummy value, making sure it will always try to re-bind next time someone binds a texture.
                 RenderSystem.activeTexture(GL13.GL_TEXTURE0 + unit)
                 RenderSystem.enableTexture()
-                Client.textureManager.bindTexture(ResourceLocation("librarianlib:albedo/textures/dummy.png"))
+                Client.textureManager.bind(ResourceLocation("librarianlib:albedo/textures/dummy.png"))
             }
             RenderSystem.activeTexture(GL13.GL_TEXTURE0) // get GlStateManager into a known state
             GL13.glActiveTexture(GL13.GL_TEXTURE0 + unit)
@@ -167,7 +168,7 @@ public abstract class Shader(
                 // since it may think that a texture doesn't need to be re-bound. To alleviate this we set it to a
                 // dummy value, making sure it will always try to re-bind next time someone binds a texture.
                 RenderSystem.activeTexture(GL13.GL_TEXTURE0 + unit)
-                Client.textureManager.bindTexture(ResourceLocation("librarianlib:albedo/textures/dummy.png"))
+                Client.textureManager.bind(ResourceLocation("librarianlib:albedo/textures/dummy.png"))
                 RenderSystem.bindTexture(0)
                 RenderSystem.disableTexture()
             }
@@ -183,7 +184,7 @@ public abstract class Shader(
     }
 
     public fun delete() {
-        GlStateManager.deleteProgram(glProgram)
+        GlStateManager.glDeleteProgram(glProgram)
         glProgram = 0
     }
 
@@ -214,25 +215,25 @@ public abstract class Shader(
         var vertexHandle = 0
         var fragmentHandle = 0
         try {
-            if (vertexName != null) {
+            if (vertexName !== null) {
                 val files = mutableMapOf<ResourceLocation, Int>()
                 vertexHandle = compileShader(GL_VERTEX_SHADER, "vertex",
                     readShader(resourceManager, vertexName, files), vertexName, files)
             }
-            if (fragmentName != null) {
+            if (fragmentName !== null) {
                 val files = mutableMapOf<ResourceLocation, Int>()
                 fragmentHandle = compileShader(GL_FRAGMENT_SHADER, "fragment",
                     readShader(resourceManager, fragmentName, files), fragmentName, files)
             }
-            GlStateManager.deleteProgram(glProgram)
+            GlStateManager.glDeleteProgram(glProgram)
             glProgram = linkProgram(vertexHandle, fragmentHandle)
         } finally {
             if (glProgram != 0) {
                 glDetachShader(glProgram, vertexHandle)
                 glDetachShader(glProgram, fragmentHandle)
             }
-            GlStateManager.deleteShader(vertexHandle)
-            GlStateManager.deleteShader(fragmentHandle)
+            GlStateManager.glDeleteShader(vertexHandle)
+            GlStateManager.glDeleteShader(fragmentHandle)
         }
         logger.debug("Finished compiling shader program $shaderName")
     }
@@ -243,7 +244,7 @@ public abstract class Shader(
         stack: LinkedList<ResourceLocation> = LinkedList()
     ): String {
         if (name in stack) {
-            val cycleString = stack.reversed().joinToString(" -> ") { if (it == name) "[$it" else "$it" } + " -> $name]"
+            val cycleString = stack.reversed().joinToString(" -> ") { if (it.equals(name)) "[$it" else "$it" } + " -> $name]"
             throw ShaderCompilationException("#pragma include cycle: $cycleString")
         }
         stack.push(name)
@@ -301,17 +302,17 @@ public abstract class Shader(
     private fun compileShader(type: Int, typeName: String, source: String, location: ResourceLocation, files: Map<ResourceLocation, Int>): Int {
         logger.debug("Compiling $typeName shader $location")
         checkVersion(source)
-        val shader = GlStateManager.createShader(type)
+        val shader = GlStateManager.glCreateShader(type)
         if (shader == 0)
             throw ShaderCompilationException("Could not create shader object")
-        GlStateManager.shaderSource(shader, source)
-        GlStateManager.compileShader(shader)
+        GlStateManager.glShaderSource(shader, source)
+        GlStateManager.glCompileShader(shader)
 
-        val status = GlStateManager.getShader(shader, GL_COMPILE_STATUS)
-        val logLength = GlStateManager.getShader(shader, GL_INFO_LOG_LENGTH)
-        var log = GlStateManager.getShaderInfoLog(shader, logLength)
+        val status = GlStateManager.glGetShaderi(shader, GL_COMPILE_STATUS)
+        val logLength = GlStateManager.glGetShaderi(shader, GL_INFO_LOG_LENGTH)
+        var log = GlStateManager.glGetShaderInfoLog(shader, logLength)
         if (status == GL_FALSE) {
-            GlStateManager.deleteShader(shader)
+            GlStateManager.glDeleteShader(shader)
 
             files.forEach { (key, value) ->
                 log = log.replace(Regex("\\b$value\\b"), if (key.namespace != location.namespace) "$key" else key.path)
@@ -337,22 +338,22 @@ public abstract class Shader(
 
     private fun linkProgram(vertexHandle: Int, fragmentHandle: Int): Int {
         logger.debug("Linking shader")
-        val program = GlStateManager.createProgram()
+        val program = GlStateManager.glCreateProgram()
         if (program == 0)
             throw ShaderCompilationException("could not create program object")
 
         if (vertexHandle != 0)
-            GlStateManager.attachShader(program, vertexHandle)
+            GlStateManager.glAttachShader(program, vertexHandle)
         if (fragmentHandle != 0)
-            GlStateManager.attachShader(program, fragmentHandle)
+            GlStateManager.glAttachShader(program, fragmentHandle)
 
-        GlStateManager.linkProgram(program)
+        GlStateManager.glLinkProgram(program)
 
-        val status = GlStateManager.getProgram(program, GL_LINK_STATUS)
+        val status = GlStateManager.glGetProgrami(program, GL_LINK_STATUS)
         if (status == GL_FALSE) {
-            val logLength = GlStateManager.getProgram(program, GL_INFO_LOG_LENGTH)
-            val log = GlStateManager.getProgramInfoLog(program, logLength)
-            GlStateManager.deleteProgram(program)
+            val logLength = GlStateManager.glGetProgrami(program, GL_INFO_LOG_LENGTH)
+            val log = GlStateManager.glGetProgramInfoLog(program, logLength)
+            GlStateManager.glDeleteProgram(program)
             logger.error("Error linking shader")
             throw ShaderCompilationException("Could not link program: $log")
         }

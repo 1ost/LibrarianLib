@@ -41,13 +41,13 @@ public class TestEntityConfig(public val id: String, public val name: String, sp
         TestEntity(this, world)
     }
 
-    public val typeBuilder: EntityType.Builder<TestEntity> = EntityType.Builder.create<TestEntity>({ _, world ->
+    public val typeBuilder: EntityType.Builder<TestEntity> = EntityType.Builder.of<TestEntity>({ _, world ->
         serverFactory(world)
     }, EntityClassification.MISC)
         .setCustomClientFactory { _, world ->
             clientFactory(world)
         }
-        .size(0.5f, 0.5f)
+        .sized(0.5f, 0.5f)
     public val type: EntityType<TestEntity> by lazy {
         @Suppress("UNCHECKED_CAST")
         typeBuilder.build(id).setRegistryName(modid, id) as EntityType<TestEntity>
@@ -90,26 +90,26 @@ public class TestEntityConfig(public val id: String, public val name: String, sp
     public val attack: SidedAction<AttackContext> = SidedAction()
 
     public data class RightClickContext(val target: TestEntity, val player: PlayerEntity, val hand: Hand, val hitPos: Vector3d): PlayerTestContext(player) {
-        val world: World = target.world
-        val stack: ItemStack = player.getHeldItem(hand)
+        val world: World = target.level
+        val stack: ItemStack = player.getItemInHand(hand)
     }
 
     public data class TickContext(val target: TestEntity): TestContext() {
-        val world: World = target.world
+        val world: World = target.level
     }
 
     public data class HitContext(val target: TestEntity, val actor: Entity, var kill: Boolean): TestContext() {
-        val world: World = target.world
+        val world: World = target.level
     }
 
     public data class AttackContext(val target: TestEntity, val source: DamageSource, var amount: Float): TestContext() {
-        val world: World = target.world
+        val world: World = target.level
     }
 
     internal val entityProperties = mutableListOf<Property<*>>()
 
     public fun <T> parameter(serializer: IDataSerializer<T>): DataParameter<T> {
-        return EntityDataManager.createKey(TestEntity::class.java, serializer)
+        return EntityDataManager.defineId(TestEntity::class.java, serializer)
     }
 
     public operator fun <T: Property<*>> T.unaryPlus(): T {
@@ -124,20 +124,20 @@ public class TestEntityConfig(public val id: String, public val name: String, sp
         val serializer = when (T::class.java) {
             Boolean::class.java, Boolean::class.javaPrimitiveType -> DataSerializers.BOOLEAN
             Byte::class.java, Byte::class.javaPrimitiveType -> DataSerializers.BYTE
-            Int::class.java, Int::class.javaPrimitiveType -> DataSerializers.VARINT
+            Int::class.java, Int::class.javaPrimitiveType -> DataSerializers.INT
             Float::class.java, Float::class.javaPrimitiveType -> DataSerializers.FLOAT
             String::class.java -> DataSerializers.STRING
 
-            ITextComponent::class.java -> DataSerializers.TEXT_COMPONENT
+            ITextComponent::class.java -> DataSerializers.COMPONENT
             //ITextComponent::class.java -> DataSerializers.OPTIONAL_TEXT_COMPONENT
-            ItemStack::class.java -> DataSerializers.ITEMSTACK
+            ItemStack::class.java -> DataSerializers.ITEM_STACK
             Rotations::class.java -> DataSerializers.ROTATIONS
             BlockPos::class.java -> DataSerializers.BLOCK_POS
             //ZzZ::class.java -> DataSerializers.OPTIONAL_BLOCK_POS
             Direction::class.java -> DataSerializers.DIRECTION
             //ZzZ::class.java -> DataSerializers.OPTIONAL_UNIQUE_ID
             //ZzZ::class.java -> DataSerializers.OPTIONAL_BLOCK_STATE
-            CompoundNBT::class.java -> DataSerializers.COMPOUND_NBT
+            CompoundNBT::class.java -> DataSerializers.COMPOUND_TAG
             //ZzZ::class.java -> DataSerializers.OPTIONAL_VARINT
             //ZzZ::class.java -> DataSerializers.POSE
             else -> error("No known serializer for type ${T::class.java.simpleName}")
@@ -151,12 +151,12 @@ public class TestEntityConfig(public val id: String, public val name: String, sp
 
         public operator fun getValue(thisRef: Any?, property: KProperty<*>): T {
             val entity = entity!!
-            return entity.dataManager[parameter]
+            return entity.entityData[parameter]
         }
 
         public operator fun setValue(thisRef: Any?, property: KProperty<*>, value: T) {
             val entity = entity!!
-            entity.dataManager[parameter] = value
+            entity.entityData[parameter] = value
         }
     }
 
@@ -166,11 +166,9 @@ public class TestEntityConfig(public val id: String, public val name: String, sp
      */
     public fun spawn(player: PlayerEntity) {
         val eye = player.getEyePosition(0f)
-        val entity = TestEntity(this@TestEntityConfig, player.world)
-        entity.setPosition(eye.x, eye.y - entity.eyeHeight, eye.z)
-        entity.rotationPitch = player.rotationPitch
-        entity.rotationYaw = player.rotationYaw
-        player.world.addEntity(entity)
+        val entity = TestEntity(this@TestEntityConfig, player.level)
+        entity.setPos(eye.x, eye.y - entity.eyeHeight, eye.z)
+        player.level.addFreshEntity(entity)
     }
 
     public var spawnerItem: TestItem = TestItem(TestItemConfig(this.id + "_entity", this.name, spawnerItemGroup) {

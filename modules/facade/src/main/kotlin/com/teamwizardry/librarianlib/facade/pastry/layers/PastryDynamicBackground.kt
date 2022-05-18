@@ -48,12 +48,12 @@ public class PastryDynamicBackground(style: IBackgroundStyle, vararg shapeLayers
     }
 
     override fun draw(context: GuiDrawContext) {
-        val buffer = IRenderTypeBuffer.getImpl(Client.tessellator.buffer)
+        val buffer = IRenderTypeBuffer.immediate(Client.tessellator.builder)
         val vb = buffer.getBuffer(style.edges.renderType)
         for(element in elements) {
             element.draw(context.transform, vb)
         }
-        buffer.finish()
+        buffer.endBatch()
     }
 
     // yes this creates a lot of temporary Vec2d objects, but efficiency be damned this is hard enough as it is and
@@ -154,10 +154,10 @@ public class PastryDynamicBackground(style: IBackgroundStyle, vararg shapeLayers
         fun draw(matrix: Matrix4d, vb: IVertexBuilder) {
             val tint = Color.WHITE
 
-            vb.pos2d(matrix, minX, maxY).color(tint).tex(minU, maxV).endVertex()
-            vb.pos2d(matrix, maxX, maxY).color(tint).tex(maxU, maxV).endVertex()
-            vb.pos2d(matrix, maxX, minY).color(tint).tex(maxU, minV).endVertex()
-            vb.pos2d(matrix, minX, minY).color(tint).tex(minU, minV).endVertex()
+            vb.pos2d(matrix, minX, maxY).color(tint).uv(minU, maxV).endVertex()
+            vb.pos2d(matrix, maxX, maxY).color(tint).uv(maxU, maxV).endVertex()
+            vb.pos2d(matrix, maxX, minY).color(tint).uv(maxU, minV).endVertex()
+            vb.pos2d(matrix, minX, minY).color(tint).uv(minU, minV).endVertex()
         }
     }
 }

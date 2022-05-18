@@ -16,7 +16,7 @@ import java.util.function.Consumer
  */
 @RecipeDslMarker
 public class ShapedRecipeDsl(result: IItemProvider, count: Int) {
-    private val builder: ShapedRecipeBuilder = ShapedRecipeBuilder.shapedRecipe(result, count)
+    private val builder: ShapedRecipeBuilder = ShapedRecipeBuilder.shaped(result, count)
 
     public var group: String = ""
         set(value) {

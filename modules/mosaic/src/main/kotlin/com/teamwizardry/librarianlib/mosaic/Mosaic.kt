@@ -3,6 +3,7 @@ package com.teamwizardry.librarianlib.mosaic
 import com.teamwizardry.librarianlib.core.util.DefaultRenderStates
 import com.teamwizardry.librarianlib.core.util.kotlin.synchronized
 import com.teamwizardry.librarianlib.core.util.kotlin.weakSetOf
+import kotlinx.coroutines.yield
 import net.minecraft.client.renderer.RenderState
 import net.minecraft.client.renderer.RenderType
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats
@@ -165,15 +166,15 @@ public class Mosaic(
 
         private fun createRenderType(texture: RenderState.TextureState): RenderType {
             return types.getOrPut(texture) {
-                val renderState = RenderType.State.getBuilder()
-                    .texture(texture)
-                    .alpha(DefaultRenderStates.DEFAULT_ALPHA)
-                    .depthTest(DefaultRenderStates.DEPTH_LEQUAL)
-                    .transparency(DefaultRenderStates.TRANSLUCENT_TRANSPARENCY)
+                val renderState = RenderType.State.builder()
+                    .setTextureState(texture)
+                    .setAlphaState(DefaultRenderStates.DEFAULT_ALPHA)
+                    .setDepthTestState(DefaultRenderStates.DEPTH_LEQUAL)
+                    .setTransparencyState(DefaultRenderStates.TRANSLUCENT_TRANSPARENCY)
 
                 @Suppress("INACCESSIBLE_TYPE")
-                RenderType.makeType("sprite_type",
-                    DefaultVertexFormats.POSITION_COLOR_TEX, GL11.GL_QUADS, 256, false, false, renderState.build(true)
+                RenderType.create("sprite_type",
+                    DefaultVertexFormats.POSITION_COLOR_TEX, GL11.GL_QUADS, 256, false, false, renderState.createCompositeState(true)
                 )
             }
         }

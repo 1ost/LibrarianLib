@@ -46,7 +46,7 @@ public abstract class TestMod(public val module: LibrarianLibModule) {
             return@lazy stack
         }
 
-        override fun createIcon(): ItemStack {
+        override fun makeIcon(): ItemStack {
             return stack
         }
     }
@@ -80,9 +80,9 @@ public abstract class TestMod(public val module: LibrarianLibModule) {
 
     public operator fun <T: Block> T.unaryPlus(): T {
         val properties = Item.Properties()
-            .group(itemGroup)
+            .tab(itemGroup)
         val item = if (this is TestBlock)
-            TestBlockItem(this, properties.maxStackSize(1))
+            TestBlockItem(this, properties.durability(1))
         else
             BlockItem(this, properties)
         item.registryName = ResourceLocation(this.registryName!!.namespace, this.registryName!!.path + "_block")
@@ -186,7 +186,7 @@ public abstract class TestMod(public val module: LibrarianLibModule) {
 
         blocks.forEach { block ->
             if (block is TestBlock) {
-                RenderTypeLookup.setRenderLayer(block, RenderType.getCutout())
+                RenderTypeLookup.setRenderLayer(block, RenderType.cutout())
             }
         }
     }
@@ -266,7 +266,7 @@ public abstract class TestMod(public val module: LibrarianLibModule) {
 
     private fun languageKeys(): Map<String, String> {
         val keys = mutableMapOf<String, String>()
-        val groupKey = (itemGroup.groupName as TranslationTextComponent).key
+        val groupKey = (itemGroup.displayName as TranslationTextComponent).key
         keys[groupKey] = "${module.humanName} Test"
         items.forEach { item ->
             if (item is ITestItem) {

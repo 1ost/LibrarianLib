@@ -44,14 +44,14 @@ public abstract class WrappedSprite: ISprite {
     private companion object {
         @Suppress("INACCESSIBLE_TYPE")
         val missingType: RenderType = run {
-            val renderState = RenderType.State.getBuilder()
-                .texture(RenderState.TextureState(loc("minecraft:missingno"), false, false))
-                .alpha(DefaultRenderStates.DEFAULT_ALPHA)
-                .depthTest(DefaultRenderStates.DEPTH_LEQUAL)
-                .transparency(DefaultRenderStates.TRANSLUCENT_TRANSPARENCY)
+            val renderState = RenderType.State.builder()
+                .setTextureState(RenderState.TextureState(loc("minecraft:missingno"), false, false))
+                .setAlphaState(DefaultRenderStates.DEFAULT_ALPHA)
+                .setDepthTestState(DefaultRenderStates.DEPTH_LEQUAL)
+                .setTransparencyState(DefaultRenderStates.TRANSLUCENT_TRANSPARENCY)
 
-            RenderType.makeType("sprite_type",
-                DefaultVertexFormats.POSITION_COLOR_TEX, GL11.GL_QUADS, 256, false, false, renderState.build(true)
+            RenderType.create("sprite_type",
+                DefaultVertexFormats.POSITION_COLOR_TEX, GL11.GL_QUADS, 256, false, false, renderState.createCompositeState(true)
             )
         }
     }

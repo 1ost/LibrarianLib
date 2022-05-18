@@ -20,10 +20,10 @@ public class TestBlockConfig(public val id: String, public val name: String): Te
         this.config()
     }
 
-    public val properties: AbstractBlock.Properties = AbstractBlock.Properties.create(testMaterial)
+    public val properties: AbstractBlock.Properties = AbstractBlock.Properties.of(testMaterial)
 
     init {
-        properties.notSolid()
+        properties.noOcclusion()
     }
 
     /**
@@ -53,7 +53,7 @@ public class TestBlockConfig(public val id: String, public val name: String): Te
         val state: BlockState, val world: World, val pos: BlockPos,
         val player: PlayerEntity, val hand: Hand, val hit: BlockRayTraceResult
     ): PlayerTestContext(player) {
-        val stack: ItemStack = player.getHeldItem(hand)
+        val stack: ItemStack = player.getItemInHand(hand)
     }
 
     public data class LeftClickContext(
@@ -76,7 +76,7 @@ public class TestBlockConfig(public val id: String, public val name: String): Te
 
     private companion object {
         val testMaterial: Material = Material(
-            MaterialColor.PINK, // materialMapColorIn
+            MaterialColor.COLOR_PINK, // materialMapColorIn
             false, // liquid
             false, // solid
             true, // doesBlockMovement
