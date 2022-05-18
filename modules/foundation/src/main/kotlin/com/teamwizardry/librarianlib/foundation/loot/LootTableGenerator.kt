@@ -25,9 +25,9 @@ public open class LootTableGenerator(public val parameterSet: LootParameterSet) 
     }
 
     public fun createTable(vararg pools: LootPool.Builder): LootTable.Builder {
-        val table = LootTable.builder()
+        val table = LootTable.lootTable()
         for(pool in pools) {
-            table.addLootPool(pool)
+            table.withPool(pool)
         }
         return table
     }

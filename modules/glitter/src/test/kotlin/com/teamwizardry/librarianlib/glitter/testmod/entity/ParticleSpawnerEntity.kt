@@ -14,29 +14,29 @@ import net.minecraftforge.fml.network.NetworkHooks
 
 class ParticleSpawnerEntity(world: World): Entity(TestEntities.spawner, world) {
     var system: String
-        get() = this.dataManager[SYSTEM]
+        get() = this.entityData[SYSTEM]
         set(value) {
-            this.dataManager[SYSTEM] = value
+            this.entityData[SYSTEM] = value
         }
 
     init {
         canUpdate(true)
     }
 
-    override fun createSpawnPacket(): IPacket<*> {
+    override fun getAddEntityPacket(): IPacket<*> {
         return NetworkHooks.getEntitySpawningPacket(this)
     }
 
-    override fun readAdditional(compound: CompoundNBT) {
+    override fun readAdditionalSaveData(compound: CompoundNBT) {
         system = compound.getString("System")
     }
 
-    override fun writeAdditional(compound: CompoundNBT) {
+    override fun addAdditionalSaveData(compound: CompoundNBT) {
         compound.putString("System", system)
     }
 
-    override fun registerData() {
-        dataManager.register(SYSTEM, "")
+    override fun defineSynchedData() {
+        entityData.define(SYSTEM, "")
     }
 
     override fun canBeCollidedWith(): Boolean {
@@ -45,14 +45,14 @@ class ParticleSpawnerEntity(world: World): Entity(TestEntities.spawner, world) {
 
     override fun tick() {
         super.tick()
-        if(world.isRemote) {
+        if(level.isClientSide) {
             SidedRunnable.client {
                 ParticleSystems.spawn(system, this)
             }
         }
     }
 
-    override fun hitByEntity(entity: Entity): Boolean {
+    override fun skipAttackInteraction(entity: Entity): Boolean {
         if(entity is PlayerEntity) {
             this.remove()
             return true
@@ -61,7 +61,7 @@ class ParticleSpawnerEntity(world: World): Entity(TestEntities.spawner, world) {
     }
 
     companion object {
-        val SYSTEM = EntityDataManager.createKey(ParticleSpawnerEntity::class.java, DataSerializers.STRING)
+        val SYSTEM = EntityDataManager.defineId(ParticleSpawnerEntity::class.java, DataSerializers.STRING)
     }
 
 }

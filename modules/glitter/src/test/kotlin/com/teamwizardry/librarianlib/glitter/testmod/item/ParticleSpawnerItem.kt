@@ -18,38 +18,38 @@ import net.minecraft.world.World
 
 class ParticleSpawnerItem(val type: String): Item(
     Properties()
-        .group(TestItemGroup)
-        .maxStackSize(1)
+        .tab(TestItemGroup)
+        .stacksTo(1)
 ) {
 
     init {
         this.registryName = ResourceLocation(modid, "spawn_$type")
     }
 
-    override fun getUseAction(stack: ItemStack): UseAction {
+    override fun getUseAnimation(stack: ItemStack): UseAction {
         return UseAction.BOW
     }
 
     override fun onUsingTick(stack: ItemStack, player: LivingEntity, count: Int) {
-        if(player.world.isRemote)
+        if(player.level.isClientSide)
             SidedRunnable.client {
                 ParticleSystems.spawn(type, player)
             }
     }
 
-    override fun onItemRightClick(worldIn: World, playerIn: PlayerEntity, handIn: Hand): ActionResult<ItemStack> {
+    override fun use(worldIn: World, playerIn: PlayerEntity, handIn: Hand): ActionResult<ItemStack> {
         if(playerIn.isCrouching) {
-            if(!worldIn.isRemote) {
+            if(!worldIn.isClientSide) {
                 val eye = playerIn.getEyePosition(0f)
                 val spawner = ParticleSpawnerEntity(worldIn)
                 spawner.system = type
-                spawner.setPosition(eye.x, eye.y - spawner.eyeHeight, eye.z)
-                spawner.rotationPitch = playerIn.rotationPitch
-                spawner.rotationYaw = playerIn.rotationYaw
-                worldIn.addEntity(spawner)
+                spawner.setPos(eye.x, eye.y - spawner.eyeHeight, eye.z)
+                spawner.xRot = playerIn.xRot
+                spawner.yRot = playerIn.yRot
+                worldIn.addFreshEntity(spawner)
             }
         } else {
-            playerIn.activeHand = handIn
+//            playerIn. = handIn
         }
         return ActionResult(ActionResultType.SUCCESS, playerIn.getItemInHand(handIn))
     }

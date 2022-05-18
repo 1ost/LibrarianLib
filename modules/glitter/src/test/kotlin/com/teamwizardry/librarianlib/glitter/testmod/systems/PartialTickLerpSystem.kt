@@ -43,7 +43,7 @@ object PartialTickLerpSystem : TestSystem("partial_tick_lerp") {
 
     override fun spawn(player: Entity) {
         val eyePos = player.getEyePosition(0f)
-        val look = player.lookVec
+        val look = player.lookAngle
 
         val spawnDistance = 2
         val spawnVelocity = 1

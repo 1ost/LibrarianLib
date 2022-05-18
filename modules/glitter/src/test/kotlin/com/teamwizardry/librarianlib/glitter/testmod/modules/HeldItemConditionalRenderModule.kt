@@ -32,7 +32,7 @@ class HeldItemConditionalRenderModule(
     @Suppress("LocalVariableName")
     override fun render(matrixStack: MatrixStack, projectionMatrix: Matrix4f, particles: List<DoubleArray>, prepModules: List<ParticleUpdateModule>) {
         val isHoldingItem = Client.player!!.let {
-            it.heldItemMainhand.item.registryName == filter || it.heldItemOffhand.item.registryName == filter
+            it.mainHandItem.item.registryName == filter || it.offhandItem.item.registryName == filter
         }
         if(isHoldingItem)
             wrapped.render(matrixStack, projectionMatrix, particles, prepModules)

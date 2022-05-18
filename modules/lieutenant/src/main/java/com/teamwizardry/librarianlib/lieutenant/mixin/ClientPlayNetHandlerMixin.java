@@ -23,9 +23,9 @@ import static com.teamwizardry.librarianlib.core.util.CoreUtils.mixinCast;
 @Mixin(ClientPlayNetHandler.class)
 public abstract class ClientPlayNetHandlerMixin {
     @Shadow
-    private CommandDispatcher<ISuggestionProvider> commandDispatcher;
+    private CommandDispatcher<ISuggestionProvider> commands;
 
-    @Inject(method = "handleCommandList", at = @At("RETURN"))
+    @Inject(method = "handleCommands", at = @At("RETURN"))
     private void handleCommandList(SCommandListPacket packetIn, CallbackInfo ci) {
         addCommands();
     }
@@ -38,6 +38,6 @@ public abstract class ClientPlayNetHandlerMixin {
 
     @Unique
     private void addCommands() {
-        MinecraftForge.EVENT_BUS.post(new RegisterClientCommandsEvent(mixinCast(commandDispatcher)));
+        MinecraftForge.EVENT_BUS.post(new RegisterClientCommandsEvent(mixinCast(commands)));
     }
 }

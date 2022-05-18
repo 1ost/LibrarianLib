@@ -9,12 +9,12 @@ import net.minecraftforge.common.data.ExistingFileHelper
 internal class FoundationExistingFileHelper(val wrapped: ExistingFileHelper): ExistingFileHelper(listOf(), setOf(), false) {
     val modelProviders: MutableList<ModelProvider<*>> = mutableListOf()
 
-    override fun exists(loc: ResourceLocation?, packType: ResourcePackType?): Boolean {
+    override fun exists(loc: ResourceLocation, packType: ResourcePackType): Boolean {
         return wrapped.exists(loc, packType)
     }
 
-    override fun exists(loc: ResourceLocation?, type: IResourceType?): Boolean {
-        if(type?.suffix == ".png")
+    override fun exists(loc: ResourceLocation, type: IResourceType): Boolean {
+        if(type.suffix == ".png")
             return true
         return wrapped.exists(loc, type)
     }
@@ -27,29 +27,29 @@ internal class FoundationExistingFileHelper(val wrapped: ExistingFileHelper): Ex
         return wrapped.exists(loc, type, pathSuffix, pathPrefix)
     }
 
-    override fun trackGenerated(loc: ResourceLocation?, type: IResourceType?) {
+    override fun trackGenerated(loc: ResourceLocation, type: IResourceType) {
         wrapped.trackGenerated(loc, type)
     }
 
     override fun trackGenerated(
-        loc: ResourceLocation?,
-        packType: ResourcePackType?,
-        pathSuffix: String?,
-        pathPrefix: String?
+        loc: ResourceLocation,
+        packType: ResourcePackType,
+        pathSuffix: String,
+        pathPrefix: String
     ) {
         wrapped.trackGenerated(loc, packType, pathSuffix, pathPrefix)
     }
 
     override fun getResource(
-        loc: ResourceLocation?,
-        packType: ResourcePackType?,
-        pathSuffix: String?,
-        pathPrefix: String?
+        loc: ResourceLocation,
+        packType: ResourcePackType,
+        pathSuffix: String,
+        pathPrefix: String
     ): IResource {
         return wrapped.getResource(loc, packType, pathSuffix, pathPrefix)
     }
 
-    override fun getResource(loc: ResourceLocation?, packType: ResourcePackType?): IResource {
+    override fun getResource(loc: ResourceLocation, packType: ResourcePackType): IResource {
         return wrapped.getResource(loc, packType)
     }
 

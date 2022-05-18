@@ -44,7 +44,7 @@ object WorldLitSystem : TestSystem("world_lit") {
 
     override fun spawn(player: Entity) {
         val eyePos = player.getEyePosition(0f)
-        val look = player.lookVec
+        val look = player.lookAngle
 
         val spawnDistance = 2
         val spawnVelocity = 0.2

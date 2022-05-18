@@ -9,13 +9,13 @@ import net.minecraft.util.ResourceLocation
 import net.minecraftforge.registries.ForgeRegistries
 
 object TestEntities {
-    val spawner = EntityType.Builder.create<ParticleSpawnerEntity>({ _, world ->
+    val spawner = EntityType.Builder.of<ParticleSpawnerEntity>({ _, world ->
         ParticleSpawnerEntity(world)
     }, EntityClassification.MISC)
         .setCustomClientFactory { _, world ->
             ParticleSpawnerEntity(world)
         }
-        .size(0.5f, 0.5f).build("particle_spawner")
+        .sized(0.5f, 0.5f).build("particle_spawner")
         .setRegistryName(modid, "particle_spawner")
 
     fun register() {

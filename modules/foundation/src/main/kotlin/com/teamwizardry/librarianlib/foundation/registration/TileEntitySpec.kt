@@ -72,7 +72,7 @@ public class TileEntitySpec<T: TileEntity>(
         if (this.validBlocks.isEmpty())
             throw IncompleteBuilderException("Tile entity $registryName was never added to any blocks")
         val resolvedBlocks = this.validBlocks.map { it.get() }.toSet().toTypedArray()
-        val type = TileEntityType.Builder.create(factory, *resolvedBlocks).build(null)
+        val type = TileEntityType.Builder.of(factory, *resolvedBlocks).build(null)
         type.registryName = registryName
         type
     }

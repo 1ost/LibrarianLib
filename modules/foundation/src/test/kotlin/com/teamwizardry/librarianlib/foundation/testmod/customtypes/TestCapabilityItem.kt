@@ -7,8 +7,8 @@ import net.minecraft.util.ActionResultType
 import net.minecraft.util.text.StringTextComponent
 
 class TestCapabilityItem(properties: Properties): BaseItem(properties) {
-    override fun onItemUse(context: ItemUseContext): ActionResultType {
-        val te = context.world.getTileEntity(context.pos)
+    override fun useOn(context: ItemUseContext): ActionResultType {
+        val te = context.level.getBlockEntity(context.clickedPos)
         val cap = te?.getCapability(TestCapability.capability)?.getOrNull()
         if(cap == null) {
             context.player?.displayClientMessage(StringTextComponent("No capability. Try clicking the test Tile Entity block."), false)
@@ -16,7 +16,7 @@ class TestCapabilityItem(properties: Properties): BaseItem(properties) {
         }
         context.player?.displayClientMessage(StringTextComponent("Capability present! Data is ${cap.data}++"), false)
         cap.data++
-        te.markDirty()
+        te.setChanged()
 
         return ActionResultType.SUCCESS
     }

@@ -72,7 +72,7 @@ class VelocityRenderModule(
             RenderSystem.disableBlend()
         }
         if(blendFactors != null) {
-            RenderSystem.blendFunc(blendFactors.first.param, blendFactors.second.param)
+            RenderSystem.blendFunc(blendFactors.first.value, blendFactors.second.value)
         }
         RenderSystem.depthMask(depthMask)
         RenderSystem.alphaFunc(GL11.GL_GREATER, 0.003921569F)
@@ -96,7 +96,7 @@ class VelocityRenderModule(
         val tm23 = transformMatrix.m23
 
         val tessellator = Tessellator.getInstance()
-        val vb = tessellator.buffer
+        val vb = tessellator.builder
         vb.begin(GL11.GL_LINES, DefaultVertexFormats.POSITION_COLOR)
 
         particles.forEach { particle ->
@@ -142,13 +142,13 @@ class VelocityRenderModule(
             endY = tm10 * _endX + tm11 * _endY + tm12 * _endZ + tm13 * 1
             endZ = tm20 * _endX + tm21 * _endY + tm22 * _endZ + tm23 * 1
 
-            vb.pos(startX, startY, startZ).color(r, g, b, a).endVertex()
-            vb.pos(endX, endY, endZ).color(r, g, b, a).endVertex()
+            vb.vertex(startX, startY, startZ).color(r, g, b, a).endVertex()
+            vb.vertex(endX, endY, endZ).color(r, g, b, a).endVertex()
         }
 
-        tessellator.draw()
+        tessellator.end()
 
-        RenderSystem.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA.param, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA.param)
+        RenderSystem.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA.value, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA.value)
         RenderSystem.enableCull()
         RenderSystem.alphaFunc(GL11.GL_GREATER, 0.1F)
         RenderSystem.depthMask(true)

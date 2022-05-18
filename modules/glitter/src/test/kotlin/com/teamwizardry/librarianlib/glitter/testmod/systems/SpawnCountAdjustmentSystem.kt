@@ -57,8 +57,8 @@ object SpawnCountAdjustmentSystem : TestSystem("spawn_count_adjustment") {
         repeat(adjustParticleCount(20)) {
             doSpawn(
                 eyePos,
-                player.rotationPitch + (Math.random() - 0.5).toFloat() * 40,
-                player.rotationYaw + (Math.random() - 0.5).toFloat() * 180
+                player.xRot + (Math.random() - 0.5).toFloat() * 40,
+                player.yRot + (Math.random() - 0.5).toFloat() * 180
             )
         }
     }

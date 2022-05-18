@@ -28,7 +28,7 @@ object SpriteSheetSystem : TestSystem("spritesheet") {
 
     override fun spawn(player: Entity) {
         val eyePos = player.getEyePosition(0f)
-        val look = player.lookVec
+        val look = player.lookAngle
 
         this.addParticle(
             200,

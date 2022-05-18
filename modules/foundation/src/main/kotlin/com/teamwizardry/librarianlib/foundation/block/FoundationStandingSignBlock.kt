@@ -37,7 +37,7 @@ public open class FoundationStandingSignBlock(
 ): StandingSignBlock(properties.vanillaProperties, WoodType.OAK), IFoundationBlock, ICustomSignMaterialBlock {
 
     override fun signMaterial(): RenderMaterial {
-        return RenderMaterial(Atlases.SIGN_ATLAS, signTexture(registryName!!.namespace, materialName))
+        return RenderMaterial(Atlases.SIGN_SHEET, signTexture(registryName!!.namespace, materialName))
     }
 
     override fun generateBlockState(gen: BlockStateProvider) {

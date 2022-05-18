@@ -5,7 +5,7 @@ import net.minecraft.item.ItemStack
 import net.minecraft.item.Items
 
 object TestItemGroup: ItemGroup("liblibtest.particles") {
-    override fun createIcon(): ItemStack {
+    override fun makeIcon(): ItemStack {
         return ItemStack(Items.IRON_INGOT)
     }
 }

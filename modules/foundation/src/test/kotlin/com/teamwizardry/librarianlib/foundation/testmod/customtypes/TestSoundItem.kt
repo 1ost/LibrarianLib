@@ -13,10 +13,10 @@ import net.minecraft.util.text.StringTextComponent
 import net.minecraft.world.World
 
 class TestSoundItem(properties: Properties): BaseItem(properties) {
-    override fun onItemRightClick(worldIn: World, playerIn: PlayerEntity, handIn: Hand): ActionResult<ItemStack> {
-        if(worldIn.isRemote) {
+    override fun use(worldIn: World, playerIn: PlayerEntity, handIn: Hand): ActionResult<ItemStack> {
+        if(worldIn.isClientSide) {
             playerIn.playSound(ModSounds.testSound, 1f, 1f)
         }
-        return ActionResult.resultPass(playerIn.getItemInHand(handIn))
+        return ActionResult.pass(playerIn.getItemInHand(handIn))
     }
 }

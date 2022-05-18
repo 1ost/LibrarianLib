@@ -28,7 +28,7 @@ object DepthSortSystem : TestSystem("depthsort") {
 
     override fun spawn(player: Entity) {
         val eyePos = player.getEyePosition(0f)
-        val look = player.lookVec
+        val look = player.lookAngle
         val center = eyePos + look * 5
 
         for (i in 0 until 5) {

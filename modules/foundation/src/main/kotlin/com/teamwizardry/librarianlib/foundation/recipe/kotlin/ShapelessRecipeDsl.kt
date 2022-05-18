@@ -29,25 +29,25 @@ public class ShapelessRecipeDsl(result: IItemProvider, count: Int) {
     public var group: String = ""
         set(value) {
             field = value
-            builder.setGroup(value)
+            builder.group(value)
         }
 
-    public fun ingredient(tag: ITag<Item>): Ingredient = Ingredient.fromTag(tag)
-    public fun ingredient(vararg items: IItemProvider): Ingredient = Ingredient.fromItems(*items)
-    public fun ingredient(vararg stacks: ItemStack): Ingredient = Ingredient.fromStacks(*stacks)
+    public fun ingredient(tag: ITag<Item>): Ingredient = Ingredient.of(tag)
+    public fun ingredient(vararg items: IItemProvider): Ingredient = Ingredient.of(*items)
+    public fun ingredient(vararg stacks: ItemStack): Ingredient = Ingredient.of(*stacks)
 
     public operator fun Int.times(other: Ingredient): List<Ingredient> = List(this) { other }
     public operator fun Int.times(other: ITag<Item>): List<Ingredient> = List(this) { ingredient(other) }
     public operator fun Int.times(other: IItemProvider): List<Ingredient> = List(this) { ingredient(other) }
 
     public fun criteria(config: RecipeCriteriaDsl.() -> Unit) {
-        RecipeCriteriaDsl(builder::addCriterion).config()
+        RecipeCriteriaDsl(builder::unlockedBy).config()
     }
 
     public fun buildRecipe(consumer: Consumer<IFinishedRecipe>, id: ResourceLocation) {
         for(ingredient in inputs) {
-            builder.addIngredient(ingredient)
+            builder.requires(ingredient)
         }
-        builder.build(consumer, id)
+        builder.save(consumer, id)
     }
 }

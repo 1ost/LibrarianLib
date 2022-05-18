@@ -23,7 +23,7 @@ object SizeAxesSystem: TestSystem("size_axes") {
 
     override fun spawn(player: Entity) {
         val eyePos = player.getEyePosition(0f)
-        val look = player.lookVec
+        val look = player.lookAngle
 
         this.addParticle(200,
             eyePos.x + look.x * 2,

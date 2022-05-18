@@ -22,16 +22,16 @@ public object TagWrappers {
     public fun itemFormOf(blockTag: ITag.INamedTag<Block>): ITag.INamedTag<Item> = item(blockTag.name)
 
     @JvmStatic
-    public fun block(name: String): ITag.INamedTag<Block> = BlockTags.makeWrapperTag(name)
+    public fun block(name: String): ITag.INamedTag<Block> = BlockTags.bind(name)
 
     @JvmStatic
-    public fun entityType(name: String): ITag.INamedTag<EntityType<*>> = EntityTypeTags.getTagById(name)
+    public fun entityType(name: String): ITag.INamedTag<EntityType<*>> =EntityTypeTags.bind(name)
 
     @JvmStatic
-    public fun fluid(name: String): ITag.INamedTag<Fluid> = FluidTags.makeWrapperTag(name)
+    public fun fluid(name: String): ITag.INamedTag<Fluid> = FluidTags.bind(name)
 
     @JvmStatic
-    public fun item(name: String): ITag.INamedTag<Item> = ItemTags.makeWrapperTag(name)
+    public fun item(name: String): ITag.INamedTag<Item> = ItemTags.bind(name)
 
     @JvmStatic
     public fun block(modid: String, name: String): ITag.INamedTag<Block> = block(ResourceLocation(modid, name))
@@ -46,14 +46,14 @@ public object TagWrappers {
     public fun item(modid: String, name: String): ITag.INamedTag<Item> = item(ResourceLocation(modid, name))
 
     @JvmStatic
-    public fun block(name: ResourceLocation): ITag.INamedTag<Block> = BlockTags.makeWrapperTag(name.toString())
+    public fun block(name: ResourceLocation): ITag.INamedTag<Block> = BlockTags.bind(name.toString())
 
     @JvmStatic
-    public fun entityType(name: ResourceLocation): ITag.INamedTag<EntityType<*>> = EntityTypeTags.getTagById(name.toString())
+    public fun entityType(name: ResourceLocation): ITag.INamedTag<EntityType<*>> =EntityTypeTags.bind(name.toString())
 
     @JvmStatic
-    public fun fluid(name: ResourceLocation): ITag.INamedTag<Fluid> = FluidTags.makeWrapperTag(name.toString())
+    public fun fluid(name: ResourceLocation): ITag.INamedTag<Fluid> = FluidTags.bind(name.toString())
 
     @JvmStatic
-    public fun item(name: ResourceLocation): ITag.INamedTag<Item> = ItemTags.makeWrapperTag(name.toString())
+    public fun item(name: ResourceLocation): ITag.INamedTag<Item> = ItemTags.bind(name.toString())
 }

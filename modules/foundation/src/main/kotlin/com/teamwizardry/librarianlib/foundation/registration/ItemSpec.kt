@@ -91,18 +91,18 @@ public class ItemSpec(
     /**
      * Sets the maximum stack size for this item
      */
-    public fun maxStackSize(maxStackSize: Int): ItemSpec = build { itemProperties.maxStackSize(maxStackSize) }
+    public fun maxStackSize(maxStackSize: Int): ItemSpec = build { itemProperties.stacksTo(maxStackSize) }
 
     /**
      * Sets the max damage (i.e. durability) of this item. This also implicitly sets the max stack size to 1.
      */
-    public fun maxDamage(maxDamage: Int): ItemSpec = build { itemProperties.maxDamage(maxDamage) }
+    public fun maxDamage(maxDamage: Int): ItemSpec = build { itemProperties.durability(maxDamage) }
 
     /**
      * Sets the container item for this item. e.g. bucket for a lava bucket, bottle for a dragon's breath, etc. This is
      * the item left behind in the crafting grid after a recipe completes.
      */
-    public fun containerItem(containerItem: Item): ItemSpec = build { itemProperties.containerItem(containerItem) }
+    public fun containerItem(containerItem: Item): ItemSpec = build { itemProperties.craftRemainder(containerItem) }
 
     /**
      * Sets this item's rarity

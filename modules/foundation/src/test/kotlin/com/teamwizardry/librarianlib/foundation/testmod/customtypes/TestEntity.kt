@@ -8,16 +8,16 @@ import net.minecraft.world.World
 import net.minecraftforge.fml.network.NetworkHooks
 
 class TestEntity(entityTypeIn: EntityType<*>, worldIn: World): Entity(entityTypeIn, worldIn) {
-    override fun registerData() {
+    override fun defineSynchedData() {
     }
 
-    override fun readAdditional(compound: CompoundNBT) {
+    override fun readAdditionalSaveData(compound: CompoundNBT) {
     }
 
-    override fun writeAdditional(compound: CompoundNBT) {
+    override fun addAdditionalSaveData(compound: CompoundNBT) {
     }
 
-    override fun createSpawnPacket(): IPacket<*> {
+    override fun getAddEntityPacket(): IPacket<*> {
         return NetworkHooks.getEntitySpawningPacket(this)
     }
 }

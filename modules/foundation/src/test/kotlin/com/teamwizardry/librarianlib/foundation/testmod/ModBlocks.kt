@@ -65,7 +65,7 @@ object ModBlocks {
         buildingBlockCollection.blockProperties
             .material(Material.STONE)
             .hardnessAndResistance(2f, 6f)
-            .mapColor(MaterialColor.MAGENTA)
+            .mapColor(MaterialColor.COLOR_MAGENTA)
         buildingBlock.from(registrationManager.add(buildingBlockCollection.full))
         buildingBlockSlab.from(registrationManager.add(buildingBlockCollection.slab))
         buildingBlockStairs.from(registrationManager.add(buildingBlockCollection.stairs))
@@ -74,8 +74,8 @@ object ModBlocks {
         val woodCollection = WoodBlockCollection(
             registrationManager,
             "test_wood",
-            MaterialColor.PINK,
-            MaterialColor.PINK_TERRACOTTA
+            MaterialColor.COLOR_PINK,
+            MaterialColor.TERRACOTTA_PINK
         )
         woodPlanks.from(registrationManager.add(woodCollection.planks))
         woodSlab.from(registrationManager.add(woodCollection.slab))

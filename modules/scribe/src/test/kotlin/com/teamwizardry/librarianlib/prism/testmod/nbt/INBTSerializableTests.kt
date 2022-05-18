@@ -38,7 +38,7 @@ internal class INBTSerializableTests: NBTPrismTest() {
         }
 
         override fun deserializeNBT(nbt: StringNBT) {
-            value = nbt.string
+            value = nbt.asString
         }
     }
 }

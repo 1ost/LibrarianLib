@@ -7,7 +7,7 @@ import net.minecraft.client.renderer.entity.EntityRendererManager
 import net.minecraft.util.ResourceLocation
 
 class TestEntityRenderer(renderManager: EntityRendererManager): EntityRenderer<TestEntity>(renderManager) {
-    override fun getEntityTexture(entity: TestEntity): ResourceLocation {
+    override fun getTextureLocation(entity: TestEntity): ResourceLocation {
         return loc("minecraft:block/dirt.png")
     }
 }

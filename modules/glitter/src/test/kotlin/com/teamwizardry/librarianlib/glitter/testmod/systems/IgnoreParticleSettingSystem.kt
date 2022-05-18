@@ -45,7 +45,7 @@ object IgnoreParticleSettingSystem : TestSystem("ignore_particle_setting") {
 
     override fun spawn(player: Entity) {
         val eyePos = player.getEyePosition(0f)
-        val look = player.lookVec
+        val look = player.lookAngle
 
         val spawnDistance = 2
         val spawnVelocity = 0.2

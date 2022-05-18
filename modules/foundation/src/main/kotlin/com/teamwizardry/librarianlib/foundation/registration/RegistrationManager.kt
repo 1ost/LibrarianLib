@@ -67,7 +67,7 @@ public class RegistrationManager(public val modid: String, modEventBus: IEventBu
      */
     public val itemGroup: ItemGroup = object : ItemGroup(modid) {
         @OnlyIn(Dist.CLIENT)
-        override fun createIcon(): ItemStack {
+        override fun makeIcon(): ItemStack {
             return ItemStack(itemGroupIcon?.get() ?: Items.AIR)
         }
     }
@@ -99,7 +99,7 @@ public class RegistrationManager(public val modid: String, modEventBus: IEventBu
     public fun add(spec: BlockSpec): LazyBlock {
         spec.modid = modid
         @Suppress("NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS")
-        spec.itemProperties.group(spec.itemGroup.get(this))
+        spec.itemProperties.tab(spec.itemGroup.get(this))
         blocks.add(spec)
         return spec.lazy
     }
@@ -110,7 +110,7 @@ public class RegistrationManager(public val modid: String, modEventBus: IEventBu
     public fun add(spec: ItemSpec): LazyItem {
         spec.modid = modid
         @Suppress("NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS")
-        spec.itemProperties.group(spec.itemGroup.get(this))
+        spec.itemProperties.tab(spec.itemGroup.get(this))
         items.add(spec)
         return spec.lazy
     }
@@ -351,7 +351,7 @@ public class RegistrationManager(public val modid: String, modEventBus: IEventBu
             val factory = spec.screenFactory
             logger.debug("Registering ContainerScreen factory for ${spec.registryName}")
             @Suppress("UNCHECKED_CAST")
-            ScreenManager.registerFactory(spec.typeInstance as ContainerType<FacadeContainer>) { container, inventory, title ->
+            ScreenManager.register(spec.typeInstance as ContainerType<FacadeContainer>) { container, inventory, title ->
                 (factory.getClientFunction() as ContainerScreenFactory<FacadeContainer>).create(container, inventory, title)
             }
         }
@@ -366,7 +366,7 @@ public class RegistrationManager(public val modid: String, modEventBus: IEventBu
     @SubscribeEvent
     @JvmSynthetic
     internal fun stitchAtlasSprites(e: TextureStitchEvent.Pre) {
-        (atlasSprites[e.map.textureLocation] ?: return).forEach { sprite ->
+        (atlasSprites[e.map.location()] ?: return).forEach { sprite ->
             e.addSprite(sprite)
         }
     }
@@ -453,7 +453,7 @@ public class RegistrationManager(public val modid: String, modEventBus: IEventBu
                 val name = spec.datagen.names[locale] ?: continue
                 this.add(spec.blockInstance, name)
                 spec.itemInstance?.also { item ->
-                    if (item.translationKey != spec.blockInstance.translationKey)
+                    if (item.descriptionId != spec.blockInstance.descriptionId)
                         this.add(spec.itemInstance, name)
                 }
             }
@@ -468,20 +468,20 @@ public class RegistrationManager(public val modid: String, modEventBus: IEventBu
 
     private inner class BlockTagsGeneration(gen: DataGenerator, existingFileHelper: ExistingFileHelper) :
         BlockTagsProvider(gen, modid, existingFileHelper) {
-        override fun registerTags() {
+        override fun addTags() {
             logger.debug("Generating tags")
             for (spec in blocks) {
                 for (tag in spec.datagen.tags) {
-                    getOrCreateBuilder(tag).add(spec.blockInstance)
+                    tag(tag).add(spec.blockInstance)
                 }
             }
 
             datagen.blockTags.valueTags.forEach { (tag, values) ->
-                getOrCreateBuilder(tag).add(*values.toTypedArray())
+                tag(tag).add(*values.toTypedArray())
             }
 
             datagen.blockTags.metaTags.forEach { (tag, values) ->
-                val builder = getOrCreateBuilder(tag)
+                val builder = tag(tag)
                 values.forEach { builder.addTag(it) }
             }
         }
@@ -493,22 +493,22 @@ public class RegistrationManager(public val modid: String, modEventBus: IEventBu
         existingFileHelper: ExistingFileHelper
     ) : ItemTagsProvider(gen, blockTags, modid, existingFileHelper) {
 
-        override fun registerTags() {
+        override fun addTags() {
             for (spec in blocks) {
                 val item = spec.itemInstance ?: continue
                 for (tag in spec.datagen.itemTags) {
-                    getOrCreateBuilder(tag).add(item)
+                    tag(tag).add(item)
                 }
             }
 
             for (spec in items) {
                 for (tag in spec.datagen.tags) {
-                    getOrCreateBuilder(tag).add(spec.itemInstance)
+                    tag(tag).add(spec.itemInstance)
                 }
             }
 
             datagen.itemTags.valueTags.forEach { (tag, values) ->
-                getOrCreateBuilder(tag).add(*values.toTypedArray())
+                tag(tag).add(*values.toTypedArray())
             }
 
             for ((blockTag, itemTags) in datagen.blockTags.itemForms) {
@@ -518,7 +518,7 @@ public class RegistrationManager(public val modid: String, modEventBus: IEventBu
             }
 
             datagen.itemTags.metaTags.forEach { (tag, values) ->
-                val builder = getOrCreateBuilder(tag)
+                val builder = tag(tag)
                 values.forEach { builder.addTag(it) }
             }
         }
@@ -547,13 +547,13 @@ public class RegistrationManager(public val modid: String, modEventBus: IEventBu
 
         override fun validate(map: MutableMap<ResourceLocation, LootTable>, validationtracker: ValidationTracker) {
             for ((name, table) in map) {
-                LootTableManager.validateLootTable(validationtracker, name, table)
+                LootTableManager.validate(validationtracker, name, table)
             }
         }
     }
 
     private inner class RecipeGeneration(gen: DataGenerator) : RecipeProvider(gen) {
-        override fun registerRecipes(consumer: Consumer<IFinishedRecipe>) {
+        override fun buildShapelessRecipes(consumer: Consumer<IFinishedRecipe>) {
             for(generator in datagen.recipeGenerators) {
                 generator.addRecipes(consumer)
             }
@@ -567,7 +567,7 @@ public class RegistrationManager(public val modid: String, modEventBus: IEventBu
             return "sounds.json"
         }
 
-        override fun act(cache: DirectoryCache) {
+        override fun run(cache: DirectoryCache) {
             if(sounds.size == 0)
                 return
             val root = JsonObject()

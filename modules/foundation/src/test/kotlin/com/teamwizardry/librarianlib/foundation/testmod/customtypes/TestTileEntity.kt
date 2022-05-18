@@ -21,16 +21,16 @@ class TestTileEntity: BaseTileEntity(ModTiles.testTile) {
     }
 
     fun onFallenUpon(entity: Entity, fallDistance: Float) {
-        val world = world ?: return
+        val world = level ?: return
 
         totalFallDistance += fallDistance
         lastFallDistance = fallDistance
-        markDirty()
+        setChanged()
         notifyStateChange()
 
-        (world as? ServerWorld)?.spawnParticle(
+        (world as? ServerWorld)?.sendParticles(
             ParticleTypes.POOF,
-            entity.posX, entity.posY, entity.posZ,
+            entity.x, entity.y, entity.z,
             5,
             0.1, 0.0, 0.1,
             0.0

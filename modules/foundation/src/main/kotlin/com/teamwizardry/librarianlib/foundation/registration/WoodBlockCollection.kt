@@ -124,7 +124,7 @@ public class WoodBlockCollection @JvmOverloads constructor(
         BlockSpec(woodName + "_log")
             .applyFrom(logProperties)
             .mapColor { state ->
-                if(state.get(RotatedPillarBlock.AXIS) == Direction.Axis.Y)
+                if(state.getValue(RotatedPillarBlock.AXIS) == Direction.Axis.Y)
                     woodColor
                 else
                     barkColor
@@ -142,7 +142,7 @@ public class WoodBlockCollection @JvmOverloads constructor(
         BlockSpec("stripped_" + woodName + "_log")
             .applyFrom(logProperties)
             .mapColor { state ->
-                if(state.get(RotatedPillarBlock.AXIS) == Direction.Axis.Y)
+                if(state.getValue(RotatedPillarBlock.AXIS) == Direction.Axis.Y)
                     woodColor
                 else
                     barkColor
@@ -256,7 +256,7 @@ public class WoodBlockCollection @JvmOverloads constructor(
         BlockSpec(woodName + "_sign")
             .material(Material.WOOD)
             .mapColor(woodColor)
-            .noCollission()
+            .doesNotBlockMovement()
             .hardnessAndResistance(1 * hardnessMultiplier, 1 * resistanceMultiplier)
             .sound(SoundType.WOOD)
             .tileEntity(registrationManager.foundationSignTileEntityType)
@@ -281,7 +281,7 @@ public class WoodBlockCollection @JvmOverloads constructor(
         BlockSpec(woodName + "_wall_sign")
             .material(Material.WOOD)
             .mapColor(woodColor)
-            .noCollission()
+            .doesNotBlockMovement()
             .hardnessAndResistance(1 * hardnessMultiplier, 1 * resistanceMultiplier)
             .sound(SoundType.WOOD)
             .lootFrom(sign.blockInstance)
@@ -303,7 +303,7 @@ public class WoodBlockCollection @JvmOverloads constructor(
         BlockSpec(woodName + "_pressure_plate")
             .material(Material.WOOD)
             .mapColor(woodColor)
-            .noCollission()
+            .doesNotBlockMovement()
             .hardnessAndResistance(0.5f * hardnessMultiplier, 0.5f * resistanceMultiplier)
             .sound(SoundType.WOOD)
             .datagen {
@@ -316,9 +316,9 @@ public class WoodBlockCollection @JvmOverloads constructor(
 
     public val button: BlockSpec by lazy {
         BlockSpec(woodName + "_button")
-            .material(Material.MISCELLANEOUS)
+            .material(Material.DECORATION)
             .mapColor(woodColor)
-            .noCollission()
+            .doesNotBlockMovement()
             .hardnessAndResistance(0.5f * hardnessMultiplier, 0.5f * resistanceMultiplier)
             .sound(SoundType.WOOD)
             .datagen {
@@ -328,7 +328,7 @@ public class WoodBlockCollection @JvmOverloads constructor(
                 FoundationButtonBlock(
                     it.blockProperties,
                     true, 30,
-                    SoundEvents.BLOCK_WOODEN_BUTTON_CLICK_ON, SoundEvents.BLOCK_WOODEN_BUTTON_CLICK_OFF,
+                    SoundEvents.WOODEN_BUTTON_CLICK_ON, SoundEvents.WOODEN_BUTTON_CLICK_OFF,
                     woodName + "_planks"
                 )
             }

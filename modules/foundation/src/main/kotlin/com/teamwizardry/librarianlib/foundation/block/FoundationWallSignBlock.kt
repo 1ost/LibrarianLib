@@ -29,7 +29,7 @@ public open class FoundationWallSignBlock(
 ): WallSignBlock(properties.vanillaProperties, WoodType.OAK), IFoundationBlock, ICustomSignMaterialBlock {
 
     override fun signMaterial(): RenderMaterial {
-        return RenderMaterial(Atlases.SIGN_ATLAS, loc(registryName!!.namespace, "entity/signs/$materialName"))
+        return RenderMaterial(Atlases.SIGN_SHEET, loc(registryName!!.namespace, "entity/signs/$materialName"))
     }
 
     override fun generateBlockState(gen: BlockStateProvider) {
