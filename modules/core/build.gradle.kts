@@ -12,11 +12,6 @@ module {
 }
 val commonConfig = rootProject.the<CommonConfigExtension>()
 
-mixin {
-    add(sourceSets.main.get(), "ll-core.refmap.json")
-    add(sourceSets.test.get(), "ll-core.refmap.json")
-}
-
 dependencies {
     shade("dev.thecodewarrior.mirror:mirror:1.0.0b1")
     testApi(project(":testcore"))
