@@ -5,9 +5,8 @@ plugins {
 }
 
 repositories {
-    maven { url = uri("https://files.minecraftforge.net/maven") }
+    maven { url = uri("https://maven.minecraftforge.net") }
     maven { url = uri("https://repo.spongepowered.org/repository/maven-public/") }
-    jcenter()
     mavenCentral()
     gradlePluginPortal()
 }
