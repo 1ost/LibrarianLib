@@ -24,7 +24,6 @@ dependencies {
 }
 
 tasks.named<ProcessResources>("processResources") {
-    duplicatesStrategy = DuplicatesStrategy.INCLUDE
     filesMatching("**/mods.toml") {
         filter(ReplaceTokens::class, "tokens" to mapOf("version" to commonConfig.version))
     }
@@ -72,6 +71,7 @@ val generateModuleList = tasks.register("generateModuleList") {
 tasks.named("compileJava") {
     dependsOn(generateMixinConnector)
 }
+
 tasks.named("processResources") {
     dependsOn(generateCoremodsJson)
     dependsOn(generateModuleList)

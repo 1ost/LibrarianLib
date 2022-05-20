@@ -55,9 +55,3 @@ dependencies {
     serverMod fg.deobf("curse.maven:mouse-tweaks-60089:${mousetweaks_jar_id}")
     mod fg.deobf("curse.maven:inventory-sorter-240633:${inventorysorter_jar_id}")
 }
-
-sourceSets {
-    main.kotlin.srcDirs += 'src/main/kotlin'
-    main.java.srcDirs += 'src/main/java'
-    main.resources.srcDirs += 'src/main/resources'
-}
