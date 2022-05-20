@@ -4,8 +4,8 @@ plugins {
 }
 
 mixin {
-    add(sourceSets.main.get(), "ll-${project.name}.refmap.json")
-    add(sourceSets.test.get(), "ll-${project.name}-test.refmap.json")
+    add(sourceSets.main.get(), "ll-%s.refmap.json".format(project.getName()))
+    add(sourceSets.test.get(), "ll-%s-test.refmap.json".format(project.getName()))
 }
 
 val mixin_version: String by project

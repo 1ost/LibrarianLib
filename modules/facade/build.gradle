@@ -2,19 +2,19 @@ plugins {
     id 'module-conventions'
     id 'mixin-conventions'
 }
-
-import org.gradle.internal.os.OperatingSystem
-switch (OperatingSystem.current()) {
-    case OperatingSystem.LINUX:
-        ext.lwjglNatives = "natives-linux"
-        break
-    case OperatingSystem.MAC_OS:
-        ext.lwjglNatives = "natives-macos"
-        break
-    case OperatingSystem.WINDOWS:
-        ext.lwjglNatives = "natives-windows"
-        break
-}
+//
+//import org.gradle.internal.os.OperatingSystem
+//switch (OperatingSystem.current()) {
+//    case OperatingSystem.LINUX:
+//        ext.lwjglNatives = "natives-linux"
+//        break
+//    case OperatingSystem.MAC_OS:
+//        ext.lwjglNatives = "natives-macos"
+//        break
+//    case OperatingSystem.WINDOWS:
+//        ext.lwjglNatives = "natives-windows"
+//        break
+//}
 
 module {
     shadow('com.ibm.icu')
@@ -54,4 +54,10 @@ dependencies {
     clientMod fg.deobf("curse.maven:mouse-tweaks-60089:${mousetweaks_jar_id}") // mouse tweaks crashes datagen
     serverMod fg.deobf("curse.maven:mouse-tweaks-60089:${mousetweaks_jar_id}")
     mod fg.deobf("curse.maven:inventory-sorter-240633:${inventorysorter_jar_id}")
+}
+
+sourceSets {
+    main.kotlin.srcDirs += 'src/main/kotlin'
+    main.java.srcDirs += 'src/main/java'
+    main.resources.srcDirs += 'src/main/resources'
 }

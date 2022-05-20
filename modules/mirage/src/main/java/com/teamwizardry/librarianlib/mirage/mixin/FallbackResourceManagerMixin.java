@@ -1,7 +1,5 @@
 package com.teamwizardry.librarianlib.mirage.mixin;
 
-import com.teamwizardry.librarianlib.mirage.Mirage;
-import com.teamwizardry.librarianlib.mirage.VirtualResourceManager;
 import com.teamwizardry.librarianlib.mirage.bridge.MirageMixinBridge;
 import net.minecraft.resources.FallbackResourceManager;
 import net.minecraft.resources.IResourcePack;
