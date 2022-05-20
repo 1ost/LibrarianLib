@@ -5,7 +5,6 @@ import org.jetbrains.kotlin.gradle.plugin.ProjectLocalConfigurations
 
 plugins {
     `maven-publish`
-    signing
 }
 
 apply<ModPublishingPlugin>()
@@ -99,7 +98,7 @@ publishing {
             pom {
                 name.set(project.property("maven_name") as String)
                 description.set(project.property("maven_description") as String)
-                url.set("https://github.com/TeamWizardry/LibrarianLib")
+                url.set("https://github.com/1ost/LibrarianLib")
 
                 licenses {
                     license {
@@ -128,32 +127,4 @@ publishing {
             }
         }
     }
-
-    repositories {
-        maven {
-            name = "ossrh"
-
-            val stagingRepo = "https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/"
-            val snapshotRepo = "https://s01.oss.sonatype.org/content/repositories/snapshots/"
-            url = URI(if(commonConfig.version.endsWith("SNAPSHOT")) snapshotRepo else stagingRepo)
-            credentials {
-                username = project.findProperty("ossrhUsername") as String? ?: System.getenv("OSSRH_USERNAME") ?: "N/A"
-                password = project.findProperty("ossrhPassword") as String? ?: System.getenv("OSSRH_PASSWORD") ?: "N/A"
-            }
-        }
-    }
-}
-
-signing {
-    if(System.getenv("SIGNING_KEY") != null) {
-        useInMemoryPgpKeys(
-            System.getenv("SIGNING_KEY_ID"),
-            System.getenv("SIGNING_KEY"),
-            System.getenv("SIGNING_KEY_PASSWORD")
-        )
-    } else {
-        useGpgCmd()
-    }
-
-    sign(publishing.publications["maven"])
 }
