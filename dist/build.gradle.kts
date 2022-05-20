@@ -24,6 +24,7 @@ dependencies {
 }
 
 tasks.named<ProcessResources>("processResources") {
+    duplicatesStrategy = DuplicatesStrategy.INCLUDE
     filesMatching("**/mods.toml") {
         filter(ReplaceTokens::class, "tokens" to mapOf("version" to commonConfig.version))
     }
