@@ -35,18 +35,13 @@ dependencies {
     liblib(project(":scribe"))
     liblib(project(":courier"))
     testApi(project(":testcore"))
-//    shade("dev.thecodewarrior:bitfont:$bitfont_version")
-//    shade 'com.ibm.icu:icu4j:63.1'
-//    shade 'org.msgpack:msgpack-core:0.8.16'
-//
-//    // we have to include ICU in the classpath so it overrides Mojang's stripped down copy
-//    devClasspath 'com.ibm.icu:icu4j:63.1'
-//
-//    // Compatibility:
-//    // `fg.deobf` breaks source jars (MinecraftForge/ForgeGradle#736,727,637), so some dependencies aren't deobfuscated
-//
-//    // The API doesn't seem to have anything that actually gets obfuscated and we want sources, so no `fg.deobf`
-//    compileOnly "mezz.jei:jei-${jei_mc_version}:${jei_version}:api"
+    shade("dev.thecodewarrior:bitfont:0.4")
+    shade("com.ibm.icu:icu4j:63.1")
+    shade("org.msgpack:msgpack-core:0.8.16")
+
+    devClasspath("com.ibm.icu:icu4j:63.1")
+
+    compileOnly("mezz.jei:jei-1.16.5:7.7.1.152:api")
 //    // include the implementation somewhere so we can see the source code in the IDE. (We put it in test to avoid
 //    // accidental coupling with the module.)
 //    // sure, without `fg.deobf` the jar and sources won't line up, but that shouldn't really matter since this code
