@@ -21,11 +21,11 @@ plugins {
 //        break
 //}
 
-//module {
-//    shadow('com.ibm.icu')
-//    shadow('dev.thecodewarrior.bitfont')
-//    shadow('org.msgpack')
-//}
+module {
+    shadow("com.ibm.icu")
+    shadow("dev.thecodewarrior.bitfont")
+    shadow("org.msgpack")
+}
 
 dependencies {
     liblib(project(":core"))
@@ -42,16 +42,10 @@ dependencies {
     devClasspath("com.ibm.icu:icu4j:63.1")
 
     compileOnly("mezz.jei:jei-1.16.5:7.7.1.152:api")
-//    // include the implementation somewhere so we can see the source code in the IDE. (We put it in test to avoid
-//    // accidental coupling with the module.)
-//    // sure, without `fg.deobf` the jar and sources won't line up, but that shouldn't really matter since this code
-//    // should never actually get used.
-////    testCompileOnly "mezz.jei:jei-${jei_mc_version}:${jei_version}"
-//    // this is the part that actually gets used at runtime, so deobfuscate it
-////    mod fg.deobf("mezz.jei:jei-${jei_mc_version}:${jei_version}")
-//
-//    compileOnly "curse.maven:mouse-tweaks-60089:${mousetweaks_api_id}"
-////    clientMod fg.deobf("curse.maven:mouse-tweaks-60089:${mousetweaks_jar_id}") // mouse tweaks crashes datagen
-////    serverMod fg.deobf("curse.maven:mouse-tweaks-60089:${mousetweaks_jar_id}")
-//    compileOnly "curse.maven:inventory-sorter-240633:${inventorysorter_jar_id}"
+    testCompileOnly("mezz.jei:jei-1.16.5:7.7.1.152")
+    mod(fg.deobf("mezz.jei:jei-1.16.5:7.7.1.152"))
+    compileOnly("curse.maven:mouse-tweaks-60089:3035782")
+    clientMod(fg.deobf("curse.maven:mouse-tweaks-60089:3035780")) // mouse tweaks crashes datagen
+    serverMod(fg.deobf("curse.maven:mouse-tweaks-60089:3035780"))
+    compileOnly("curse.maven:inventory-sorter-240633:3077903")
 }
