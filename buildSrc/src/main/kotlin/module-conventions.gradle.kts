@@ -265,9 +265,9 @@ val dokkaJar = tasks.register<Jar>("dokkaJar") {
 // ---------------------------------------------------------------------------------------------------------------------
 //region // Publishing
 
-dependencies {
-    "publishedRuntime"(project(":zzz:librarianlib"))
-}
+//dependencies {
+//    "publishedRuntime"(project(":zzz:librarianlib"))
+//}
 
 artifacts {
     add("publishedApi", deobfJar)

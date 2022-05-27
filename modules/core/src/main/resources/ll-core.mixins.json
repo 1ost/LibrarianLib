@@ -8,8 +8,8 @@
   ],
   "client": [
     "MinecraftMixin",
-    "IMatrix3f",
-    "IMatrix4f",
+    "Matrix3fMixin",
+    "Matrix4fMixin",
     "RenderTypeStateMixin"
   ],
   "injectors": {

@@ -144,6 +144,7 @@ public open class FacadeWidget(
                 } else {
                     if (screen.shouldCloseOnEsc()) {
                         screen.onClose()
+                        println("[Facade]Closing gui...")
                         return true
                     }
                 }

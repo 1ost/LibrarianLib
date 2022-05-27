@@ -61,10 +61,10 @@ configure<UserDevExtension> {
         property("forge.logging.console.level", "debug")
 
         mods {
-            create("librarianlib") {
-                sources(project(":zzz:librarianlib").sourceSets.main.get())
-                liblibModules.forEach { sources(it.mainSources.get()) }
-            }
+//            create("librarianlib") {
+//                sources(project(":zzz:librarianlib").sourceSets.main.get())
+//                liblibModules.forEach { sources(it.mainSources.get()) }
+//            }
             create("testcore") {
                 sources(project(":testcore").sourceSets.main.get())
             }
@@ -110,14 +110,14 @@ configure<UserDevExtension> {
 }
 
 tasks.named("classes") {
-    dependsOn(project(":zzz:librarianlib").tasks.named("classes"))
+//    dependsOn(project(":zzz:librarianlib").tasks.named("classes"))
     dependsOn(project(":testcore").tasks.named("classes"))
     dependsOn(project(":testcore").tasks.named("testClasses"))
     dependsOn(liblibModules.map { it.project.tasks.named("classes") })
     dependsOn(liblibModules.map { it.project.tasks.named("testClasses") })
 }
 tasks.named("processResources") {
-    dependsOn(project(":zzz:librarianlib").tasks.named("processResources"))
+//    dependsOn(project(":zzz:librarianlib").tasks.named("processResources"))
     dependsOn(project(":testcore").tasks.named("processResources"))
     dependsOn(project(":testcore").tasks.named("processTestResources"))
     dependsOn(liblibModules.map { it.project.tasks.named("processResources") })
