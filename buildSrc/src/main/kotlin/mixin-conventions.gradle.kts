@@ -5,7 +5,6 @@ plugins {
 
 mixin {
     add(sourceSets.main.get(), "ll-%s.refmap.json".format(project.getName()))
-//    add(sourceSets.test.get(), "ll-%s.refmap.json".format(project.getName()))
     config("ll-%s.mixins.json".format(project.getName()))
 }
 

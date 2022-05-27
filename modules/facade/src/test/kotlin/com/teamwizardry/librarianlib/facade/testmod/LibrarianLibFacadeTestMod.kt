@@ -13,8 +13,6 @@ import com.teamwizardry.librarianlib.facade.example.transform.*
 import com.teamwizardry.librarianlib.facade.testmod.containers.*
 import com.teamwizardry.librarianlib.facade.testmod.containers.base.*
 import com.teamwizardry.librarianlib.facade.testmod.screens.*
-import com.teamwizardry.librarianlib.facade.testmod.screens.pastry.PastryTestScreen
-import com.teamwizardry.librarianlib.facade.testmod.screens.pastry.Rect2dUnionTestScreen
 import com.teamwizardry.librarianlib.facade.testmod.value.RMValueTests
 import com.teamwizardry.librarianlib.testcore.TestMod
 import com.teamwizardry.librarianlib.testcore.objects.TestBlock
@@ -70,8 +68,6 @@ object LibrarianLibFacadeTestMod : TestMod(LibrarianLibFacadeModule) {
         ),
         "advanced" to FacadeTestGroup(
             "Advanced", listOf(
-                FacadeTest("Pastry") { ScreenConstructor(::PastryTestScreen) },
-                FacadeTest("Rect2dUnion") { ScreenConstructor(::Rect2dUnionTestScreen) },
             )
         ),
         "examples" to FacadeTestGroup(
