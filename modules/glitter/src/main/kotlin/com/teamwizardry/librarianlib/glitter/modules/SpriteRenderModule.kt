@@ -3,8 +3,8 @@ package com.teamwizardry.librarianlib.glitter.modules
 import com.google.common.collect.ImmutableList
 import com.mojang.blaze3d.matrix.MatrixStack
 import com.mojang.blaze3d.systems.RenderSystem
-import com.teamwizardry.librarianlib.core.bridge.IMatrix3f
-import com.teamwizardry.librarianlib.core.bridge.IMatrix4f
+import com.teamwizardry.librarianlib.core.mixin.IMatrix3f
+import com.teamwizardry.librarianlib.core.mixin.IMatrix4f
 import com.teamwizardry.librarianlib.core.rendering.BlendMode
 import com.teamwizardry.librarianlib.core.util.Client
 import com.teamwizardry.librarianlib.core.util.DefaultRenderStates

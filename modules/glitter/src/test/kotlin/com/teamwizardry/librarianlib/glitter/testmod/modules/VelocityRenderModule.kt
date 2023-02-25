@@ -3,7 +3,7 @@ package com.teamwizardry.librarianlib.glitter.testmod.modules
 import com.mojang.blaze3d.matrix.MatrixStack
 import com.mojang.blaze3d.platform.GlStateManager
 import com.mojang.blaze3d.systems.RenderSystem
-import com.teamwizardry.librarianlib.core.bridge.IMatrix4f
+import com.teamwizardry.librarianlib.core.mixin.IMatrix4f
 import com.teamwizardry.librarianlib.core.util.Client
 import com.teamwizardry.librarianlib.core.util.mixinCast
 import com.teamwizardry.librarianlib.glitter.ParticleRenderModule

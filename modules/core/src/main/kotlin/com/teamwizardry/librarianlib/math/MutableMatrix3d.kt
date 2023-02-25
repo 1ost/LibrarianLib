@@ -1,6 +1,6 @@
 package com.teamwizardry.librarianlib.math
 
-import com.teamwizardry.librarianlib.core.bridge.IMatrix3f
+import com.teamwizardry.librarianlib.core.mixin.IMatrix3f
 import com.teamwizardry.librarianlib.core.util.kotlin.threadLocal
 import net.minecraft.util.math.vector.Matrix3f
 import net.minecraft.util.math.vector.Vector3d

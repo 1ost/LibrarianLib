@@ -1,6 +1,6 @@
 package com.teamwizardry.librarianlib.math
 
-import com.teamwizardry.librarianlib.core.bridge.IMatrix4f
+import com.teamwizardry.librarianlib.core.mixin.IMatrix4f
 import net.minecraft.util.math.vector.Matrix4f
 import net.minecraft.util.math.vector.Vector3d
 import kotlin.math.abs

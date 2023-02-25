@@ -3,13 +3,13 @@
   "required": true,
   "package": "com.teamwizardry.librarianlib.core.mixin",
   "compatibilityLevel": "JAVA_8",
-  "refmap": "llt-core.refmap.json",
+  "refmap": "ll-core.refmap.json",
   "mixins": [
   ],
   "client": [
     "MinecraftMixin",
-    "Matrix3fMixin",
-    "Matrix4fMixin",
+    "IMatrix3f",
+    "IMatrix4f",
     "RenderTypeStateMixin"
   ],
   "injectors": {

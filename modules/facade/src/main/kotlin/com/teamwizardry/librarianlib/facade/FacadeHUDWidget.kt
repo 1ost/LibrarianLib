@@ -1,0 +1,353 @@
+package com.teamwizardry.librarianlib.facade
+
+import com.mojang.blaze3d.matrix.MatrixStack
+import com.mojang.blaze3d.systems.RenderSystem
+import com.teamwizardry.librarianlib.core.util.Client
+import com.teamwizardry.librarianlib.core.util.SimpleRenderTypes
+import com.teamwizardry.librarianlib.core.util.kotlin.color
+import com.teamwizardry.librarianlib.core.util.vec
+import com.teamwizardry.librarianlib.facade.input.Cursor
+import com.teamwizardry.librarianlib.facade.layer.FacadeDebugOptions
+import com.teamwizardry.librarianlib.facade.layer.GuiDrawContext
+import com.teamwizardry.librarianlib.facade.layer.GuiLayer
+import com.teamwizardry.librarianlib.facade.layer.GuiLayerEvents
+import com.teamwizardry.librarianlib.facade.layer.supporting.StencilUtil
+import com.teamwizardry.librarianlib.math.Matrix3dStack
+import com.teamwizardry.librarianlib.math.Vec2d
+import net.minecraft.client.renderer.IRenderTypeBuffer
+import org.lwjgl.glfw.GLFW
+import java.awt.Color
+import java.util.function.Predicate
+
+public open class FacadeHUDWidget {
+    public val root: GuiLayer = GuiLayer()
+    public val main: GuiLayer = GuiLayer()
+    private val tooltipContainer = GuiLayer()
+    private var currentTooltip: GuiLayer? = null
+
+    /**
+     * Whether a Facade tooltip is being shown
+     */
+    public val hasTooltip: Boolean get() = currentTooltip != null
+
+    /**
+     * Whether F3 is currently pressed. Used to trigger F3+_ debug shortcuts
+     */
+    private var isF3Pressed: Boolean = false
+    /**
+     * Set to true when F3 is pressed, then set to false if a shortcut (e.g. F3+B) is pressed. If F3 is released with
+     * this set to true, the configurator is opened
+     */
+    private var isOpeningDebugConfigurator: Boolean = false
+    private val debugConfigurator = FacadeDebugOptionsConfigurator(debugOptions)
+
+    init {
+        root.ignoreMouseOverBounds = true
+        root.add(main, tooltipContainer)
+        tooltipContainer.zIndex = 100_000.0
+        tooltipContainer.interactive = false
+    }
+
+    /**
+     * We keep track of the mouse position ourselves both so we can provide deltas for move events and so we can provide
+     * subpixel mouse positions in [render]
+     */
+    private var mousePos: Vec2d = Vec2d.ZERO
+
+    /**
+     * The mouse hit for the current mouse position
+     */
+    public var mouseHit: MouseHit = MouseHit(null, false, Vec2d.ZERO)
+        private set
+
+    //region Delegates
+    public fun mouseMoved(xPos: Double, yPos: Double) {
+        if (debugConfigurator.isOpen) {
+            debugConfigurator.mouseMoved(xPos, yPos)
+            return
+        }
+        val pos = vec(xPos, yPos)
+        computeMouseOver(pos)
+        safetyNet("firing a MouseMove event") {
+            root.triggerEvent(GuiLayerEvents.MouseMove(pos, mousePos))
+        }
+        mousePos = pos
+    }
+
+    public fun mouseClicked(xPos: Double, yPos: Double, button: Int) {
+        if (debugConfigurator.isOpen) {
+            debugConfigurator.mouseClicked(xPos, yPos, button)
+            return
+        }
+        val pos = vec(xPos, yPos)
+        computeMouseOver(pos)
+        safetyNet("firing a MouseDown event") {
+            root.triggerEvent(GuiLayerEvents.MouseDown(pos, button))
+        }
+    }
+
+    public fun mouseReleased(xPos: Double, yPos: Double, button: Int) {
+        if (debugConfigurator.isOpen) return
+        val pos = vec(xPos, yPos)
+        computeMouseOver(pos)
+        safetyNet("firing a MouseUp event") {
+            root.triggerEvent(GuiLayerEvents.MouseUp(pos, button))
+        }
+    }
+
+    public fun mouseScrolled(xPos: Double, yPos: Double, deltaY: Double) {
+        if (debugConfigurator.isOpen) return
+        val pos = vec(xPos, yPos)
+        val delta = vec(0.0, deltaY)
+        computeMouseOver(pos)
+        safetyNet("firing a MouseScroll event") {
+            root.triggerEvent(GuiLayerEvents.MouseScroll(pos, delta))
+        }
+    }
+
+    public fun mouseDragged(xPos: Double, yPos: Double, button: Int, deltaX: Double, deltaY: Double) {
+        if (debugConfigurator.isOpen) return
+        val pos = vec(xPos, yPos)
+        val lastPos = vec(xPos - deltaX, yPos - deltaY)
+        computeMouseOver(pos)
+        safetyNet("firing a MouseDrag event") {
+            root.triggerEvent(GuiLayerEvents.MouseDrag(pos, lastPos, button))
+        }
+    }
+
+    @Suppress("UNUSED_PARAMETER")
+    public fun changeFocus(reverse: Boolean) {
+        // todo
+    }
+
+    public fun keyPressed(keyCode: Int, scanCode: Int, modifiers: Int): Boolean {
+        when (keyCode) {
+            GLFW.GLFW_KEY_F3 -> {
+                isF3Pressed = true
+                if (debugConfigurator.isOpen) {
+                    debugConfigurator.isOpen = false
+                } else {
+                    isOpeningDebugConfigurator = true
+                }
+            }
+            GLFW.GLFW_KEY_ESCAPE -> {
+                if (debugConfigurator.isOpen) {
+                    debugConfigurator.isOpen = false
+                }
+            }
+        }
+        if (isF3Pressed) {
+            if (debugConfigurator.shortcutKeyPressed(keyCode)) {
+                isOpeningDebugConfigurator = false
+            }
+        }
+
+        if (debugConfigurator.isOpen)
+            return true
+
+        safetyNet("firing a KeyDown event") {
+            val event = GuiLayerEvents.KeyDown(keyCode, scanCode, modifiers)
+            root.triggerEvent(event)
+            return@keyPressed event.isCanceled()
+        }
+        return false
+    }
+
+    public fun keyReleased(keyCode: Int, scanCode: Int, modifiers: Int): Boolean {
+        if (keyCode == GLFW.GLFW_KEY_F3) {
+            isF3Pressed = false
+            if(isOpeningDebugConfigurator) {
+                isOpeningDebugConfigurator = false
+                debugConfigurator.isOpen = true
+            }
+        }
+        if (debugConfigurator.isOpen)
+            return true
+
+        safetyNet("firing a KeyUp event") {
+            val event = GuiLayerEvents.KeyUp(keyCode, scanCode, modifiers)
+            root.triggerEvent(event)
+            return@keyReleased event.isCanceled()
+        }
+        return false
+    }
+
+    public fun charTyped(codepoint: Char, modifiers: Int): Boolean {
+        if (debugConfigurator.isOpen)
+            return true
+
+        safetyNet("firing a CharTyped event") {
+            val event = GuiLayerEvents.CharTyped(codepoint, modifiers)
+            root.triggerEvent(event)
+            return@charTyped event.isCanceled()
+        }
+        return false
+    }
+
+    public fun onClose() {
+        Cursor.setCursor(null)
+    }
+    //endregion
+
+    private fun computeMouseOver(absolute: Vec2d) {
+        safetyNet("computing the mouse position") {
+            lastHit = null
+            mouseHit = computeMouseHit(absolute, true)
+            generateSequence(mouseHit.layer) { if (it.propagatesMouseOver) it.parent else null }.forEach {
+                it.mouseOver = true
+            }
+        }
+    }
+
+    private fun computeMouseHit(absolute: Vec2d, isMousePos: Boolean): MouseHit {
+        var hitLayer = root.hitTest(absolute, Matrix3dStack(), isMousePos)
+        val rootZ = hitLayer?.let { over ->
+            root.children.find {
+                over == it || over in it
+            }
+        }?.zIndex ?: .0
+        val isAboveVanilla = rootZ >= 1000
+
+        return MouseHit(hitLayer, isAboveVanilla, absolute)
+    }
+
+    private var lastHit: MouseHit? = null
+
+    /**
+     * Perform a hit test on the layer hierarchy. This method is optimized for repeated accesses with the same position.
+     * If the passed position is identical to the last passed position it will reuse the result. This cache is reset
+     * when real mouse position is recalculated.
+     *
+     * @param xPos the absolute x coordinate to test in logical pixels
+     * @param yPos the absolute y coordinate to test in logical pixels
+     */
+    public fun hitTest(xPos: Double, yPos: Double): MouseHit {
+        val pos = vec(xPos, yPos)
+        lastHit?.also {
+            if (pos == it.pos)
+                return it
+        }
+        return computeMouseHit(pos, false).also { lastHit = it }
+    }
+
+    /**
+     * Performs all the logical updates that occur on a frame, e.g. computing mouseover, etc. This is the first step in
+     * rendering a frame.
+     */
+    public fun update() {
+        safetyNet("updating") {
+            root.pos = vec(0, 0)
+            root.size = vec(Client.window.guiScaledWidth, Client.window.guiScaledHeight)
+            main.pos = ((root.size - main.size) / 2).round()
+            tooltipContainer.frame = root.bounds
+
+            computeMouseOver(mousePos)
+            var tooltip: GuiLayer? = null
+            var cursor: Cursor? = null
+            generateSequence(mouseHit.layer) { it.parent }.forEach {
+                tooltip = tooltip ?: it.tooltipLayer
+                cursor = cursor ?: it.cursor
+            }
+
+            if (tooltip != currentTooltip) {
+                currentTooltip?.removeFromParent()
+                currentTooltip = tooltip
+                tooltip?.also { tooltipContainer.add(it) }
+            }
+            Cursor.setCursor(cursor)
+
+            root.updateAnimations(Client.time.time)
+            root.triggerEvent(GuiLayerEvents.Update())
+            root.zSort()
+            root.triggerEvent(GuiLayerEvents.PrepareLayout())
+            root.runLayout()
+            root.clearAllDirtyLayout()
+        }
+    }
+
+    /**
+     * The second step in rendering a frame. This can be split up into multiple passes using [filterRendering].
+     */
+    public fun render(matrixStack: MatrixStack) {
+        safetyNet("rendering") {
+            StencilUtil.clear()
+            StencilUtil.enable()
+            RenderSystem.pushMatrix()
+            val context = GuiDrawContext(matrixStack, Matrix3dStack(), debugOptions, false)
+            root.renderLayer(context)
+            RenderSystem.popMatrix()
+            StencilUtil.disable()
+
+            if(debugOptions.showGuiScaleBasis) {
+                renderGuiScaleBasis()
+            }
+        }
+        if(debugConfigurator.isOpen) {
+            debugConfigurator.render(matrixStack)
+        }
+    }
+
+    /**
+     * Configures the rendering system to only render children of the root layer that match the given predicate.
+     * This is used in containers to render the foreground and background at separate times.
+     */
+    public fun filterRendering(filter: Predicate<GuiLayer>) {
+        safetyNet("filtering rendering") {
+            root.forEachChild {
+                it.skipRender = !filter.test(it)
+            }
+        }
+    }
+
+    private fun renderGuiScaleBasis() {
+        val color = Color(1f, 0f, 0f, 0.25f)
+        val basisWidth = 320
+        val basisHeight = 240
+
+        val windowWidth = Client.window.guiScaledWidth.toDouble()
+        val windowHeight = Client.window.guiScaledHeight.toDouble()
+
+        val minSafeX = (windowWidth - basisWidth) / 2
+        val minSafeY = (windowHeight - basisHeight) / 2
+
+        val buffer = IRenderTypeBuffer.immediate(Client.tessellator.builder)
+        val vb = buffer.getBuffer(SimpleRenderTypes.flatQuads)
+
+        fun drawRect(minX: Double, minY: Double, maxX: Double, maxY: Double) {
+            vb.vertex(minX, maxY, 0.0).color(color).endVertex()
+            vb.vertex(maxX, maxY, 0.0).color(color).endVertex()
+            vb.vertex(maxX, minY, 0.0).color(color).endVertex()
+            vb.vertex(minX, minY, 0.0).color(color).endVertex()
+        }
+
+        drawRect(0.0, 0.0, windowWidth, minSafeY)
+        drawRect(0.0, minSafeY, minSafeX, minSafeY + basisHeight)
+        drawRect(minSafeX + basisWidth, minSafeY, windowWidth, minSafeY + basisHeight)
+        drawRect(0.0, minSafeY + basisHeight, windowWidth, windowHeight)
+
+        buffer.endBatch()
+    }
+
+    /**
+     * The result of hit testing the layer hierarchy
+     */
+    public data class MouseHit(
+        /**
+         * The layer the mouse hit, if any
+         */
+        val layer: GuiLayer?,
+        /**
+         * True if the layer that was hit is above the vanilla GUI (its root has a zIndex >= 1000)
+         */
+        val isOverVanilla: Boolean,
+        /**
+         * The absolute position of the hit test in logical pixels
+         */
+        val pos: Vec2d
+    )
+
+    public companion object {
+        @JvmStatic
+        public val debugOptions: FacadeDebugOptions = FacadeDebugOptions()
+    }
+}
