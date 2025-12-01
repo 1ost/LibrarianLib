@@ -21,7 +21,7 @@ public object ScreenSpace: CoordinateSpace2D {
             updateMatrices()
             return field
         }
-    override val inverseTransform: Matrix3d = Matrix3dView(_transform)
+    override val inverseTransform: Matrix3d = Matrix3dView(_inverseTransform)
         get() {
             updateMatrices()
             return field
