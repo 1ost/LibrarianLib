@@ -1,4 +1,5 @@
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
+import org.gradle.jvm.tasks.Jar
 import org.jetbrains.kotlin.gradle.plugin.KotlinPlatformType
 import org.jetbrains.kotlin.gradle.plugin.ProjectLocalConfigurations
 
@@ -48,4 +49,15 @@ dependencies {
     clientMod(fg.deobf("curse.maven:mouse-tweaks-60089:3035780")) // mouse tweaks crashes datagen
     serverMod(fg.deobf("curse.maven:mouse-tweaks-60089:3035780"))
     compileOnly("curse.maven:inventory-sorter-240633:3077903")
+}
+
+// Non-obfuscated jar for development use
+val devJar = tasks.register<Jar>("devJar") {
+    archiveClassifier.set("dev")
+    from(tasks.named<ShadowJar>("deobfJar").map { zipTree(it.archiveFile) })
+    dependsOn("deobfJar")
+}
+
+tasks.named("assemble") {
+    dependsOn(devJar)
 }

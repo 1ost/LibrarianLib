@@ -3,7 +3,7 @@
   "required": true,
   "package": "com.teamwizardry.librarianlib.lieutenant.mixin",
   "compatibilityLevel": "JAVA_8",
-  "refmap": "llt-lieutenant.refmap.json",
+  "refmap": "ll-lieutenant.refmap.json",
   "mixins": [
   ],
   "client": [
