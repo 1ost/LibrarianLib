@@ -523,6 +523,9 @@ public open class GuiLayer(posX: Int, posY: Int, width: Int, height: Int): Coord
      * The sort index and render order for the layer. Lower indices appear below higher indices.
      * Note that this does not affect the literal Z axis when rendering, this is purely a sort index.
      *
+     * Children with a negative z-index render before their parent (i.e. behind the parent's own draw call); zero or
+     * positive values render after the parent (the previous behavior).
+     *
      * Use [GuiLayer.OVERLAY_Z] and [GuiLayer.UNDERLAY_Z] to create layers that appear on top or below _literally
      * everything else._
      */
@@ -1216,6 +1219,13 @@ public open class GuiLayer(posX: Int, posY: Int, width: Int, height: Int): Coord
      * Draw just this layer and its children
      */
     private fun renderDirect(context: GuiDrawContext) {
+        // Render children that should appear behind the parent
+        forEachChild(false) {
+            if (it.zIndex < 0) {
+                it.renderLayer(context)
+            }
+        }
+
         context.matrix.assertEvenDepth {
             glStateGuarantees()
             context.matrix.push()
@@ -1225,8 +1235,12 @@ public open class GuiLayer(posX: Int, posY: Int, width: Int, height: Int): Coord
             context.popGlMatrix()
             context.matrix.pop()
         }
+
+        // Render the remaining children (default behavior)
         forEachChild(false) {
-            it.renderLayer(context)
+            if (it.zIndex >= 0) {
+                it.renderLayer(context)
+            }
         }
     }
 
