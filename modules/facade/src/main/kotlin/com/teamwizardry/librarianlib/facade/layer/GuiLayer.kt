@@ -60,6 +60,7 @@ import kotlin.math.PI
 import kotlin.math.abs
 import kotlin.math.floor
 import kotlin.math.max
+import kotlin.math.sqrt
 
 /**
  * The fundamental building block of a LibrarianLib GUI. Generally a single unit of visual or organizational design.
@@ -1094,6 +1095,28 @@ public open class GuiLayer(posX: Int, posY: Int, width: Int, height: Int): Coord
     public var blendMode: BlendMode = BlendMode.NORMAL
 
     /**
+     * Enables a post-process outline using the alpha channel when this layer is rendered through the
+     * [RenderMode.RENDER_TO_FBO] + [FlatLayerShader] path.
+     *
+     * This is intended for use-cases like text outlines, where drawing the outline as a post-process avoids the
+     * chunky "stamping" artifacts of multi-draw approaches.
+     */
+    public var fboOutlineEnabled: Boolean = false
+
+    /**
+     * Outline thickness in this layer's local coordinate space.
+     */
+    public var fboOutlineThickness: Double = 1.0
+        set(value) {
+            field = value.coerceAtLeast(0.0)
+        }
+
+    /**
+     * Outline color, applied behind the original pixel. Alpha is multiplied by the computed outline mask.
+     */
+    public var fboOutlineColor: Color = Color.BLACK
+
+    /**
      * What technique to use to render this layer
      */
     public var renderMode: RenderMode = RenderMode.DIRECT
@@ -1109,10 +1132,17 @@ public open class GuiLayer(posX: Int, posY: Int, width: Int, height: Int): Coord
     public val isMask: Boolean
         get() = parent?.maskLayer === this
 
+    private fun isFboOutlineActive(): Boolean =
+        fboOutlineEnabled && fboOutlineThickness > 0.0 && fboOutlineColor.alpha > 0
+
     private fun actualRenderMode(): RenderMode {
-        if (renderMode != RenderMode.DIRECT)
+        val outlineActive = isFboOutlineActive()
+        if (renderMode != RenderMode.DIRECT) {
+            if (renderMode == RenderMode.RENDER_TO_QUAD && outlineActive)
+                return RenderMode.RENDER_TO_FBO
             return renderMode
-        if (opacity < 1.0 || maskMode != MaskMode.NONE || blendMode != BlendMode.NORMAL)
+        }
+        if (opacity < 1.0 || maskMode != MaskMode.NONE || blendMode != BlendMode.NORMAL || outlineActive)
             return RenderMode.RENDER_TO_FBO
         return RenderMode.DIRECT
     }
@@ -1156,19 +1186,21 @@ public open class GuiLayer(posX: Int, posY: Int, width: Int, height: Int): Coord
             } else {
                 context
             }
+            val outlineActive = isFboOutlineActive()
+            val clearExtra = if (outlineActive) fboOutlineThickness + 1.0 else 0.0
             var maskFBO: Framebuffer? = null
             var layerFBO: Framebuffer? = null
             try {
 
                 layerFBO = FramebufferPool.renderToFramebuffer {
-                    clearBounds(flatContext)
+                    clearBounds(flatContext, clearExtra)
                     renderDirect(flatContext)
                 }
                 val maskLayer = maskLayer
                 if (maskMode != MaskMode.NONE && maskLayer != null) {
                     flatContext.isInMask = true
                     maskFBO = FramebufferPool.renderToFramebuffer {
-                        clearBounds(flatContext)
+                        clearBounds(flatContext, clearExtra)
                         maskLayer.renderLayer(flatContext)
                     }
                 }
@@ -1181,6 +1213,29 @@ public open class GuiLayer(posX: Int, posY: Int, width: Int, height: Int): Coord
                 FlatLayerShader.maskMode.set(maskMode.ordinal)
                 FlatLayerShader.renderMode.set(renderMode.ordinal)
                 FlatLayerShader.blendMode = blendMode
+
+                if (outlineActive) {
+                    // Convert thickness in local units to window pixels (GUI units -> window px via guiScaleFactor,
+                    // then apply the full accumulated transform scale).
+                    val scaleX = sqrt((context.matrix.m00 * context.matrix.m00) + (context.matrix.m10 * context.matrix.m10))
+                    val scaleY = sqrt((context.matrix.m01 * context.matrix.m01) + (context.matrix.m11 * context.matrix.m11))
+                    val guiScale = Client.guiScaleFactor
+                    FlatLayerShader.outlineEnabled.set(true)
+                    FlatLayerShader.outlineColor.set(
+                        fboOutlineColor.red / 255f,
+                        fboOutlineColor.green / 255f,
+                        fboOutlineColor.blue / 255f,
+                        fboOutlineColor.alpha / 255f
+                    )
+                    FlatLayerShader.outlineRadius.set(
+                        (fboOutlineThickness * scaleX * guiScale).toFloat(),
+                        (fboOutlineThickness * scaleY * guiScale).toFloat()
+                    )
+                } else {
+                    FlatLayerShader.outlineEnabled.set(false)
+                    FlatLayerShader.outlineColor.set(0f, 0f, 0f, 0f)
+                    FlatLayerShader.outlineRadius.set(0f, 0f)
+                }
 
                 val maxU = (size.xf * rasterizationScale * Client.guiScaleFactor.toFloat()) / Client.window.width
                 val maxV = (size.yf * rasterizationScale * Client.guiScaleFactor.toFloat()) / Client.window.height
@@ -1248,13 +1303,17 @@ public open class GuiLayer(posX: Int, posY: Int, width: Int, height: Int): Coord
      * Clear this layer's bounding box in the current Framebuffer. This is used to avoid having to clear the entire
      * buffer when rendering to a texture
      */
-    private fun clearBounds(context: GuiDrawContext) {
+    private fun clearBounds(context: GuiDrawContext, extra: Double = 0.0) {
         val buffer = IRenderTypeBuffer.immediate(Client.tessellator.builder)
         val vb = buffer.getBuffer(clearBufferRenderType)
-        vb.pos2d(context.transform, 0, size.y).endVertex()
-        vb.pos2d(context.transform, size.x, size.y).endVertex()
-        vb.pos2d(context.transform, size.x, 0).endVertex()
-        vb.pos2d(context.transform, 0, 0).endVertex()
+        val minX = -extra
+        val minY = -extra
+        val maxX = size.x + extra
+        val maxY = size.y + extra
+        vb.pos2d(context.transform, minX, maxY).endVertex()
+        vb.pos2d(context.transform, maxX, maxY).endVertex()
+        vb.pos2d(context.transform, maxX, minY).endVertex()
+        vb.pos2d(context.transform, minX, minY).endVertex()
         buffer.endBatch()
     }
 

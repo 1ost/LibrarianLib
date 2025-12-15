@@ -15,6 +15,13 @@ internal object FlatLayerShader: Shader("flat_layer", null, ResourceLocation("li
     val maskMode = GLSL.glInt()
     val renderMode = GLSL.glInt()
 
+    val outlineEnabled = GLSL.glBool()
+    val outlineColor = GLSL.vec4()
+    /**
+     * Outline radius in window pixels (x/y).
+     */
+    val outlineRadius = GLSL.vec2()
+
     /**
      * This has to be applied here, because MC's state will overwrite it
      */
