@@ -82,7 +82,6 @@ void main() {
     if (r > MAX_R) r = MAX_R;
 
     if (r > 0) {
-        // Ellipse distance check in pixel space (supports non-uniform scaling).
         float invRx2 = (rx > 0.0) ? (1.0 / (rx * rx)) : 0.0;
         float invRy2 = (ry > 0.0) ? (1.0 / (ry * ry)) : 0.0;
 
@@ -92,14 +91,23 @@ void main() {
                 float fx = float(dx);
                 float fy = float(dy);
 
-                float dist =
-                    ((rx > 0.0) ? (fx * fx * invRx2) : 0.0) +
-                    ((ry > 0.0) ? (fy * fy * invRy2) : 0.0);
-                if (dist > 1.0) continue;
+                float distSample = sqrt(fx * fx + fy * fy);
+                if (distSample == 0.0) continue;
+
+                // Compute the ellipse boundary distance along this direction and apply a 1px feather so that
+                // subpixel radii (e.g. 0.5px) still yield a faint, thinner-looking outline.
+                float dirX = fx / distSample;
+                float dirY = fy / distSample;
+                float denom =
+                    ((rx > 0.0) ? (dirX * dirX * invRx2) : 0.0) +
+                    ((ry > 0.0) ? (dirY * dirY * invRy2) : 0.0);
+                float boundaryDist = (denom > 0.0) ? (1.0 / sqrt(denom)) : 0.0;
+                float weight = clamp(boundaryDist + 1.0 - distSample, 0.0, 1.0);
+                if (weight <= 0.0) continue;
 
                 vec2 sampleUv = clamp(uv + vec2(fx, fy) * texel, vec2(0.0), vec2(1.0));
                 float a = layerAlphaAt(sampleUv);
-                maxNeighborAlpha = max(maxNeighborAlpha, a);
+                maxNeighborAlpha = max(maxNeighborAlpha, a * weight);
             }
         }
     }

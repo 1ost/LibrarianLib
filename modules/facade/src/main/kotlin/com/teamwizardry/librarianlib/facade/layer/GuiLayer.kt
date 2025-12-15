@@ -58,6 +58,7 @@ import java.util.PriorityQueue
 import java.util.function.*
 import kotlin.math.PI
 import kotlin.math.abs
+import kotlin.math.ceil
 import kotlin.math.floor
 import kotlin.math.max
 import kotlin.math.sqrt
@@ -1104,7 +1105,8 @@ public open class GuiLayer(posX: Int, posY: Int, width: Int, height: Int): Coord
     public var fboOutlineEnabled: Boolean = false
 
     /**
-     * Outline thickness in this layer's local coordinate space.
+     * Outline thickness in unscaled GUI pixels. This is converted to window pixels via [Client.guiScaleFactor] and
+     * does not scale with this layer's [scale2d].
      */
     public var fboOutlineThickness: Double = 1.0
         set(value) {
@@ -1187,7 +1189,18 @@ public open class GuiLayer(posX: Int, posY: Int, width: Int, height: Int): Coord
                 context
             }
             val outlineActive = isFboOutlineActive()
-            val clearExtra = if (outlineActive) fboOutlineThickness + 1.0 else 0.0
+            val guiScale = Client.guiScaleFactor.coerceAtLeast(0.0001)
+            val clearExtra = if (outlineActive) {
+                // Clear enough pixels around our bounds so the outline sampling window never reads stale data from the
+                // pooled framebuffer. `extra` is in local units; the outline radius is specified in window pixels.
+                val scaleX = sqrt((context.matrix.m00 * context.matrix.m00) + (context.matrix.m10 * context.matrix.m10))
+                val scaleY = sqrt((context.matrix.m01 * context.matrix.m01) + (context.matrix.m11 * context.matrix.m11))
+                val px = fboOutlineThickness * guiScale
+                val clearPx = ceil(px) + 1.0
+                val denomX = (scaleX * guiScale).coerceAtLeast(0.0001)
+                val denomY = (scaleY * guiScale).coerceAtLeast(0.0001)
+                max(clearPx / denomX, clearPx / denomY)
+            } else 0.0
             var maskFBO: Framebuffer? = null
             var layerFBO: Framebuffer? = null
             try {
@@ -1215,11 +1228,7 @@ public open class GuiLayer(posX: Int, posY: Int, width: Int, height: Int): Coord
                 FlatLayerShader.blendMode = blendMode
 
                 if (outlineActive) {
-                    // Convert thickness in local units to window pixels (GUI units -> window px via guiScaleFactor,
-                    // then apply the full accumulated transform scale).
-                    val scaleX = sqrt((context.matrix.m00 * context.matrix.m00) + (context.matrix.m10 * context.matrix.m10))
-                    val scaleY = sqrt((context.matrix.m01 * context.matrix.m01) + (context.matrix.m11 * context.matrix.m11))
-                    val guiScale = Client.guiScaleFactor
+                    // Outline thickness is specified in unscaled GUI pixels; convert to window pixels via guiScaleFactor.
                     FlatLayerShader.outlineEnabled.set(true)
                     FlatLayerShader.outlineColor.set(
                         fboOutlineColor.red / 255f,
@@ -1228,8 +1237,8 @@ public open class GuiLayer(posX: Int, posY: Int, width: Int, height: Int): Coord
                         fboOutlineColor.alpha / 255f
                     )
                     FlatLayerShader.outlineRadius.set(
-                        (fboOutlineThickness * scaleX * guiScale).toFloat(),
-                        (fboOutlineThickness * scaleY * guiScale).toFloat()
+                        (fboOutlineThickness * guiScale).toFloat(),
+                        (fboOutlineThickness * guiScale).toFloat()
                     )
                 } else {
                     FlatLayerShader.outlineEnabled.set(false)
