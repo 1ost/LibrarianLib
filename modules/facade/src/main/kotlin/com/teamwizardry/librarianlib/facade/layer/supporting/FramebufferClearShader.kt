@@ -5,13 +5,21 @@ import com.mojang.blaze3d.systems.RenderSystem
 import com.teamwizardry.librarianlib.albedo.Shader
 import net.minecraft.util.ResourceLocation
 import org.lwjgl.opengl.GL11
+import java.util.ArrayDeque
 
 /**
  * Clears every pixel it's drawn over to be transparent black, with a depth reset to 1, and stencil reset to 0.
  */
 internal object FramebufferClearShader: Shader("framebuffer_clear", null, ResourceLocation("librarianlib:facade/shaders/framebuffer_clear.frag")) {
 
+    /**
+     * RenderType state callbacks can be invoked nested; preserve and restore the stencil-enabled bit without leaking
+     * state to subsequent draws.
+     */
+    private val stencilEnabledStack = ArrayDeque<Boolean>()
+
     override fun setupState() {
+        stencilEnabledStack.addLast(GL11.glIsEnabled(GL11.GL_STENCIL_TEST))
         RenderSystem.disableAlphaTest()
         RenderSystem.disableDepthTest()
         RenderSystem.blendFuncSeparate(
@@ -29,6 +37,12 @@ internal object FramebufferClearShader: Shader("framebuffer_clear", null, Resour
         RenderSystem.disableDepthTest()
         RenderSystem.blendFuncSeparate(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA, GL11.GL_ONE, GL11.GL_ZERO)
         StencilUtil.resetTest(StencilUtil.currentStencil)
-        StencilUtil.disable()
+
+        val wasStencilEnabled = stencilEnabledStack.pollLast() ?: true
+        if (wasStencilEnabled) {
+            StencilUtil.enable()
+        } else {
+            StencilUtil.disable()
+        }
     }
 }
