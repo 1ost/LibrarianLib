@@ -3,6 +3,7 @@ package com.teamwizardry.librarianlib.facade.layer.supporting
 import com.teamwizardry.librarianlib.core.util.Client
 import net.minecraft.client.Minecraft
 import net.minecraft.client.shader.Framebuffer
+import org.lwjgl.opengl.GL11
 import java.util.LinkedList
 import java.util.function.Consumer
 
@@ -43,15 +44,26 @@ internal object FramebufferPool {
      */
     fun renderToFramebuffer(callback: Consumer<Framebuffer>): Framebuffer {
         val stencilLevel = StencilUtil.currentStencil
+        val stencilEnabled = GL11.glIsEnabled(GL11.GL_STENCIL_TEST)
         val existing = current // store the current framebuffer so we can reset it later
 
         val framebuffer = getFramebuffer()
         useFramebuffer(framebuffer)
+        // Reset stencil state for offscreen buffers so we don't inherit parent clip masks.
+        StencilUtil.clear()
+        if (stencilEnabled) {
+            StencilUtil.enable()
+        }
         try {
             callback.accept(framebuffer)
         } finally {
             useFramebuffer(existing)
             StencilUtil.resetTest(stencilLevel)
+            if (stencilEnabled) {
+                StencilUtil.enable()
+            } else {
+                StencilUtil.disable()
+            }
         }
 
         return framebuffer
