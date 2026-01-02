@@ -1249,17 +1249,30 @@ public open class GuiLayer(posX: Int, posY: Int, width: Int, height: Int): Coord
                 val maxU = (size.xf * rasterizationScale * Client.guiScaleFactor.toFloat()) / Client.window.width
                 val maxV = (size.yf * rasterizationScale * Client.guiScaleFactor.toFloat()) / Client.window.height
 
-                val buffer = IRenderTypeBuffer.immediate(Client.tessellator.builder)
-                val vb = buffer.getBuffer(flatLayerRenderType)
-                // why 1-maxV?
-                vb.pos2d(context.transform, 0, size.y).uv(0f, 1 - maxV).endVertex()
-                vb.pos2d(context.transform, size.x, size.y).uv(maxU, 1 - maxV).endVertex()
-                vb.pos2d(context.transform, size.x, 0).uv(maxU, 1f).endVertex()
-                vb.pos2d(context.transform, 0, 0).uv(0f, 1f).endVertex()
-                buffer.endBatch()
-                GlStateManager._activeTexture(GL13.GL_TEXTURE0)
-                GlStateManager._disableTexture()
-                GlStateManager._enableTexture()
+                val depthTestWasEnabled = GL11.glIsEnabled(GL11.GL_DEPTH_TEST)
+                val depthMaskWasEnabled = GL11.glGetBoolean(GL11.GL_DEPTH_WRITEMASK)
+                RenderSystem.disableDepthTest()
+                RenderSystem.depthMask(false)
+                try {
+                    val buffer = IRenderTypeBuffer.immediate(Client.tessellator.builder)
+                    val vb = buffer.getBuffer(flatLayerRenderType)
+                    // why 1-maxV?
+                    vb.pos2d(context.transform, 0, size.y).uv(0f, 1 - maxV).endVertex()
+                    vb.pos2d(context.transform, size.x, size.y).uv(maxU, 1 - maxV).endVertex()
+                    vb.pos2d(context.transform, size.x, 0).uv(maxU, 1f).endVertex()
+                    vb.pos2d(context.transform, 0, 0).uv(0f, 1f).endVertex()
+                    buffer.endBatch()
+                    GlStateManager._activeTexture(GL13.GL_TEXTURE0)
+                    GlStateManager._disableTexture()
+                    GlStateManager._enableTexture()
+                } finally {
+                    if (depthTestWasEnabled) {
+                        RenderSystem.enableDepthTest()
+                    } else {
+                        RenderSystem.disableDepthTest()
+                    }
+                    RenderSystem.depthMask(depthMaskWasEnabled)
+                }
             } finally {
                 layerFBO?.also { FramebufferPool.releaseFramebuffer(it) }
                 maskFBO?.also { FramebufferPool.releaseFramebuffer(it) }
