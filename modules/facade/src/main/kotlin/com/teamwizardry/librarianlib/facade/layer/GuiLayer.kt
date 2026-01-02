@@ -1225,7 +1225,7 @@ public open class GuiLayer(posX: Int, posY: Int, width: Int, height: Int): Coord
                 FlatLayerShader.alphaMultiply.set(opacity.toFloat())
                 FlatLayerShader.maskMode.set(maskMode.ordinal)
                 FlatLayerShader.renderMode.set(renderMode.ordinal)
-                FlatLayerShader.blendMode = blendMode
+                FlatLayerShader.blendMode = compositeBlendMode(blendMode)
 
                 if (outlineActive) {
                     // Outline thickness is specified in unscaled GUI pixels; convert to window pixels via guiScaleFactor.
@@ -1319,6 +1319,21 @@ public open class GuiLayer(posX: Int, posY: Int, width: Int, height: Int): Coord
                 it.renderLayer(context)
             }
         }
+    }
+
+    private fun compositeBlendMode(mode: BlendMode): BlendMode {
+        if (mode.sourceAlpha == BlendMode.Factor.ONE && mode.destAlpha == BlendMode.Factor.ONE_MINUS_SRC_ALPHA) {
+            return mode
+        }
+        return BlendMode(
+            mode.sourceRGB,
+            mode.destRGB,
+            BlendMode.Factor.ONE,
+            BlendMode.Factor.ONE_MINUS_SRC_ALPHA,
+            mode.rgbEquation,
+            mode.alphaEquation,
+            mode.constantColor
+        )
     }
 
     /**
