@@ -1862,6 +1862,8 @@ public open class GuiLayer(posX: Int, posY: Int, width: Int, height: Int): Coord
         private val flatColorFanRenderType: RenderType = SimpleRenderTypes.flat(GL11.GL_TRIANGLE_FAN)
         private val flatLayerRenderType: RenderType = run {
             val renderState = RenderType.State.builder()
+                .setDepthTestState(DefaultRenderStates.DEPTH_ALWAYS)
+                .setWriteMaskState(DefaultRenderStates.COLOR_WRITE)
                 .createCompositeState(false)
             mixinCast<IMutableRenderTypeState>(renderState).addState(FlatLayerShader.renderState)
 
