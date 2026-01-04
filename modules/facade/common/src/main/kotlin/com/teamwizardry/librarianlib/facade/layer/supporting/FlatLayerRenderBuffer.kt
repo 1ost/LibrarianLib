@@ -15,6 +15,12 @@ internal class FlatLayerRenderBuffer(vbo: VertexBuffer) : BaseRenderBuffer<FlatL
     val alphaMultiply = +Uniform.float.create("AlphaMultiply")
     val maskMode = +Uniform.int.create("MaskMode")
     val renderMode = +Uniform.int.create("RenderMode")
+    val outlineEnabled = +Uniform.bool.create("OutlineEnabled")
+    val outlineColor = +Uniform.vec4.create("OutlineColor")
+    /**
+     * Outline radius in window pixels (x/y).
+     */
+    val outlineRadius = +Uniform.vec2.create("OutlineRadius")
 
     private val texelCoordAttribute = +VertexLayoutElement("TexelCoord", VertexLayoutElement.FloatFormat.FLOAT, 2, false)
 

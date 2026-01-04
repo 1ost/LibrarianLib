@@ -17,13 +17,13 @@ import org.lwjgl.opengl.GL33
  */
 public object BaseRenderStates {
     public data class Blend(
-        private val enabled: Boolean,
-        private val srcFactor: Factor,
-        private val dstFactor: Factor,
-        private val srcAlpha: Factor,
-        private val dstAlpha: Factor,
-        private val rgbEquation: Equation,
-        private val alphaEquation: Equation,
+        val enabled: Boolean,
+        val srcFactor: Factor,
+        val dstFactor: Factor,
+        val srcAlpha: Factor,
+        val dstAlpha: Factor,
+        val rgbEquation: Equation,
+        val alphaEquation: Equation,
     ) : RenderState.State(Identifier.of("liblib_albedo:blend")) {
         public constructor(
             enabled: Boolean,

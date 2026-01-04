@@ -8,6 +8,7 @@ import com.teamwizardry.librarianlib.albedo.shader.Shader
 import com.teamwizardry.librarianlib.albedo.state.RenderState
 import net.minecraft.util.Identifier
 import org.lwjgl.opengl.GL11
+import java.util.ArrayDeque
 
 /**
  * Clears every pixel it's drawn over to be transparent black, with a depth reset to 1, and stencil reset to 0.
@@ -23,8 +24,10 @@ internal class FramebufferClearRenderBuffer(vbo: VertexBuffer) : BaseRenderBuffe
             .vertex(Identifier.of("liblib_facade:framebuffer_clear.vert"))
             .fragment(Identifier.of("liblib_facade:framebuffer_clear.frag"))
             .build()
+        private val stencilEnabledStack = ArrayDeque<Boolean>()
         val stencilState = object : RenderState.State(Identifier.of("liblib_facade:framebuffer_clear_stencil")) {
             override fun apply() {
+                stencilEnabledStack.addLast(GL11.glIsEnabled(GL11.GL_STENCIL_TEST))
                 StencilUtil.enable()
                 RenderSystem.stencilFunc(GL11.GL_ALWAYS, 0x00, 0x00)
                 RenderSystem.stencilOp(GL11.GL_ZERO, GL11.GL_ZERO, GL11.GL_ZERO)
@@ -33,7 +36,12 @@ internal class FramebufferClearRenderBuffer(vbo: VertexBuffer) : BaseRenderBuffe
 
             override fun cleanup() {
                 StencilUtil.resetTest(StencilUtil.currentStencil)
-                StencilUtil.disable()
+                val wasStencilEnabled = stencilEnabledStack.pollLast() ?: true
+                if (wasStencilEnabled) {
+                    StencilUtil.enable()
+                } else {
+                    StencilUtil.disable()
+                }
             }
         }
         val renderState = RenderState.normal.extend(DefaultRenderStates.DepthTest.ALWAYS, DefaultRenderStates.Blend.OVERWRITE, stencilState)

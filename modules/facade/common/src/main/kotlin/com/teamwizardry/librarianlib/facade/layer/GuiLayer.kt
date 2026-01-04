@@ -9,7 +9,6 @@ import com.teamwizardry.librarianlib.albedo.base.state.DefaultRenderStates
 import com.teamwizardry.librarianlib.albedo.buffer.Framebuffer
 import com.teamwizardry.librarianlib.albedo.buffer.Primitive
 import com.teamwizardry.librarianlib.albedo.state.RenderState
-import com.teamwizardry.librarianlib.core.rendering.BlendMode
 import com.teamwizardry.librarianlib.core.util.*
 import com.teamwizardry.librarianlib.core.util.kotlin.unmodifiableView
 import com.teamwizardry.librarianlib.core.util.kotlin.weakSetOf
@@ -35,8 +34,10 @@ import java.util.*
 import java.util.function.*
 import kotlin.math.PI
 import kotlin.math.abs
+import kotlin.math.ceil
 import kotlin.math.floor
 import kotlin.math.max
+import kotlin.math.sqrt
 
 /**
  * The fundamental building block of a LibrarianLib GUI. Generally a single unit of visual or organizational design.
@@ -499,6 +500,9 @@ public open class GuiLayer(posX: Int, posY: Int, width: Int, height: Int): Coord
     /**
      * The sort index and render order for the layer. Lower indices appear below higher indices.
      * Note that this does not affect the literal Z axis when rendering, this is purely a sort index.
+     *
+     * Children with a negative z-index render before their parent (i.e. behind the parent's own draw call); zero or
+     * positive values render after the parent (the default behavior).
      *
      * Use [GuiLayer.OVERLAY_Z] and [GuiLayer.UNDERLAY_Z] to create layers that appear on top or below _literally
      * everything else._
@@ -1062,10 +1066,33 @@ public open class GuiLayer(posX: Int, posY: Int, width: Int, height: Int): Coord
         }
 
     /**
-     * The blend mode to use for this layer. Any value other than [BlendMode.NORMAL] will cause the layer to be rendered
-     * to a texture using [RenderMode.RENDER_TO_FBO]
+     * The blend mode to use for this layer. Any value other than [DefaultRenderStates.Blend.DEFAULT] will cause the
+     * layer to be rendered to a texture using [RenderMode.RENDER_TO_FBO]
      */
     public var blendMode: BaseRenderStates.Blend = DefaultRenderStates.Blend.DEFAULT
+
+    /**
+     * Enables a post-process outline using the alpha channel when this layer is rendered through the
+     * [RenderMode.RENDER_TO_FBO] + [FlatLayerRenderBuffer] path.
+     *
+     * This is intended for use-cases like text outlines, where drawing the outline as a post-process avoids the
+     * chunky "stamping" artifacts of multi-draw approaches.
+     */
+    public var fboOutlineEnabled: Boolean = false
+
+    /**
+     * Outline thickness in unscaled GUI pixels. This is converted to window pixels via [Client.scaleFactor] and
+     * does not scale with this layer's [scale2d].
+     */
+    public var fboOutlineThickness: Double = 1.0
+        set(value) {
+            field = value.coerceAtLeast(0.0)
+        }
+
+    /**
+     * Outline color, applied behind the original pixel. Alpha is multiplied by the computed outline mask.
+     */
+    public var fboOutlineColor: Color = Color.BLACK
 
     /**
      * What technique to use to render this layer
@@ -1083,10 +1110,17 @@ public open class GuiLayer(posX: Int, posY: Int, width: Int, height: Int): Coord
     public val isMask: Boolean
         get() = parent?.maskLayer === this
 
+    private fun isFboOutlineActive(): Boolean =
+        fboOutlineEnabled && fboOutlineThickness > 0.0 && fboOutlineColor.alpha > 0
+
     private fun actualRenderMode(): RenderMode {
-        if (renderMode != RenderMode.DIRECT)
+        val outlineActive = isFboOutlineActive()
+        if (renderMode != RenderMode.DIRECT) {
+            if (renderMode == RenderMode.RENDER_TO_QUAD && outlineActive)
+                return RenderMode.RENDER_TO_FBO
             return renderMode
-        if (opacity < 1.0 || maskMode != MaskMode.NONE || blendMode != DefaultRenderStates.Blend.DEFAULT)
+        }
+        if (opacity < 1.0 || maskMode != MaskMode.NONE || blendMode != DefaultRenderStates.Blend.DEFAULT || outlineActive)
             return RenderMode.RENDER_TO_FBO
         return RenderMode.DIRECT
     }
@@ -1151,13 +1185,26 @@ public open class GuiLayer(posX: Int, posY: Int, width: Int, height: Int): Coord
             } else {
                 context
             }
+            val outlineActive = isFboOutlineActive()
+            val guiScale = Client.scaleFactor.coerceAtLeast(0.0001)
+            val clearExtra = if (outlineActive) {
+                // Clear enough pixels around our bounds so the outline sampling window never reads stale data from the
+                // pooled framebuffer. `extra` is in local units; the outline radius is specified in window pixels.
+                val scaleX = sqrt((context.matrix.m00 * context.matrix.m00) + (context.matrix.m10 * context.matrix.m10))
+                val scaleY = sqrt((context.matrix.m01 * context.matrix.m01) + (context.matrix.m11 * context.matrix.m11))
+                val px = fboOutlineThickness * guiScale
+                val clearPx = ceil(px) + 1.0
+                val denomX = (scaleX * guiScale).coerceAtLeast(0.0001)
+                val denomY = (scaleY * guiScale).coerceAtLeast(0.0001)
+                max(clearPx / denomX, clearPx / denomY)
+            } else 0.0
             var maskFBO: Framebuffer? = null
             var layerFBO: Framebuffer? = null
             try {
 
                 layerFBO = FramebufferPool.renderToFramebuffer {
                     flatContext.hashCode()
-                    clearBounds(flatContext)
+                    clearBounds(flatContext, clearExtra)
                     renderDirect(flatContext)
                 }
                 val maskLayer = maskLayer
@@ -1166,13 +1213,13 @@ public open class GuiLayer(posX: Int, posY: Int, width: Int, height: Int): Coord
                     maskFBO = FramebufferPool.renderToFramebuffer {
                         maskLayer.hashCode()
                         flatContext.hashCode()
-                        clearBounds(flatContext)
+                        clearBounds(flatContext, clearExtra)
                         maskLayer.renderLayer(flatContext)
                     }
                 }
 
 //                layerFilter?.filter(this.layer, layerFBO, maskFBO) TODO: add back filters?
-                val blendMode = blendMode
+                val blendMode = compositeBlendMode(blendMode)
                 val buffer = FlatLayerRenderBuffer.SHARED
 
                 buffer.layerImage.set(layerFBO[GL30.GL_COLOR_ATTACHMENT0].glId)
@@ -1180,6 +1227,23 @@ public open class GuiLayer(posX: Int, posY: Int, width: Int, height: Int): Coord
                 buffer.alphaMultiply.set(opacity.toFloat())
                 buffer.maskMode.set(maskMode.ordinal)
                 buffer.renderMode.set(renderMode.ordinal)
+                if (outlineActive) {
+                    buffer.outlineEnabled.set(true)
+                    buffer.outlineColor.set(
+                        fboOutlineColor.red / 255f,
+                        fboOutlineColor.green / 255f,
+                        fboOutlineColor.blue / 255f,
+                        fboOutlineColor.alpha / 255f
+                    )
+                    buffer.outlineRadius.set(
+                        (fboOutlineThickness * guiScale).toFloat(),
+                        (fboOutlineThickness * guiScale).toFloat()
+                    )
+                } else {
+                    buffer.outlineEnabled.set(false)
+                    buffer.outlineColor.set(0f, 0f, 0f, 0f)
+                    buffer.outlineRadius.set(0f, 0f)
+                }
 
                 val left = 0f
                 val right = size.xf * rasterizationScale
@@ -1191,13 +1255,28 @@ public open class GuiLayer(posX: Int, posY: Int, width: Int, height: Int): Coord
                 buffer.pos(context.transform, size.x, size.y, 0).texel(right, bottom).endVertex()
                 buffer.pos(context.transform, size.x, 0, 0).texel(right, top).endVertex()
 
-                GL30.glDisable(GL30.GL_STENCIL_TEST)
-                DefaultRenderStates.DepthTest.ALWAYS.apply()
-                blendMode.apply()
-                buffer.draw(Primitive.QUADS)
-                blendMode.cleanup()
-                DefaultRenderStates.DepthTest.ALWAYS.cleanup()
-                GL30.glEnable(GL30.GL_STENCIL_TEST)
+                val depthTestWasEnabled = GL11.glIsEnabled(GL11.GL_DEPTH_TEST)
+                val depthMaskWasEnabled = GL11.glGetBoolean(GL11.GL_DEPTH_WRITEMASK)
+                RenderSystem.disableDepthTest()
+                RenderSystem.depthMask(false)
+                try {
+                    GL30.glDisable(GL30.GL_STENCIL_TEST)
+                    DefaultRenderStates.DepthTest.ALWAYS.apply()
+                    DefaultRenderStates.WriteMask.NO_DEPTH.apply()
+                    blendMode.apply()
+                    buffer.draw(Primitive.QUADS)
+                    blendMode.cleanup()
+                    DefaultRenderStates.WriteMask.NO_DEPTH.cleanup()
+                    DefaultRenderStates.DepthTest.ALWAYS.cleanup()
+                    GL30.glEnable(GL30.GL_STENCIL_TEST)
+                } finally {
+                    if (depthTestWasEnabled) {
+                        RenderSystem.enableDepthTest()
+                    } else {
+                        RenderSystem.disableDepthTest()
+                    }
+                    RenderSystem.depthMask(depthMaskWasEnabled)
+                }
 
             } finally {
                 maskFBO?.also { FramebufferPool.releaseFramebuffer(it) }
@@ -1222,6 +1301,13 @@ public open class GuiLayer(posX: Int, posY: Int, width: Int, height: Int): Coord
      * Draw just this layer and its children
      */
     private fun renderDirect(context: GuiDrawContext) {
+        // Render children that should appear behind the parent
+        forEachChild(false) {
+            if (it.zIndex < 0) {
+                it.renderLayer(context)
+            }
+        }
+
         context.matrix.assertEvenDepth {
             context.matrix.push()
             context.matrix.assertEvenDepth {
@@ -1230,21 +1316,48 @@ public open class GuiLayer(posX: Int, posY: Int, width: Int, height: Int): Coord
             context.popVanillaMatrix()
             context.matrix.pop()
         }
+        // Render the remaining children (default behavior)
         forEachChild(false) {
-            it.renderLayer(context)
+            if (it.zIndex >= 0) {
+                it.renderLayer(context)
+            }
         }
+    }
+
+    private fun compositeBlendMode(mode: BaseRenderStates.Blend): BaseRenderStates.Blend {
+        if (!mode.enabled) {
+            return mode
+        }
+        if (mode.srcAlpha == BaseRenderStates.Blend.Factor.ONE &&
+            mode.dstAlpha == BaseRenderStates.Blend.Factor.ONE_MINUS_SRC_ALPHA
+        ) {
+            return mode
+        }
+        return BaseRenderStates.Blend(
+            mode.enabled,
+            mode.srcFactor,
+            mode.dstFactor,
+            BaseRenderStates.Blend.Factor.ONE,
+            BaseRenderStates.Blend.Factor.ONE_MINUS_SRC_ALPHA,
+            mode.rgbEquation,
+            mode.alphaEquation
+        )
     }
 
     /**
      * Clear this layer's bounding box in the current Framebuffer. This is used to avoid having to clear the entire
      * buffer when rendering to a texture
      */
-    private fun clearBounds(context: GuiDrawContext) {
+    private fun clearBounds(context: GuiDrawContext, extra: Double = 0.0) {
         val buffer = FramebufferClearRenderBuffer.SHARED
-        buffer.pos(context.transform, 0, size.y, 0).endVertex()
-        buffer.pos(context.transform, size.x, size.y, 0).endVertex()
-        buffer.pos(context.transform, size.x, 0, 0).endVertex()
-        buffer.pos(context.transform, 0, 0, 0).endVertex()
+        val minX = -extra
+        val minY = -extra
+        val maxX = size.x + extra
+        val maxY = size.y + extra
+        buffer.pos(context.transform, minX, maxY, 0).endVertex()
+        buffer.pos(context.transform, maxX, maxY, 0).endVertex()
+        buffer.pos(context.transform, maxX, minY, 0).endVertex()
+        buffer.pos(context.transform, minX, minY, 0).endVertex()
         FramebufferClearRenderBuffer.renderState.apply()
         buffer.draw(Primitive.QUADS)
         FramebufferClearRenderBuffer.renderState.cleanup()
