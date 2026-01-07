@@ -1,6 +1,7 @@
 @file:Suppress("PublicApiImplicitType", "UnstableApiUsage")
 
 import dev.architectury.plugin.TransformingTask
+import com.teamwizardry.gradle.CommonConfigExtension
 import java.util.*
 
 plugins {
@@ -54,6 +55,26 @@ commonConfig {
 architectury {
     minecraft = project.property("minecraft_version") as String
     compileOnly()
+}
+
+val liblibConfig = the<CommonConfigExtension>()
+tasks.register("buildModuleJars") {
+    group = "build"
+    description = "Builds per-module remapped jars for Fabric and NeoForge"
+    dependsOn(liblibConfig.modules.map { ":${it.name}:fabric:remapJar" })
+    dependsOn(liblibConfig.modules.map { ":${it.name}:neoforge:remapJar" })
+}
+
+tasks.register("buildModuleJarsFabric") {
+    group = "build"
+    description = "Builds per-module remapped jars for Fabric"
+    dependsOn(liblibConfig.modules.map { ":${it.name}:fabric:remapJar" })
+}
+
+tasks.register("buildModuleJarsNeoForge") {
+    group = "build"
+    description = "Builds per-module remapped jars for NeoForge"
+    dependsOn(liblibConfig.modules.map { ":${it.name}:neoforge:remapJar" })
 }
 
 
