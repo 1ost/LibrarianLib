@@ -1,11 +1,22 @@
 package com.teamwizardry.librarianlib.mosaic
 
 import com.teamwizardry.librarianlib.albedo.base.buffer.FlatTextureRenderBuffer
+import com.teamwizardry.librarianlib.albedo.base.state.BaseRenderStates
+import com.teamwizardry.librarianlib.albedo.state.RenderState
 import com.teamwizardry.librarianlib.albedo.buffer.Primitive
 import com.teamwizardry.librarianlib.math.Matrix4d
 import java.awt.Color
 
 internal object SpriteRenderer {
+
+    private val legacyBlend = BaseRenderStates.Blend(
+        true,
+        BaseRenderStates.Blend.Factor.SRC_ALPHA,
+        BaseRenderStates.Blend.Factor.ONE_MINUS_SRC_ALPHA,
+        BaseRenderStates.Blend.Factor.ONE,
+        BaseRenderStates.Blend.Factor.ONE_MINUS_SRC_ALPHA
+    )
+    private val spriteRenderState = RenderState.normal.extend(legacyBlend)
 
     fun draw(sprite: Sprite, matrix: Matrix4d, x: Float, y: Float, width: Float, height: Float, animFrames: Int, tint: Color) {
         if(sprite.pinTop && sprite.pinBottom && sprite.pinLeft && sprite.pinRight &&
@@ -33,8 +44,10 @@ internal object SpriteRenderer {
         rb.pos(matrix, maxX, minY, 0).color(tint).tex(maxU, minV).endVertex()
         rb.pos(matrix, minX, minY, 0).color(tint).tex(minU, minV).endVertex()
 
-        rb.texture.set(sprite.texture)
-        rb.draw(Primitive.QUADS)
+        spriteRenderState.use {
+            rb.texture.set(sprite.texture)
+            rb.draw(Primitive.QUADS)
+        }
     }
 
     private fun drawComplex(sprite: Sprite, matrix: Matrix4d, x: Float, y: Float, width: Float, height: Float, animFrames: Int, tint: Color) {
@@ -86,8 +99,10 @@ internal object SpriteRenderer {
             }
         }
 
-        rb.texture.set(sprite.texture)
-        rb.draw(Primitive.QUADS)
+        spriteRenderState.use {
+            rb.texture.set(sprite.texture)
+            rb.draw(Primitive.QUADS)
+        }
     }
 
     private data class DestructureUVs(
